@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>私人订猪 - 完整原型（三端整合）</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hirino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #e8e8e8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 端切换按钮 */
+.end-switcher {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+.end-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #4CAF50;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4CAF50;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+.end-btn:hover, .end-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+/* 端容器 */
+.end-screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.end-screen.active {
+  display: block;
+}
+
+/* 手机外壳 */
+.device {
+  width: 390px;
+  height: 844px;
+  background: #1a1a1a;
+  border-radius: 48px;
+  padding: 12px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15);
+  position: relative;
+}
+.device::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #1a1a1a;
+  border-radius: 18px;
+  z-index: 200;
+}
+
+/* 屏幕 */
+.screen {
+  width: 100%;
+  height: 100%;
+  background: #F5F5F5;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 页面容器 */
+.page {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #F5F5F5;
+  display: none;
+  -webkit-overflow-scrolling: touch;
+}
+.page::-webkit-scrollbar { display: none; }
+.page.active { display: block; }
+
+/* 页面转场动画 */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.page.enter { animation: slideInRight 0.3s ease-out; }
+
+/* 导航栏 */
+.nav {
+  height: 88px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: flex-end;
+  padding: 0 16px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 0.5px solid rgba(0,0,0,0.05);
+}
+.nav-back { width: 40px; font-size: 22px; color: #333; cursor: pointer; }
+.nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-right: 40px; }
+.nav-right { font-size: 20px; color: #333; cursor: pointer; }
+
+/* TabBar */
+.tabbar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: 14px;
+  z-index: 100;
+}
+.tabbar-item { text-align: center; cursor: pointer; padding: 4px 12px; transition: transform 0.15s; }
+.tabbar-item:active { transform: scale(0.9); }
+.tabbar-icon { font-size: 22px; color: #b0b0b0; margin-bottom: 2px; transition: color 0.2s; }
+.tabbar-icon.on { color: #4CAF50; }
+.tabbar-text { font-size: 10px; color: #b0b0b0; transition: color 0.2s; }
+.tabbar-text.on { color: #4CAF50; font-weight: 600; }
+
+/* 组件 */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  margin: 12px 16px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.btn-main {
+  background: linear-gradient(135deg, #66BB6A, #4CAF50);
+  color: #fff;
+  border-radius: 28px;
+  height: 52px;
+  line-height: 52px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 16px;
+  box-shadow: 0 6px 20px rgba(76,175,80,0.3);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-main:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(76,175,80,0.2); }
+
+.btn-second {
+  background: #fff;
+  color: #4CAF50;
+  border: 1.5px solid #4CAF50;
+  border-radius: 10px;
+  height: 44px;
+  line-height: 42px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-second:active { background: #E8F5E9; }
+
+.btn-danger {
+  background: linear-gradient(135deg, #EF5350, #E53935);
+  color: #fff;
+  border-radius: 14px;
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 16px;
+  box-shadow: 0 4px 12px rgba(229,57,53,0.25);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.btn-danger:active { transform: scale(0.96); }
+
+.tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.tag-green { background: #E8F5E9; color: #2E7D32; }
+.tag-orange { background: #FFF3E0; color: #E65100; }
+.tag-red { background: #FFEBEE; color: #C62828; }
+.tag-blue { background: #E3F2FD; color: #1565C0; }
+
+/* ========== 首页 ========== */
+.home-top {
+  background: #fff;
+  padding: 50px 16px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.home-brand { font-size: 20px; font-weight: 800; color: #4CAF50; letter-spacing: -0.5px; }
+.home-notify { font-size: 22px; cursor: pointer; position: relative; }
+.home-notify::after {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 8px; height: 8px; background: #F44336; border-radius: 50%; border: 2px solid #fff;
+}
+
+.live-card {
+  margin: 12px 16px;
+  height: 210px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #0f2027, #203a43, #2c5364);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.live-card::before {
+  content: '';
+  position: absolute;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 50%, rgba(76,175,80,0.15) 0%, transparent 50%);
+}
+.live-play {
+  width: 60px; height: 60px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+  z-index: 2;
+  border: 2px solid rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.live-play:active { transform: scale(0.9); }
+.live-badge {
+  position: absolute;
+  top: 14px; left: 14px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255,75,43,0.3);
+}
+.live-pulse {
+  width: 6px; height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.live-viewer {
+  position: absolute;
+  bottom: 14px; left: 14px;
+  color: #fff;
+  font-size: 12px;
+  z-index: 2;
+  background: rgba(0,0,0,0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.stats-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  margin: 0 16px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 26px; font-weight: 800; color: #4CAF50; }
+.stat-label { font-size: 12px; color: #999; margin-top: 6px; }
+
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.sec-title::before, .sec-title::after {
+  content: ''; flex: 1; height: 0.5px; background: #e0e0e0;
+}
+
+.farmer-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px 16px;
+  overflow-x: auto;
+}
+.farmer-row::-webkit-scrollbar { display: none; }
+.farmer-card {
+  width: 100px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.farmer-card:active { transform: scale(0.95); }
+.farmer-av {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+.farmer-name { font-size: 13px; font-weight: 700; color: #333; }
+.farmer-star { font-size: 11px; color: #FF9800; margin-top: 4px; }
+.farmer-loc { font-size: 11px; color: #bbb; margin-top: 2px; }
+
+.features {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 16px 16px;
+}
+.ft-item { text-align: center; cursor: pointer; }
+.ft-icon {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 8px;
+}
+.ft-text { font-size: 12px; color: #666; font-weight: 500; }
+
+/* ========== 我的猪圈 ========== */
+.pig-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pig-card:active { background: #f8f8f8; border-radius: 12px; }
+.pig-thumb {
+  width: 88px; height: 88px;
+  background: linear-gradient(135deg, #1a1a2e, #2d3561);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  position: relative;
+  flex-shrink: 0;
+}
+.pig-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 10px; height: 10px;
+  background: #4CAF50;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(76,175,80,0.3);
+}
+.pig-dot.off { background: #bbb; box-shadow: none; }
+.pig-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+.pig-status { font-size: 12px; color: #4CAF50; margin-top: 4px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.pig-days { font-size: 13px; color: #999; margin-top: 4px; }
+.pig-cost { font-size: 14px; color: #FF9800; font-weight: 700; margin-top: 4px; }
+
+/* ========== 猪只详情 ========== */
+.detail-video {
+  width: 100%;
+  height: 230px;
+  background: linear-gradient(135deg, #0f2027, #203a43);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-play {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.detail-play:active { transform: scale(0.9); }
+
+.feed-row {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 0.5px solid #f0f0f0;
+}
+.feed-row:last-child { border-bottom: none; }
+.feed-icon { font-size: 20px; width: 28px; text-align: center; }
+.feed-info { flex: 1; }
+.feed-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+.feed-desc { font-size: 13px; color: #888; margin-top: 4px; }
+.feed-status { font-size: 12px; margin-top: 5px; font-weight: 600; }
+.feed-status.ok { color: #4CAF50; }
+.feed-status.wait { color: #FF9800; }
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+.action-cell {
+  text-align: center;
+  padding: 14px 4px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.action-cell:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.action-ic {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin: 0 auto 6px;
+}
+.action-tx { font-size: 12px; color: #666; font-weight: 500; }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 0.5px solid #f5f5f5;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: #999; }
+.info-value { color: #333; font-weight: 500; }
+
+/* ========== 订猪流程 ========== */
+.step-bar {
+  background: #fff;
+  padding: 16px 20px;
+}
+.step-title { font-size: 14px; font-weight: 700; color: #333; text-align: center; margin-bottom: 14px; }
+.step-dots { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e0e0e0; transition: background 0.3s; }
+.step-dot.on { background: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.15); }
+.step-line { width: 36px; height: 2px; background: #e0e0e0; }
+.step-line.on { background: #4CAF50; }
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.filter-btn {
+  flex: 1;
+  height: 38px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+.filter-btn:active { background: #f5f5f5; }
+
+.pig-select {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.pig-select-img {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  flex-shrink: 0;
+}
+.pig-select-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+.pig-select-attr { font-size: 13px; color: #888; margin-top: 4px; }
+.pig-select-price { font-size: 18px; font-weight: 800; color: #FF9800; margin-top: 6px; }
+
+.ins-card {
+  border: 2px solid #eee;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.ins-card:active { border-color: #4CAF50; }
+.ins-card.sel { border-color: #4CAF50; background: #F1F8E9; }
+.ins-badge {
+  position: absolute;
+  top: 0; left: 0;
+  background: linear-gradient(135deg, #FF9800, #FF6F00);
+  color: #fff;
+  padding: 5px 14px;
+  border-radius: 16px 0 16px 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+.ins-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.ins-price { font-size: 24px; font-weight: 800; color: #FF9800; margin: 8px 0; }
+.ins-list { font-size: 13px; color: #666; line-height: 1.8; }
+
+.order-box {
+  background: #FAFAFA;
+  border-radius: 16px;
+  padding: 18px;
+  margin: 12px 16px;
+}
+.order-box-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.order-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+.order-line.t { border-top: 1px solid #e0e0e0; margin-top: 8px; padding-top: 12px; }
+.order-k { color: #888; }
+.order-v { color: #333; font-weight: 600; }
+.order-v.big { font-size: 20px; color: #FF9800; font-weight: 800; }
+
+/* ========== 个人中心 ========== */
+.profile-box {
+  background: linear-gradient(160deg, #4CAF50, #2E7D32);
+  padding: 55px 20px 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.profile-box::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.profile-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.profile-av {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.profile-name { font-size: 20px; font-weight: 700; }
+.profile-phone { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.profile-vip {
+  display: inline-block;
+  background: linear-gradient(135deg, #FFD700, #FFA000);
+  color: #fff;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  padding: 16px;
+  border-radius: 0 0 16px 16px;
+  margin: 0 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.p-stat { text-align: center; }
+.p-stat-num { font-size: 20px; font-weight: 800; color: #1a1a1a; }
+.p-stat-label { font-size: 12px; color: #999; margin-top: 4px; }
+
+.menu-box {
+  background: #fff;
+  border-radius: 16px;
+  margin: 12px 16px;
+  overflow: hidden;
+}
+.menu-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 0.5px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.menu-line:active { background: #f8f8f8; }
+.menu-line:last-child { border-bottom: none; }
+.menu-left { display: flex; align-items: center; gap: 12px; }
+.menu-ic { font-size: 20px; width: 24px; text-align: center; }
+.menu-tx { font-size: 15px; color: #1a1a1a; font-weight: 500; }
+.menu-right { display: flex; align-items: center; gap: 8px; }
+.menu-badge { background: #F44336; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.menu-arrow { color: #ccc; font-size: 18px; font-weight: 300; }
+
+/* 状态栏时间 */
+.status-time {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  z-index: 201;
+  pointer-events: none;
+}
+
+/* 底部安全提示 */
+.bottom-hint {
+  text-align: center;
+  padding: 30px;
+  font-size: 12px;
+  color: #bbb;
+}
+</style>
+</head>
+<body>
+
+<!-- 端切换按钮 -->
+<div class="end-switcher">
+  <button class="end-btn active" onclick="switchEnd('client')">客户端</button>
+  <button class="end-btn" onclick="switchEnd('farmer')">代养人端</button>
+  <button class="end-btn" onclick="switchEnd('admin')">管理端</button>
+</div>
+
+<div class="device">
+  <div class="status-time" id="statusTime">9:41</div>
+  <div class="screen">
+
+    <!-- ==================== 客户端 ==================== -->
+    <div class="end-screen active" id="client-screen">
+      <!-- ==================== 首页 ==================== -->
+      <div class="page active" id="page-home">
+        <div class="home-top">
+          <div class="home-brand">私人订猪</div>
+          <div class="home-notify" onclick="goPage('page-message')">🔔</div>
+        </div>
+        
+        <div class="live-card" onclick="goPage('page-live')">
+          <div class="live-badge"><div class="live-pulse"></div>直播中</div>
+          <div class="live-play">▶</div>
+          <div class="live-viewer">128人正在观看</div>
+        </div>
+        
+        <div class="stats-bar">
+          <div class="stat-item"><div class="stat-num">1,234</div><div class="stat-label">服务客户</div></div>
+          <div class="stat-item"><div class="stat-num">567</div><div class="stat-label">正在代养</div></div>
+          <div class="stat-item"><div class="stat-num">89</div><div class="stat-label">合作农户</div></div>
+        </div>
+        
+        <div class="sec-title">农户故事</div>
+        <div class="farmer-row">
+          <div class="farmer-card" onclick="goPage('page-farmer')">
+            <div class="farmer-av">👨‍🌾</div>
+            <div class="farmer-name">张大爷</div>
+            <div class="farmer-star">★★★★★ 4.9</div>
+            <div class="farmer-loc">四川广元</div>
+          </div>
+          <div class="farmer-card" onclick="goPage('page-farmer')">
+            <div class="farmer-av">👩‍🌾</div>
+            <div class="farmer-name">李大妈</div>
+            <div class="farmer-star">★★★★★ 4.8</div>
+            <div class="farmer-loc">四川绵阳</div>
+          </div>
+          <div class="farmer-card" onclick="goPage('page-farmer')">
+            <div class="farmer-av">👨‍🌾</div>
+            <div class="farmer-name">王叔</div>
+            <div class="farmer-star">★★★★★ 4.9</div>
+            <div class="farmer-loc">四川德阳</div>
+          </div>
+        </div>
+        
+        <div class="sec-title">为什么选择我们</div>
+        <div class="features">
+          <div class="ft-item"><div class="ft-icon">🌿</div><div class="ft-text">天然养殖</div></div>
+          <div class="ft-item"><div class="ft-icon">📹</div><div class="ft-text">可视化</div></div>
+          <div class="ft-item"><div class="ft-icon">🍖</div><div class="ft-text">土猪肉质</div></div>
+          <div class="ft-item"><div class="ft-icon">💚</div><div class="ft-text">助农增收</div></div>
+        </div>
+        
+        <div class="btn-main" onclick="goPage('page-order1')">立即订猪</div>
+        <div style="height:80px"></div>
+        
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTabClient('home')">
+            <div class="tabbar-icon on">🏠</div>
+            <div class="tabbar-text on">首页</div>
+          </div>
+          <div class="tabbar-item" onclick="goPage('page-order1')">
+            <div class="tabbar-icon">🐷</div>
+            <div class="tabbar-text">订猪</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('pigs')">
+            <div class="tabbar-icon">🐽</div>
+            <div class="tabbar-text">我的猪圈</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('profile')">
+            <div class="tabbar-icon">👤</div>
+            <div class="tabbar-text">我的</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 我的猪圈 ==================== -->
+      <div class="page" id="page-pigs">
+        <div class="nav">
+          <span></span>
+          <span class="nav-title">我的猪圈</span>
+          <span class="nav-right" onclick="goPage('page-order1')">+</span>
+        </div>
+        
+        <div class="card" onclick="goPage('page-detail')">
+          <div class="pig-card">
+            <div class="pig-thumb">
+              🎥
+              <div class="pig-dot"></div>
+            </div>
+            <div>
+              <div class="pig-name">猪 #A001 小花</div>
+              <div class="pig-status">● 直播中</div>
+              <div class="pig-days">已养殖 128天</div>
+              <div class="pig-cost">累计费用 ¥2,560</div>
+              <div style="margin-top:6px"><span class="tag tag-green">健康</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" onclick="goPage('page-detail')">
+          <div class="pig-card">
+            <div class="pig-thumb">
+              🎥
+              <div class="pig-dot off"></div>
+            </div>
+            <div>
+              <div class="pig-name">猪 #A002 小黑</div>
+              <div class="pig-status" style="color:#bbb;">○ 离线</div>
+              <div class="pig-days">已养殖 85天</div>
+              <div class="pig-cost">累计费用 ¥1,700</div>
+              <div style="margin-top:6px"><span class="tag tag-green">健康</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="height:80px"></div>
+        
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTabClient('home')">
+            <div class="tabbar-icon">🏠</div>
+            <div class="tabbar-text">首页</div>
+          </div>
+          <div class="tabbar-item" onclick="goPage('page-order1')">
+            <div class="tabbar-icon">🐷</div>
+            <div class="tabbar-text">订猪</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('pigs')">
+            <div class="tabbar-icon on">🐽</div>
+            <div class="tabbar-text on">我的猪圈</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('profile')">
+            <div class="tabbar-icon">👤</div>
+            <div class="tabbar-text">我的</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 猪只详情 ==================== -->
+      <div class="page" id="page-detail">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">猪 #A001 小花</span>
+          <span class="nav-right">↗</span>
+        </div>
+        
+        <div class="detail-video" onclick="goPage('page-live')">
+          <div class="detail-play">▶</div>
+          <div class="live-badge" style="top:14px;left:14px;"><div class="live-pulse"></div>直播中</div>
+        </div>
+        
+        <div class="card" style="margin-top:-20px;position:relative;z-index:10;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:14px;">今日喂食记录</div>
+          <div class="feed-row">
+            <div class="feed-icon">🌅</div>
+            <div class="feed-info">
+              <div class="feed-title">早餐 07:30-08:30</div>
+              <div class="feed-desc">青菜、麦麸 | 加餐：精饲料</div>
+              <div class="feed-status ok">✅ 已完成 07:35</div>
+            </div>
+          </div>
+          <div class="feed-row">
+            <div class="feed-icon">☀️</div>
+            <div class="feed-info">
+              <div class="feed-title">午餐 12:30-13:30</div>
+              <div class="feed-desc">瓜果、米糠 | 加餐：营养剂</div>
+              <div class="feed-status ok">✅ 已完成 12:28</div>
+            </div>
+          </div>
+          <div class="feed-row">
+            <div class="feed-icon">🌙</div>
+            <div class="feed-info">
+              <div class="feed-title">晚餐 17:30-18:30</div>
+              <div class="feed-desc">青菜、麦糠 | 加餐：精饲料</div>
+              <div class="feed-status wait">⏳ 等待中...</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-grid">
+          <div class="action-cell" onclick="goPage('page-playback')">
+            <div class="action-ic">📹</div>
+            <div class="action-tx">回放</div>
+          </div>
+          <div class="action-cell">
+            <div class="action-ic">💰</div>
+            <div class="action-tx">打赏</div>
+          </div>
+          <div class="action-cell">
+            <div class="action-ic">🍎</div>
+            <div class="action-tx">加餐</div>
+          </div>
+          <div class="action-cell">
+            <div class="action-ic">🛁</div>
+            <div class="action-tx">洗澡</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:14px;">基本信息</div>
+          <div class="info-row"><span class="info-label">品种</span><span class="info-value">黑毛土猪</span></div>
+          <div class="info-row"><span class="info-label">入栏日期</span><span class="info-value">2026-01-15</span></div>
+          <div class="info-row"><span class="info-label">预计出栏</span><span class="info-value">2026-12-20</span></div>
+          <div class="info-row"><span class="info-label">代养农户</span><span class="info-value">张大爷</span></div>
+          <div class="info-row"><span class="info-label">当前重量</span><span class="info-value">约95斤</span></div>
+        </div>
+        
+        <div class="btn-main" style="margin-top:4px;">🍖 预约杀猪饭</div>
+        <div class="btn-danger">⚠️ 异常申报</div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 订猪 Step1 ==================== -->
+      <div class="page" id="page-order1">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">订猪</span>
+          <span></span>
+        </div>
+        
+        <div class="step-bar">
+          <div class="step-title">步骤 1/4：选择猪只</div>
+          <div class="step-dots">
+            <div class="step-dot on"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+          </div>
+        </div>
+        
+        <div class="filter-bar">
+          <div class="filter-btn">品种 ▼</div>
+          <div class="filter-btn">重量 ▼</div>
+          <div class="filter-btn">地区 ▼</div>
+        </div>
+        
+        <div style="padding:0 16px 8px;font-size:13px;color:#888;">
+          <span style="color:#4CAF50;font-weight:700;">💡 提示：</span>下方价格仅为<span style="color:#FF9800;font-weight:700;">猪仔基础费用</span>（按市价计算），不含代养费与餐食费
+        </div>
+        
+        <div class="card">
+          <div class="pig-select">
+            <div class="pig-select-img">🐷</div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="pig-select-name">黑土猪</div>
+                <span class="tag tag-green">热销</span>
+              </div>
+              <div class="pig-select-attr">基础重量：约15斤 | 预计出栏：150斤 | 周期：约10个月</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
+                <div class="pig-select-price">¥450</div>
+                <span style="font-size:12px;color:#999;">猪仔基础费用（市价）</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #f0f0f0;display:flex;justify-content:space-between;font-size:12px;color:#888;">
+            <span>代养费 ¥10/天 + 餐食费 ¥10/天</span>
+            <span style="color:#666;">出栏约需 ¥6,800</span>
+          </div>
+          <div class="btn-second" onclick="goPage('page-order2')" style="margin-top:10px;">选择</div>
+        </div>
+        
+        <div class="card">
+          <div class="pig-select">
+            <div class="pig-select-img">🐖</div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="pig-select-name">长白猪</div>
+                <span class="tag tag-blue">生长快</span>
+              </div>
+              <div class="pig-select-attr">基础重量：约20斤 | 预计出栏：180斤 | 周期：约8个月</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
+                <div class="pig-select-price">¥600</div>
+                <span style="font-size:12px;color:#999;">猪仔基础费用（市价）</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #f0f0f0;display:flex;justify-content:space-between;font-size:12px;color:#888;">
+            <span>代养费 ¥10/天 + 餐食费 ¥10/天</span>
+            <span style="color:#666;">出栏约需 ¥5,750</span>
+          </div>
+          <div class="btn-second" onclick="goPage('page-order2')" style="margin-top:10px;">选择</div>
+        </div>
+        
+        <div class="card">
+          <div class="pig-select">
+            <div class="pig-select-img">🐽</div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="pig-select-name">花猪</div>
+                <span class="tag tag-orange">肉质好</span>
+              </div>
+              <div class="pig-select-attr">基础重量：约18斤 | 预计出栏：160斤 | 周期：约9个月</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
+                <div class="pig-select-price">¥540</div>
+                <span style="font-size:12px;color:#999;">猪仔基础费用（市价）</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #f0f0f0;display:flex;justify-content:space-between;font-size:12px;color:#888;">
+            <span>代养费 ¥10/天 + 餐食费 ¥10/天</span>
+            <span style="color:#666;">出栏约需 ¥6,290</span>
+          </div>
+          <div class="btn-second" onclick="goPage('page-order2')" style="margin-top:10px;">选择</div>
+        </div>
+        
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 订猪 Step2 ==================== -->
+      <div class="page" id="page-order2">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">选择农户</span>
+          <span></span>
+        </div>
+        
+        <div class="step-bar">
+          <div class="step-title">步骤 2/4：选择代养农户</div>
+          <div class="step-dots">
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div style="display:flex;gap:12px;margin-bottom:14px;">
+            <div style="width:50px;height:50px;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;">👨‍🌾</div>
+            <div>
+              <div style="font-size:16px;font-weight:700;">张大爷</div>
+              <div style="font-size:13px;color:#888;margin-top:2px;">★★★★★ 4.9分 | 已代养128头</div>
+              <div style="font-size:13px;color:#888;margin-top:2px;">四川广元</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <div style="width:70px;height:50px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;">猪圈1</div>
+            <div style="width:70px;height:50px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;">猪圈2</div>
+            <div style="width:70px;height:50px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;">猪圈3</div>
+          </div>
+          <div class="btn-second" onclick="goPage('page-order3')">选择此农户</div>
+        </div>
+        
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 订猪 Step3 ==================== -->
+      <div class="page" id="page-order3">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">选择保险</span>
+          <span></span>
+        </div>
+        
+        <div class="step-bar">
+          <div class="step-title">步骤 3/4：选择保险套餐</div>
+          <div class="step-dots">
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+            <div class="step-line"></div>
+            <div class="step-dot"></div>
+          </div>
+        </div>
+        
+        <div class="ins-card" onclick="selectIns(this)">
+          <div class="ins-title">基础版 - 死亡保险</div>
+          <div class="ins-price">¥200</div>
+          <div class="ins-list">
+            • 猪只死亡按市值赔付<br>
+            • 不含疾病诊疗
+          </div>
+        </div>
+        
+        <div class="ins-card sel" onclick="selectIns(this)">
+          <div class="ins-badge">🏆 推荐</div>
+          <div class="ins-title">全面版 - 医疗+死亡保险</div>
+          <div class="ins-price">¥350</div>
+          <div class="ins-list">
+            • 疾病诊疗费用报销<br>
+            • 猪只死亡按市值赔付<br>
+            • 优先兽医上门服务
+          </div>
+        </div>
+        
+        <div class="ins-card" onclick="selectIns(this)">
+          <div class="ins-title">暂不购买保险</div>
+          <div class="ins-list">风险自担，无保障</div>
+        </div>
+        
+        <div class="btn-main" onclick="goPage('page-order4')" style="margin-top:24px;">下一步</div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 订猪 Step4 ==================== -->
+      <div class="page" id="page-order4">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">确认订单</span>
+          <span></span>
+        </div>
+        
+        <div class="step-bar">
+          <div class="step-title">步骤 4/4：确认订单信息</div>
+          <div class="step-dots">
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+            <div class="step-line on"></div>
+            <div class="step-dot on"></div>
+          </div>
+        </div>
+        
+        <div class="order-box">
+          <div class="order-box-title">订单信息</div>
+          <div class="order-line"><span class="order-k">猪只品种</span><span class="order-v">黑土猪</span></div>
+          <div class="order-line"><span class="order-k">基础重量</span><span class="order-v">约15斤</span></div>
+          <div class="order-line"><span class="order-k">预计出栏</span><span class="order-v">150斤</span></div>
+          <div class="order-line"><span class="order-k">代养农户</span><span class="order-v">张大爷</span></div>
+          <div class="order-line"><span class="order-k">保险套餐</span><span class="order-v">全面版</span></div>
+        </div>
+        
+        <div class="order-box">
+          <div class="order-box-title">费用明细</div>
+          <div class="order-line"><span class="order-k">猪仔基础费用（市价）</span><span class="order-v">¥450</span></div>
+          <div class="order-line"><span class="order-k">保险费用</span><span class="order-v">¥350</span></div>
+          <div class="order-line t"><span class="order-k">本次支付合计</span><span class="order-v big">¥800</span></div>
+        </div>
+        
+        <div style="padding:0 16px;font-size:13px;color:#999;line-height:1.6;">
+          <span style="color:#4CAF50;font-weight:700;">💡 说明：</span><br>
+          • 猪仔基础费用 = 猪只入栏时的市价，按<span style="color:#FF9800;font-weight:700;">30元/斤</span> × 基础重量计算<br>
+          • 日常代养费用 ¥20/天（代养10元+餐食10元）将从余额中每日自动扣除<br>
+          • 预计总费用（至出栏）：猪仔费¥450 + 代养费约¥6,000 + 保险费¥350 = <span style="color:#FF9800;font-weight:700;">约¥6,800</span>
+        </div>
+        
+        <div class="btn-main" onclick="alert('支付成功！您的专属猪ID：A003')">立即支付 ¥800</div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 个人中心 ==================== -->
+      <div class="page" id="page-profile">
+        <div class="profile-box">
+          <div class="profile-top">
+            <div class="profile-av">👤</div>
+            <div>
+              <div class="profile-name">张三</div>
+              <div class="profile-phone">138****8888</div>
+              <div class="profile-vip">🥈 白银会员</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="p-stat"><div class="p-stat-num">1,280</div><div class="p-stat-label">积分</div></div>
+          <div class="p-stat"><div class="p-stat-num">3张</div><div class="p-stat-label">优惠券</div></div>
+          <div class="p-stat"><div class="p-stat-num" style="color:#FF9800;">¥256</div><div class="p-stat-label">余额</div></div>
+        </div>
+        
+        <div class="menu-box">
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">📋</span><span class="menu-tx">我的订单</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">💰</span><span class="menu-tx">费用明细</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">💳</span><span class="menu-tx">余额充值</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">🔔</span><span class="menu-tx">消息通知</span></div><div class="menu-right"><span class="menu-badge">3</span><span class="menu-arrow">›</span></div></div>
+        </div>
+        
+        <div class="menu-box">
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">👥</span><span class="menu-tx">邀请好友</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">❓</span><span class="menu-tx">帮助中心</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+          <div class="menu-line"><div class="menu-left"><span class="menu-ic">⚙️</span><span class="menu-tx">设置</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
+        </div>
+        
+        <div class="bottom-hint">客服电话：400-XXX-XXXX | 服务时间：9:00-18:00</div>
+        <div style="height:80px"></div>
+        
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTabClient('home')">
+            <div class="tabbar-icon">🏠</div>
+            <div class="tabbar-text">首页</div>
+          </div>
+          <div class="tabbar-item" onclick="goPage('page-order1')">
+            <div class="tabbar-icon">🐷</div>
+            <div class="tabbar-text">订猪</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('pigs')">
+            <div class="tabbar-icon">🐽</div>
+            <div class="tabbar-text">我的猪圈</div>
+          </div>
+          <div class="tabbar-item" onclick="switchTabClient('profile')">
+            <div class="tabbar-icon on">👤</div>
+            <div class="tabbar-text on">我的</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 视频回放 ==================== -->
+      <div class="page" id="page-playback">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">视频回放</span>
+          <span></span>
+        </div>
+        
+        <div style="background:#fff;padding:16px;text-align:center;">
+          <div style="font-size:16px;font-weight:700;margin-bottom:12px;">◀ 2026年4月 ▶</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;font-size:13px;color:#666;">
+            <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            <div style="color:#ddd;">28</div><div style="color:#ddd;">29</div>
+            <div style="width:32px;height:32px;background:#4CAF50;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;">30</div>
+            <div>1</div><div>2</div><div>3</div><div>4</div>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-top:12px;height:180px;background:linear-gradient(135deg,#0f2027,#203a43);display:flex;align-items:center;justify-content:center;">
+          <div class="detail-play">▶</div>
+        </div>
+        
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">该时段喂食记录</div>
+          <div class="feed-row">
+            <div class="feed-icon">🌅</div>
+            <div class="feed-info">
+              <div class="feed-title">07:35 早餐喂食完成</div>
+              <div class="feed-desc">AI判定：置信度96%</div>
+            </div>
+          </div>
+          <div class="feed-row">
+            <div class="feed-icon">🍎</div>
+            <div class="feed-info">
+              <div class="feed-title">08:15 加餐完成</div>
+              <div class="feed-desc">精饲料 200g</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 消息页占位 ==================== -->
+      <div class="page" id="page-message">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">消息通知</span>
+          <span></span>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:8px;">🔔 余额不足提醒</div>
+          <div style="font-size:13px;color:#888;">您的猪只小花余额不足7天，请及时充值。</div>
+          <div style="font-size:12px;color:#bbb;margin-top:8px;">10分钟前</div>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:8px;">✅ 喂养完成通知</div>
+          <div style="font-size:13px;color:#888;">小花今日早餐已完成，点击查看视频。</div>
+          <div style="font-size:12px;color:#bbb;margin-top:8px;">1小时前</div>
+        </div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 农户详情占位 ==================== -->
+      <div class="page" id="page-farmer">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">张大爷</span>
+          <span></span>
+        </div>
+        <div style="padding:30px;text-align:center;background:#fff;">
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto;">👨‍🌾</div>
+          <div style="font-size:20px;font-weight:700;margin-top:16px;">张大爷</div>
+          <div style="font-size:14px;color:#888;margin-top:6px;">★★★★★ 4.9分 | 已代养128头猪</div>
+          <div style="font-size:14px;color:#888;margin-top:4px;">四川广元 | 从业15年</div>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">农户故事</div>
+          <div style="font-size:14px;color:#666;line-height:1.8;">
+            张大爷是四川广元的资深养殖户，从事土猪养殖已有15年。始终坚持传统散养方式，让猪只在山间自由奔跑，食用天然饲料...
+          </div>
+        </div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 直播页占位 ==================== -->
+      <div class="page" id="page-live">
+        <div class="nav">
+          <span class="nav-back" onclick="back()">←</span>
+          <span class="nav-title">实时直播</span>
+          <span></span>
+        </div>
+        <div style="height:500px;background:linear-gradient(135deg,#0f2027,#203a43);display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:#fff;">
+            <div style="font-size:48px;margin-bottom:16px;">🎥</div>
+            <div style="font-size:16px;opacity:0.8;">实时直播中...</div>
+            <div style="font-size:14px;opacity:0.5;margin-top:8px;">128人正在观看</div>
+          </div>
+        </div>
+        <div style="height:40px"></div>
+      </div>
+    </div>
+
+    <!-- ==================== 代养人端 ==================== -->
+    <div class="end-screen" id="farmer-screen">
+      <!-- 代养人工作台 -->
+      <div class="page active" id="farmer-home">
+        <div class="home-top">
+          <div class="home-brand">👨‍🌾 代养人工作台</div>
+          <div class="home-notify">🔔</div>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">托管猪只</div></div>
+          <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">待完成任务</div></div>
+        </div>
+        <div class="sec-title">今日任务</div>
+        <div class="card">
+          <div class="feed-row">
+            <div class="feed-icon">🌅</div>
+            <div class="feed-info">
+              <div class="feed-title">早餐喂养 - A区</div>
+              <div class="feed-desc">07:00 - 08:00</div>
+              <div class="feed-status ok">✅ 已完成</div>
+            </div>
+          </div>
+          <div class="feed-row">
+            <div class="feed-icon">☀️</div>
+            <div class="feed-info">
+              <div class="feed-title">午餐喂养 - A区</div>
+              <div class="feed-desc">12:00 - 13:00</div>
+              <div class="feed-status wait">⏳ 进行中</div>
+            </div>
+          </div>
+          <div class="feed-row">
+            <div class="feed-icon">🌙</div>
+            <div class="feed-info">
+              <div class="feed-title">晚餐喂养 - A区</div>
+              <div class="feed-desc">18:00 - 19:00</div>
+              <div class="feed-status" style="color:#999;">⏰ 未开始</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:80px"></div>
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTab('farmer-home',this)"><div class="tabbar-icon on">📊</div><div class="tabbar-text on">工作台</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-tasks',this)"><div class="tabbar-icon">✅</div><div class="tabbar-text">喂养任务</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-pigs',this)"><div class="tabbar-icon">🐷</div><div class="tabbar-text">我的猪只</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-earnings',this)"><div class="tabbar-icon">💰</div><div class="tabbar-text">收益中心</div></div>
+        </div>
+      </div>
+
+      <!-- 喂养任务 -->
+      <div class="page" id="farmer-tasks">
+        <div class="nav"><span></span><span class="nav-title">喂养任务</span><span></span></div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🌅 早餐喂养</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;color:#888;">A区-03栏</div>
+              <div style="font-size:13px;color:#888;">07:00-08:00 | 玉米面粥+青菜</div>
+            </div>
+            <div class="tag tag-green">已完成</div>
+          </div>
+          <button class="btn-main" style="margin-top:12px;height:40px;line-height:40px;font-size:14px;background:#999;">✓ 已打卡</button>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">☀️ 午餐喂养</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;color:#888;">A区-03栏</div>
+              <div style="font-size:13px;color:#888;">12:00-13:00 | 红薯+豆类</div>
+            </div>
+            <div class="tag tag-orange">进行中</div>
+          </div>
+          <button class="btn-main" style="margin-top:12px;height:40px;line-height:40px;font-size:14px;" onclick="this.textContent='✓ 已打卡';this.style.background='#999';alert('打卡成功！')">立即打卡</button>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🌙 晚餐喂养</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;color:#888;">A区-03栏</div>
+              <div style="font-size:13px;color:#888;">18:00-19:00 | 粗粮+蔬菜</div>
+            </div>
+            <div class="tag" style="background:#f5f5f5;color:#999;">待完成</div>
+          </div>
+          <button class="btn-main" style="margin-top:12px;height:40px;line-height:40px;font-size:14px;background:#e0e0e0;color:#999;">待完成</button>
+        </div>
+        <div style="height:40px"></div>
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTab('farmer-home',this)"><div class="tabbar-icon">📊</div><div class="tabbar-text">工作台</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-tasks',this)"><div class="tabbar-icon on">✅</div><div class="tabbar-text on">喂养任务</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-pigs',this)"><div class="tabbar-icon">🐷</div><div class="tabbar-text">我的猪只</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-earnings',this)"><div class="tabbar-icon">💰</div><div class="tabbar-text">收益中心</div></div>
+        </div>
+      </div>
+
+      <!-- 我的猪只 -->
+      <div class="page" id="farmer-pigs">
+        <div class="nav"><span></span><span class="nav-title">我的猪只</span><span></span></div>
+        <div class="card">
+          <div class="pig-card">
+            <div class="pig-thumb">🐷</div>
+            <div>
+              <div class="pig-name">小黑 #A003</div>
+              <div class="pig-status">● 健康</div>
+              <div class="pig-days">张先生 | 养殖128天 | 89kg</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="pig-card">
+            <div class="pig-thumb">🐖</div>
+            <div>
+              <div class="pig-name">小白 #A004</div>
+              <div class="pig-status">● 健康</div>
+              <div class="pig-days">李女士 | 养殖98天 | 72kg</div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-hint">共托管 12 头猪只</div>
+        <div style="height:80px"></div>
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTab('farmer-home',this)"><div class="tabbar-icon">📊</div><div class="tabbar-text">工作台</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-tasks',this)"><div class="tabbar-icon">✅</div><div class="tabbar-text">喂养任务</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-pigs',this)"><div class="tabbar-icon on">🐷</div><div class="tabbar-text on">我的猪只</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-earnings',this)"><div class="tabbar-icon">💰</div><div class="tabbar-text">收益中心</div></div>
+        </div>
+      </div>
+
+      <!-- 收益中心 -->
+      <div class="page" id="farmer-earnings">
+        <div class="nav"><span></span><span class="nav-title">收益中心</span><span></span></div>
+        <div class="stats-bar">
+          <div class="stat-item"><div class="stat-num">¥8,650</div><div class="stat-label">本月收益</div></div>
+          <div class="stat-item"><div class="stat-num">¥56,200</div><div class="stat-label">累计收益</div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:14px;">收益明细</div>
+          <div class="order-line"><span class="order-k">2026年4月</span><span class="order-v" style="color:#4CAF50;">+¥8,650</span></div>
+          <div class="order-line"><span class="order-k">2026年3月</span><span class="order-v" style="color:#4CAF50;">+¥7,820</span></div>
+          <div class="order-line"><span class="order-k">2026年2月</span><span class="order-v" style="color:#4CAF50;">+¥9,120</span></div>
+        </div>
+        <div style="height:80px"></div>
+        <div class="tabbar">
+          <div class="tabbar-item" onclick="switchTab('farmer-home',this)"><div class="tabbar-icon">📊</div><div class="tabbar-text">工作台</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-tasks',this)"><div class="tabbar-icon">✅</div><div class="tabbar-text">喂养任务</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-pigs',this)"><div class="tabbar-icon">🐷</div><div class="tabbar-text">我的猪只</div></div>
+          <div class="tabbar-item" onclick="switchTab('farmer-earnings',this)"><div class="tabbar-icon on">💰</div><div class="tabbar-text on">收益中心</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 管理端 ==================== -->
+    <div class="end-screen" id="admin-screen">
+      <div class="page active" id="admin-home">
+        <div class="home-top">
+          <div class="home-brand">📊 管理后台</div>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-item"><div class="stat-num">1,286</div><div class="stat-label">总用户数</div></div>
+          <div class="stat-item"><div class="stat-num">356</div><div class="stat-label">活跃订单</div></div>
+          <div class="stat-item"><div class="stat-num">89</div><div class="stat-label">代养农户</div></div>
+        </div>
+        <div class="stats-bar" style="margin-top:0;">
+          <div class="stat-item"><div class="stat-num">¥2.8M</div><div class="stat-label">本月营收</div></div>
+          <div class="stat-item"><div class="stat-num">30</div><div class="stat-label">今日新单</div></div>
+          <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">待处理</div></div>
+        </div>
+        <div class="sec-title">功能模块</div>
+        <div class="features">
+          <div class="ft-item" onclick="alert('用户管理')"><div class="ft-icon">👥</div><div class="ft-text">用户管理</div></div>
+          <div class="ft-item" onclick="alert('订单管理')"><div class="ft-icon">📦</div><div class="ft-text">订单管理</div></div>
+          <div class="ft-item" onclick="alert('监控中心')"><div class="ft-icon">📹</div><div class="ft-text">监控中心</div></div>
+          <div class="ft-item" onclick="alert('餐食管理')"><div class="ft-icon">🍽️</div><div class="ft-text">餐食管理</div></div>
+        </div>
+        <div class="features" style="padding-top:0;">
+          <div class="ft-item" onclick="alert('兽医服务')"><div class="ft-icon">🏥</div><div class="ft-text">兽医服务</div></div>
+          <div class="ft-item" onclick="alert('财务管理')"><div class="ft-icon">💰</div><div class="ft-text">财务管理</div></div>
+          <div class="ft-item" onclick="alert('数据报表')"><div class="ft-icon">📊</div><div class="ft-text">数据报表</div></div>
+          <div class="ft-item" onclick="alert('系统设置')"><div class="ft-icon">⚙️</div><div class="ft-text">系统设置</div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px;">最近订单</div>
+          <div class="order-line"><span class="order-k">20260430001</span><span>张先生</span><span class="tag tag-green" style="padding:2px 8px;">养殖中</span></div>
+          <div class="order-line"><span class="order-k">20260429003</span><span>李女士</span><span class="tag tag-orange" style="padding:2px 8px;">待确认</span></div>
+          <div class="order-line"><span class="order-k">20260428005</span><span>王先生</span><span class="tag tag-green" style="padding:2px 8px;">养殖中</span></div>
+        </div>
+        <div class="bottom-hint">💻 管理端完整版为Web界面</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// 页面历史栈
+let historyStack = ['page-home'];
+
+// 端切换
+function switchEnd(endName) {
+  document.querySelectorAll('.end-screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(endName + '-screen').classList.add('active');
+  document.querySelectorAll('.end-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// Tab切换（代养人端）
+function switchTab(pageId, tabEl) {
+  const endScreen = tabEl.closest('.end-screen');
+  endScreen.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  endScreen.querySelectorAll('.tabbar-item').forEach(tab => {
+    tab.querySelector('.tabbar-icon').classList.remove('on');
+    tab.querySelector('.tabbar-text').classList.remove('on');
+  });
+  document.getElementById(pageId).classList.add('active');
+  tabEl.querySelector('.tabbar-icon').classList.add('on');
+  tabEl.querySelector('.tabbar-text').classList.add('on');
+}
+
+// 原来的goPage函数保留给客户端
+function goPage(pageId) {
+  document.querySelectorAll('#client-screen .page').forEach(p => p.classList.remove('active','enter'));
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active','enter');
+    if (target.closest('#client-screen')) {
+      historyStack.push(pageId);
+    }
+  }
+  updateTime();
+}
+
+// 保留原来的back给客户端
+function back() {
+  if (historyStack.length > 1) {
+    historyStack.pop();
+    const prev = historyStack[historyStack.length - 1];
+    document.querySelectorAll('#client-screen .page').forEach(p => p.classList.remove('active','enter'));
+    document.getElementById(prev).classList.add('active');
+  }
+  updateTime();
+}
+
+// 客户端Tab切换
+function switchTabClient(tabName) {
+  const map = { home: 'page-home', pigs: 'page-pigs', profile: 'page-profile' };
+  goPage(map[tabName]);
+}
+
+function selectIns(el) {
+  document.querySelectorAll('.ins-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function updateTime() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('statusTime').textContent = h + ':' + m;
+}
+
+updateTime();
+setInterval(updateTime, 60000);
+</script>
+
+</body>
+</html>
