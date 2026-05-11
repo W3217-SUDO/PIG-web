@@ -6,6 +6,12 @@
 
 ## [Unreleased]
 
+### Planning
+- 制定 5/31 上线总路线图 `docs/ROADMAP.md`
+- MVP v1.0.0 范围矩阵 `docs/00-overview/mvp-scope.md`
+- W1 / W2 / W3 自动执行任务清单(`docs/AUTO-RUN-2026-05-12.md` / `-19.md` / `-26.md`)
+- 文档总索引更新,顶部增加"当前进行中"区块
+
 ## [0.2.0] - 2026-05-11
 
 ### Added

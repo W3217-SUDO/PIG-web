@@ -4,6 +4,20 @@
 
 ---
 
+## 🚨 当前进行中
+
+| 文档 | 作用 |
+|---|---|
+| **[`ROADMAP.md`](./ROADMAP.md)** | 🗺 **5/31 上线总路线图**(范围 / 时间线 / 合规依赖 / 风险) |
+| [`00-overview/mvp-scope.md`](./00-overview/mvp-scope.md) | 🎯 MVP v1.0.0 模块矩阵(做什么 / 不做什么 / 为什么) |
+| [`AUTO-RUN-2026-05-12.md`](./AUTO-RUN-2026-05-12.md) | 📅 **W1 任务**(5/12-5/18) — 后端业务核心 + 前端骨架页 |
+| [`AUTO-RUN-2026-05-19.md`](./AUTO-RUN-2026-05-19.md) | 📅 W2 任务(5/19-5/25) — 微信支付 + 小程序提审 |
+| [`AUTO-RUN-2026-05-26.md`](./AUTO-RUN-2026-05-26.md) | 📅 W3 任务(5/26-5/31) — 审核回归 + 上线灰度 + APP 内测 |
+| [`AUTO-RUN-2026-05-11.md`](./AUTO-RUN-2026-05-11.md) | 📜 W0(已完成归档)— 后端骨架 / JWT / uni-app 初始化 |
+| [`../CHANGELOG.md`](../CHANGELOG.md) | 版本变更日志 |
+
+---
+
 ## 文档导航
 
 ### 🪧 0. 产品与项目背景
@@ -11,6 +25,7 @@
 | 文档 | 看完知道 |
 |---|---|
 | [`00-overview/product.md`](./00-overview/product.md) | 我们做什么、为什么做、核心商业逻辑 |
+| [`00-overview/mvp-scope.md`](./00-overview/mvp-scope.md) | v1.0.0 范围、用户故事覆盖、模块裁剪 |
 | [`00-overview/glossary.md`](./00-overview/glossary.md) | 项目术语:认领人 / 主认领人 / 拼猪 / 年猪 / … |
 
 ### 🚀 1. 环境搭建与本地启动
@@ -84,9 +99,11 @@
 **第 1 天 · 新人入职** → 读完能跑起本地
 
 1. [`00-overview/product.md`](./00-overview/product.md) — 知道项目是什么 (15 min)
-2. [`01-getting-started/prerequisites.md`](./01-getting-started/prerequisites.md) — 准备工具 (30 min)
-3. [`01-getting-started/local-setup.md`](./01-getting-started/local-setup.md) — 跑通本地 (60 min)
-4. [`02-architecture/overview.md`](./02-architecture/overview.md) — 知道全貌 (20 min)
+2. [`ROADMAP.md`](./ROADMAP.md) — 知道我们要在 5/31 上线什么 (10 min)
+3. [`00-overview/mvp-scope.md`](./00-overview/mvp-scope.md) — 知道 v1 边界 (10 min)
+4. [`01-getting-started/prerequisites.md`](./01-getting-started/prerequisites.md) — 准备工具 (30 min)
+5. [`01-getting-started/local-setup.md`](./01-getting-started/local-setup.md) — 跑通本地 (60 min)
+6. [`02-architecture/overview.md`](./02-architecture/overview.md) — 知道全貌 (20 min)
 
 **第 2-3 天 · 上手开发** → 读完能写一个完整功能
 
