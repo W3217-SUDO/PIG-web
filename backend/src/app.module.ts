@@ -9,6 +9,7 @@ import { configuration } from './config/configuration';
 import { validationSchema } from './config/validation';
 
 import { HealthModule } from './modules/health/health.module';
+import { RedisModule } from './modules/redis/redis.module';
 // 业务模块逐步加入(各自独立 PR)
 // import { AuthModule } from './modules/auth/auth.module';
 // import { UserModule } from './modules/user/user.module';
@@ -104,6 +105,9 @@ import { HealthModule } from './modules/health/health.module';
         autoLoadEntities: true,
       }),
     }),
+
+    // Redis (全局, 提供 REDIS_CLIENT)
+    RedisModule,
 
     // 业务模块
     HealthModule,
