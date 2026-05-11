@@ -1,0 +1,37 @@
+{
+  "name": "pig-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PIG 私人订猪 · 三端代养土猪平台 Monorepo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/W3217-SUDO/PIG-web.git"
+  },
+  "license": "UNLICENSED",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "admin"
+  ],
+  "engines": {
+    "node": ">=20.0.0 <21.0.0"
+  },
+  "scripts": {
+    "dev:backend": "npm -w backend run start:dev",
+    "dev:client:mp": "npm -w frontend run dev:mp-weixin",
+    "dev:client:app": "npm -w frontend run dev:app",
+    "dev:client:h5": "npm -w frontend run dev:h5",
+    "dev:admin": "npm -w admin run dev",
+    "build:backend": "npm -w backend run build",
+    "build:client:mp": "npm -w frontend run build:mp-weixin",
+    "build:client:app": "npm -w frontend run build:app",
+    "build:client:h5": "npm -w frontend run build:h5",
+    "build:admin": "npm -w admin run build",
+    "lint": "npm -w backend run lint && npm -w frontend run lint",
+    "test": "npm -w backend run test",
+    "clean": "rimraf '**/node_modules' '**/dist' '**/unpackage' '**/.cache'"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  }
+}

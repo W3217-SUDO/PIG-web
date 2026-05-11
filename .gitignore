@@ -25,7 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# 环境变量与密钥（绝不入库）
+# 环境变量与密钥(绝不入库)
 .env
 .env.*
 !.env.example
@@ -57,3 +57,14 @@ project.private.config.json
 *.sqlite
 *.db
 data/
+
+# HBuilderX(uni-app 真机调试用)
+.hbuilderx/
+
+# Workspace / IDE 配置
+*.code-workspace
+.history/
+
+# 测试覆盖率
+coverage/
+.nyc_output/
