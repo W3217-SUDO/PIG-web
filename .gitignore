@@ -38,6 +38,7 @@ config/secrets.*
 # 编辑器/系统
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 .DS_Store

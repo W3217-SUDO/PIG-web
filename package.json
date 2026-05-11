@@ -9,12 +9,10 @@
   },
   "license": "UNLICENSED",
   "workspaces": [
-    "backend",
-    "frontend",
-    "admin"
+    "backend"
   ],
   "engines": {
-    "node": ">=20.0.0 <21.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "dev:backend": "npm -w backend run start:dev",
