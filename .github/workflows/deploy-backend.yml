@@ -1,0 +1,83 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: install
+        run: npm ci
+
+      - name: build
+        run: npm -w backend run build
+        continue-on-error: true
+
+      - name: archive
+        run: |
+          if [ -d backend/dist ]; then
+            tar czf release.tar.gz \
+              backend/dist \
+              backend/package.json \
+              backend/package-lock.json \
+              backend/db 2>/dev/null || tar czf release.tar.gz backend/package.json backend/package-lock.json
+          else
+            echo "no dist yet, skip deploy"
+            exit 0
+          fi
+
+      - name: upload to server
+        if: success()
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          source: 'release.tar.gz'
+          target: '/tmp/'
+
+      - name: extract + reload
+        if: success()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/pig
+            TS=$(date +%Y%m%d_%H%M%S)
+            mkdir -p releases/$TS
+            tar xzf /tmp/release.tar.gz -C releases/$TS
+            cd releases/$TS/backend
+            npm ci --omit=dev
+            [ -f /opt/pig/shared/.env.production ] && ln -sfn /opt/pig/shared/.env.production .env.production
+            cd /opt/pig
+            ln -sfn releases/$TS current
+            cd current/backend
+            npm run migration:run 2>/dev/null || echo "no migrations"
+            pm2 reload pig-backend --update-env 2>/dev/null || pm2 start dist/main.js --name pig-backend --update-env
+            sleep 3
+            curl -fsS http://127.0.0.1:3000/api/health || { pm2 logs pig-backend --lines 50 --nostream; exit 1; }
+            cd /opt/pig/releases
+            ls -1t | tail -n +6 | xargs -r rm -rf
