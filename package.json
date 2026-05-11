@@ -9,7 +9,8 @@
   },
   "license": "UNLICENSED",
   "workspaces": [
-    "backend"
+    "backend",
+    "frontend"
   ],
   "engines": {
     "node": ">=20.0.0"
