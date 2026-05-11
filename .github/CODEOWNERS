@@ -1,0 +1,35 @@
+# CODEOWNERS · 自动指派 PR Reviewer
+# 文档: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+#
+# 格式:<glob 路径> <@user1> <@user2>
+# 顺序:后写的覆盖先写的(更具体路径在后)
+#
+# 等合作者加入仓库后,把 @your-partner 替换为他的 GitHub username
+
+# ───── 默认 owner(所有未匹配文件) ─────
+*                                          @W3217-SUDO
+
+# ───── 后端 ─────
+/backend/                                  @W3217-SUDO
+/backend/src/modules/                      @W3217-SUDO
+
+# ───── 前端 ─────
+/frontend/                                 @W3217-SUDO
+# 等合作者加入,改成:@W3217-SUDO @your-partner
+
+# ───── 高危区:涉及钱、鉴权、迁移,owner 必看 ─────
+/backend/src/modules/wallet/               @W3217-SUDO
+/backend/src/modules/order/                @W3217-SUDO
+/backend/src/modules/auth/                 @W3217-SUDO
+/backend/db/migrations/                    @W3217-SUDO
+
+# ───── 跨端契约:数据库 schema + API 规范,双人 review ─────
+/docs/03-backend/database.md               @W3217-SUDO
+/docs/03-backend/api-spec.md               @W3217-SUDO
+
+# ───── CI/CD + 部署 ─────
+/.github/                                  @W3217-SUDO
+/scripts/                                  @W3217-SUDO
+
+# ───── 文档(任意 reviewer 可批) ─────
+/docs/                                     @W3217-SUDO
