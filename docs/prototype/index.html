@@ -98,7 +98,9 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 .page::-webkit-scrollbar { display: none; }
-.page.active { display: block; }
+.page.active { display: flex; flex-direction: column; }
+.page.active > * { flex-shrink: 0; }
+.page.active > .tabbar { margin-top: auto; }
 
 /* 页面转场动画 */
 @keyframes slideInRight {
@@ -130,17 +132,20 @@ body {
 
 /* TabBar */
 .tabbar {
-  position: absolute;
+  position: sticky;
   bottom: 0; left: 0; right: 0;
+  margin-top: auto;
   height: 64px;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.96);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 0.5px solid rgba(0,0,0,0.08);
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding-bottom: 14px;
   z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
 }
 .tabbar-item { text-align: center; cursor: pointer; padding: 4px 12px; transition: transform 0.15s; }
 .tabbar-item:active { transform: scale(0.9); }
@@ -681,6 +686,1164 @@ body {
   font-size: 12px;
   color: #bbb;
 }
+
+/* ============================================================
+   关于我们 · 长页面
+   ============================================================ */
+.about-hero {
+  position: relative;
+  height: 360px;
+  background: linear-gradient(160deg, #2c1810 0%, #5a2818 50%, #8b3a1a 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 24px 36px;
+}
+.about-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,200,100,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,80,40,0.20) 0%, transparent 50%);
+}
+.about-hero::after {
+  content: '🏮';
+  position: absolute;
+  top: 70px; right: 26px;
+  font-size: 64px;
+  opacity: 0.55;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  animation: lantern 3s ease-in-out infinite;
+}
+@keyframes lantern {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+.about-back {
+  position: absolute;
+  top: 50px; left: 16px;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  cursor: pointer;
+}
+.about-tag {
+  display: inline-block;
+  background: rgba(255,220,160,0.18);
+  color: #ffd89c;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 2;
+  letter-spacing: 1px;
+}
+.about-title {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.about-title em {
+  font-style: normal;
+  color: #ffd89c;
+}
+.about-subtitle {
+  color: rgba(255,255,255,0.82);
+  font-size: 14px;
+  line-height: 1.7;
+  position: relative;
+  z-index: 2;
+}
+
+.about-section {
+  padding: 42px 22px 8px;
+  background: #fff;
+}
+.about-section.cream { background: #FFF8EE; }
+.about-section.dark { background: #1a1a1a; }
+
+.about-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c0392b;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+.about-section.dark .about-eyebrow { color: #ffb347; }
+.about-h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.32;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+.about-h2 em {
+  font-style: normal;
+  color: #c0392b;
+}
+.about-section.dark .about-h2 { color: #fff; }
+.about-section.dark .about-h2 em { color: #ffb347; }
+
+.about-p {
+  font-size: 15px;
+  line-height: 2;
+  color: #444;
+  margin-bottom: 14px;
+}
+.about-section.dark .about-p { color: rgba(255,255,255,0.78); }
+.about-p .hl {
+  color: #c0392b;
+  font-weight: 700;
+}
+.about-section.dark .about-p .hl { color: #ffb347; }
+
+.about-quote {
+  border-left: 3px solid #c0392b;
+  padding: 8px 0 8px 16px;
+  margin: 24px 0 18px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+.about-section.dark .about-quote {
+  color: #ffd89c;
+  border-color: #ffb347;
+}
+
+.about-scene {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 22px 0 8px;
+}
+.scene-card {
+  height: 124px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  padding: 14px 8px;
+  line-height: 1.5;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+.scene-card .em { font-size: 34px; margin-bottom: 8px; }
+.scene-1 { background: linear-gradient(135deg, #6b4423, #a0522d); }
+.scene-2 { background: linear-gradient(135deg, #8b3a1a, #c0392b); }
+.scene-3 { background: linear-gradient(135deg, #4a2c2a, #7d4e3c); }
+.scene-4 { background: linear-gradient(135deg, #5d4037, #8d6e63); }
+
+/* 商业模式对比表 */
+.compare-table {
+  background: #fff;
+  border-radius: 16px;
+  margin: 22px 0 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  border: 1px solid #f3e8d9;
+}
+.compare-row {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 1fr;
+  font-size: 13px;
+  border-bottom: 0.5px solid #f0f0f0;
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-row.head {
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.compare-row.head > div { padding: 14px 8px; text-align: center; }
+.compare-row.head .ours-h { color: #ffd89c; }
+.compare-row > div { padding: 13px 10px; }
+.compare-row .label {
+  background: #FFF8EE;
+  color: #5a3a1f;
+  font-weight: 600;
+}
+.compare-row .other {
+  color: #999;
+  text-align: center;
+}
+.compare-row .ours {
+  color: #c0392b;
+  font-weight: 700;
+  text-align: center;
+  background: #FFF5F0;
+}
+
+/* 监控环节 */
+.monitor-list { margin: 20px 0 8px; }
+.monitor-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.about-section.dark .monitor-item {
+  background: rgba(255,255,255,0.06);
+  box-shadow: none;
+}
+.monitor-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.monitor-info { flex: 1; min-width: 0; }
+.monitor-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+.about-section.dark .monitor-title { color: #fff; }
+.monitor-desc {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.7;
+}
+.about-section.dark .monitor-desc { color: rgba(255,255,255,0.6); }
+
+/* 五条承诺 */
+.promise-list { margin: 18px 0 0; }
+.promise-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 0.5px dashed rgba(192,57,43,0.22);
+  font-size: 14px;
+  line-height: 1.75;
+  color: #333;
+}
+.promise-item:last-child { border-bottom: none; }
+.promise-item .check {
+  color: #c0392b;
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.promise-item .hl { color: #c0392b; font-weight: 700; }
+
+/* 农户卡片 */
+.about-farmer {
+  background: linear-gradient(135deg, #fdfcf7, #f5e9d4);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 14px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid rgba(192,57,43,0.08);
+}
+.about-farmer-av {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #e67e22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+.about-farmer-info { flex: 1; min-width: 0; }
+.about-farmer-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+.about-farmer-line {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 2px;
+}
+.about-farmer-quote {
+  font-size: 13px;
+  color: #5a2818;
+  margin-top: 8px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* 数据 */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 22px 0 8px;
+}
+.about-stat {
+  background: #FFF5F0;
+  border-radius: 12px;
+  padding: 14px 6px;
+  text-align: center;
+}
+.about-stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #c0392b;
+}
+.about-stat-label {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* CTA */
+.about-cta {
+  padding: 50px 24px 44px;
+  background: linear-gradient(160deg, #2c1810 0%, #5a2818 100%);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.about-cta::before,
+.about-cta::after {
+  content: '🏮';
+  position: absolute;
+  top: 24px;
+  font-size: 32px;
+  opacity: 0.42;
+}
+.about-cta::before { left: 24px; }
+.about-cta::after { right: 24px; }
+.cta-h {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  line-height: 1.3;
+}
+.cta-sub {
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+  margin-bottom: 26px;
+  line-height: 1.8;
+}
+.cta-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd89c, #ff9e3d);
+  color: #2c1810;
+  padding: 14px 40px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 24px rgba(255,158,61,0.42);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.cta-btn:active { transform: scale(0.96); }
+
+/* 首页入口卡片 */
+.about-entry {
+  margin: 12px 16px;
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  border-radius: 16px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(44,24,16,0.18);
+  transition: transform 0.15s;
+}
+.about-entry:active { transform: scale(0.98); }
+.about-entry::before {
+  content: '🏮';
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  font-size: 70px;
+  opacity: 0.20;
+}
+.about-entry-text { flex: 1; z-index: 2; min-width: 0; }
+.about-entry-t {
+  color: #ffd89c;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+}
+.about-entry-h {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+.about-entry-d {
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+}
+.about-entry-arrow {
+  color: #ffd89c;
+  font-size: 22px;
+  z-index: 2;
+}
+
+/* ============================================================
+   首页 · 沉浸式重做
+   ============================================================ */
+.hero-wrap {
+  position: relative;
+  background: linear-gradient(165deg, #2c1810 0%, #5a2818 45%, #8b3a1a 100%);
+  padding: 50px 20px 24px;
+  color: #fff;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.hero-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,200,100,0.20) 0%, transparent 55%),
+    radial-gradient(circle at 88% 78%, rgba(255,80,40,0.20) 0%, transparent 55%);
+  pointer-events: none;
+}
+.hero-lantern {
+  position: absolute;
+  font-size: 36px;
+  opacity: 0.6;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
+  animation: lan 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-lantern.l1 { top: 56px; right: 22px; }
+.hero-lantern.l2 { top: 96px; right: 70px; font-size: 24px; opacity: 0.42; animation-delay: 0.7s; }
+@keyframes lan {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.hero-brand {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffd89c;
+  letter-spacing: 3px;
+  cursor: pointer;
+}
+.hero-bell {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  position: relative;
+}
+.hero-bell::after {
+  content: '';
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 7px; height: 7px;
+  background: #ff5252;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #5a2818;
+}
+.hero-eyebrow {
+  display: inline-block;
+  background: rgba(255,220,160,0.18);
+  color: #ffd89c;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  margin-top: 28px;
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+}
+.hero-h1 {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  line-height: 1.18;
+  margin-top: 14px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 18px rgba(0,0,0,0.35);
+}
+.hero-h1 em { font-style: normal; color: #ffd89c; }
+.hero-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.78);
+  margin-top: 12px;
+  line-height: 1.8;
+  position: relative;
+  z-index: 2;
+}
+
+.countdown {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,220,160,0.28);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+.countdown-icon { font-size: 26px; }
+.countdown-text { flex: 1; min-width: 0; }
+.countdown-t1 { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 2px; }
+.countdown-t2 {
+  font-size: 13px;
+  color: #ffd89c;
+  font-weight: 600;
+  margin-top: 3px;
+}
+.countdown-t2 strong {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 4px;
+  color: #fff;
+}
+.countdown-arrow { font-size: 20px; color: #ffd89c; }
+
+.hero-cta-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  position: relative;
+  z-index: 2;
+}
+.hero-cta {
+  flex: 1;
+  height: 48px;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: transform 0.15s;
+}
+.hero-cta:active { transform: scale(0.96); }
+.hero-cta.primary {
+  background: linear-gradient(135deg, #ffd89c, #ff9e3d);
+  color: #2c1810;
+  box-shadow: 0 8px 22px rgba(255,158,61,0.40);
+}
+.hero-cta.ghost {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.28);
+  backdrop-filter: blur(10px);
+}
+
+.sec-title-pro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 24px 18px 12px;
+}
+.stp-l { display: flex; flex-direction: column; gap: 3px; }
+.stp-eyebrow {
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #c0392b;
+  font-weight: 700;
+}
+.stp-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
+}
+.stp-r {
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  padding-bottom: 2px;
+}
+
+.value-row {
+  display: flex;
+  gap: 10px;
+  padding: 4px 16px 6px;
+  overflow-x: auto;
+}
+.value-row::-webkit-scrollbar { display: none; }
+.value-card {
+  width: 200px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  min-height: 144px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+.value-card:active { transform: scale(0.97); }
+.value-card.v1 {
+  background: linear-gradient(135deg, #FFF5F0 0%, #FFE4D6 100%);
+  border: 1px solid rgba(192,57,43,0.15);
+  color: #1a1a1a;
+}
+.value-card.v2 {
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  color: #fff;
+}
+.value-card.v3 {
+  background: linear-gradient(135deg, #1a4a3a, #2d6a4f);
+  color: #fff;
+}
+.vc-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.value-card.v1 .vc-tag { background: rgba(192,57,43,0.12); color: #c0392b; }
+.value-card.v2 .vc-tag { background: rgba(255,216,156,0.18); color: #ffd89c; }
+.value-card.v3 .vc-tag { background: rgba(255,255,255,0.18); color: #ffd89c; }
+.vc-icon { font-size: 30px; margin-bottom: 6px; }
+.vc-title {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.5px;
+}
+.value-card.v1 .vc-title { color: #c0392b; }
+.vc-desc {
+  font-size: 12px;
+  line-height: 1.65;
+  opacity: 0.78;
+  margin-top: 8px;
+}
+
+.live-mix {
+  margin: 18px 16px 4px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 10px;
+  height: 196px;
+}
+.live-mix-left {
+  border-radius: 16px;
+  background: linear-gradient(160deg, #0f2027 0%, #2c1810 100%);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+.live-mix-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(255,158,61,0.22), transparent 60%),
+    radial-gradient(circle at 75% 30%, rgba(192,57,43,0.20), transparent 55%);
+}
+.lm-badge {
+  position: absolute;
+  top: 12px; left: 12px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255,75,43,0.35);
+}
+.lm-pulse { width: 6px; height: 6px; background: #fff; border-radius: 50%; animation: pulse 1.6s infinite; }
+.lm-play {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(255,216,156,0.22);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(255,216,156,0.55);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  z-index: 2;
+}
+.lm-info {
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.lm-info-t { font-size: 11px; opacity: 0.75; letter-spacing: 0.5px; }
+.lm-info-b { font-size: 13px; font-weight: 700; margin-top: 3px; }
+
+.live-mix-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.farmer-mini {
+  flex: 1;
+  background: linear-gradient(135deg, #FFF8EE, #f5e9d4);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(192,57,43,0.10);
+  transition: transform 0.15s;
+}
+.farmer-mini:active { transform: scale(0.97); }
+.farmer-mini-av {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #e67e22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.farmer-mini-info { flex: 1; min-width: 0; }
+.farmer-mini-name { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+.farmer-mini-loc { font-size: 11px; color: #999; margin-top: 1px; }
+.farmer-mini-star { font-size: 10px; color: #FF9800; margin-top: 2px; }
+
+.flow-section {
+  margin: 22px 16px 4px;
+  background: linear-gradient(135deg, #FFF8EE, #fff);
+  border-radius: 18px;
+  padding: 18px 12px 20px;
+  border: 1px solid rgba(192,57,43,0.10);
+  box-shadow: 0 2px 12px rgba(192,57,43,0.04);
+}
+.flow-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.flow-sub {
+  font-size: 10px;
+  color: #c0392b;
+  text-align: center;
+  margin-bottom: 18px;
+  letter-spacing: 4px;
+  font-weight: 700;
+}
+.flow-line {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 6px;
+}
+.flow-line::before {
+  content: '';
+  position: absolute;
+  left: 30px; right: 30px; top: 22px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, rgba(192,57,43,0.35) 0 5px, transparent 5px 10px);
+}
+.flow-step {
+  text-align: center;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+.flow-step-ic {
+  width: 44px; height: 44px;
+  background: #fff;
+  border: 2px solid rgba(192,57,43,0.22);
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 2px 8px rgba(192,57,43,0.10);
+}
+.flow-step.on .flow-step-ic {
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  border-color: #c0392b;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(192,57,43,0.40);
+}
+.flow-step-tx {
+  font-size: 11px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.flow-step.on .flow-step-tx { color: #c0392b; font-weight: 700; }
+
+.breed-row {
+  display: flex;
+  gap: 10px;
+  padding: 4px 16px 16px;
+  overflow-x: auto;
+}
+.breed-row::-webkit-scrollbar { display: none; }
+.breed-card {
+  width: 152px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 10px 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border: 1px solid #f3e8d9;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.breed-card:active { transform: scale(0.97); }
+.breed-emoji {
+  width: 64px; height: 64px;
+  margin: 0 auto 10px;
+  background: linear-gradient(135deg, #FFF5F0, #FFE4D6);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  border: 1px solid rgba(192,57,43,0.10);
+}
+.breed-name {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+.breed-attr {
+  text-align: center;
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 8px;
+}
+.breed-price {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #c0392b;
+}
+.breed-price small {
+  font-size: 10px;
+  font-weight: 500;
+  color: #999;
+  margin-left: 2px;
+}
+.breed-tag {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  background: linear-gradient(135deg, #fff5e6, #ffe4ba);
+  color: #c0392b;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.about-entry-pro {
+  margin: 18px 16px 0;
+  background: linear-gradient(135deg, #FFF8EE, #f5e9d4);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(192,57,43,0.12);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.15s;
+}
+.about-entry-pro:active { transform: scale(0.98); }
+.aep-deco {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+.aep-info { flex: 1; min-width: 0; }
+.aep-eb { font-size: 10px; letter-spacing: 3px; color: #c0392b; font-weight: 700; }
+.aep-h { font-size: 15px; font-weight: 800; color: #1a1a1a; margin-top: 4px; letter-spacing: 0.5px; }
+.aep-d { font-size: 12px; color: #888; margin-top: 3px; }
+.aep-arrow { color: #c0392b; font-size: 20px; flex-shrink: 0; }
+
+.trust-bar {
+  margin: 14px 16px 0;
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  border-radius: 16px;
+  padding: 16px 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+  overflow: hidden;
+}
+.trust-bar::before {
+  content: '🏮  🏮';
+  position: absolute;
+  top: -10px; right: 12px;
+  font-size: 32px;
+  opacity: 0.18;
+  letter-spacing: 4px;
+}
+.trust-item {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.trust-item + .trust-item {
+  border-left: 1px solid rgba(255,216,156,0.22);
+}
+.trust-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffd89c;
+  letter-spacing: 0.5px;
+}
+.trust-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.68);
+  margin-top: 4px;
+  letter-spacing: 1.5px;
+}
+
+.home-bottom-cta {
+  margin: 16px 16px 0;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  border-radius: 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  box-shadow: 0 10px 28px rgba(192,57,43,0.38);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.home-bottom-cta:active { transform: scale(0.98); }
+
+/* ============================================================
+   拼猪(主认领人 + 分享码)
+   ============================================================ */
+.share-section {
+  margin: 22px 16px 4px;
+  background: linear-gradient(135deg, #FFF8EE 0%, #fff5e0 50%, #ffe9c7 100%);
+  border-radius: 18px;
+  padding: 22px 18px 18px;
+  border: 1px solid rgba(192,57,43,0.14);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(192,57,43,0.06);
+}
+.share-section::before {
+  content: '🤝';
+  position: absolute;
+  top: -8px;
+  right: 14px;
+  font-size: 64px;
+  opacity: 0.10;
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+.share-eb {
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #c0392b;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.share-h {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.share-h em {
+  font-style: normal;
+  color: #c0392b;
+}
+.share-sub {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+
+.share-tier {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.share-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 6px 14px;
+  text-align: center;
+  border: 1px solid rgba(192,57,43,0.10);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.share-card.active {
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  border-color: #c0392b;
+  box-shadow: 0 8px 20px rgba(192,57,43,0.32);
+  transform: translateY(-4px);
+}
+.share-card.active::after {
+  content: '推 荐';
+  position: absolute;
+  top: -9px; left: 50%;
+  transform: translateX(-50%);
+  background: #ffd89c;
+  color: #2c1810;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 8px;
+  letter-spacing: 2px;
+}
+.share-tier-people { font-size: 22px; margin-bottom: 6px; letter-spacing: 1px; }
+.share-tier-name { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+.share-tier-desc { font-size: 11px; opacity: 0.72; line-height: 1.5; }
+.share-card.active .share-tier-desc { opacity: 0.88; }
+
+.share-flow {
+  background: rgba(255,255,255,0.65);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.8);
+}
+.share-flow-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.65;
+  padding: 5px 0;
+}
+.share-flow-num {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.share-flow-row .hl { color: #c0392b; font-weight: 700; }
+
+.share-tip {
+  background: rgba(192,57,43,0.07);
+  border-left: 3px solid #c0392b;
+  padding: 10px 12px;
+  border-radius: 0 8px 8px 0;
+  font-size: 12px;
+  color: #5a2818;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+.share-tip strong { color: #c0392b; font-weight: 700; }
+
+.share-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  border-radius: 26px;
+  height: 48px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(192,57,43,0.36);
+  transition: transform 0.15s;
+}
+.share-cta:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -700,56 +1863,244 @@ body {
     <div class="end-screen active" id="client-screen">
       <!-- ==================== 首页 ==================== -->
       <div class="page active" id="page-home">
-        <div class="home-top">
-          <div class="home-brand">私人订猪</div>
-          <div class="home-notify" onclick="goPage('page-message')">🔔</div>
-        </div>
-        
-        <div class="live-card" onclick="goPage('page-live')">
-          <div class="live-badge"><div class="live-pulse"></div>直播中</div>
-          <div class="live-play">▶</div>
-          <div class="live-viewer">128人正在观看</div>
-        </div>
-        
-        <div class="stats-bar">
-          <div class="stat-item"><div class="stat-num">1,234</div><div class="stat-label">服务客户</div></div>
-          <div class="stat-item"><div class="stat-num">567</div><div class="stat-label">正在代养</div></div>
-          <div class="stat-item"><div class="stat-num">89</div><div class="stat-label">合作农户</div></div>
-        </div>
-        
-        <div class="sec-title">农户故事</div>
-        <div class="farmer-row">
-          <div class="farmer-card" onclick="goPage('page-farmer')">
-            <div class="farmer-av">👨‍🌾</div>
-            <div class="farmer-name">张大爷</div>
-            <div class="farmer-star">★★★★★ 4.9</div>
-            <div class="farmer-loc">四川广元</div>
+
+        <!-- ========== Hero 沉浸式英雄区 ========== -->
+        <div class="hero-wrap">
+          <span class="hero-lantern l1">🏮</span>
+          <span class="hero-lantern l2">🏮</span>
+          <div class="hero-top">
+            <div class="hero-brand" onclick="goPage('page-about')">私 人 订 猪</div>
+            <div class="hero-bell" onclick="goPage('page-message')">🔔</div>
           </div>
-          <div class="farmer-card" onclick="goPage('page-farmer')">
-            <div class="farmer-av">👩‍🌾</div>
-            <div class="farmer-name">李大妈</div>
-            <div class="farmer-star">★★★★★ 4.8</div>
-            <div class="farmer-loc">四川绵阳</div>
+          <div class="hero-eyebrow">— 找 回 小 时 候 的 年 味 —</div>
+          <div class="hero-h1">认一头猪<br/><em>过一个年</em></div>
+          <div class="hero-tagline">城里没有的年味,我们在山里替你养着<br/>10–12 个月慢养土猪 · <strong style="color:#ffd89c;">正 好 一 头 年 猪</strong></div>
+
+          <div class="countdown" onclick="goPage('page-about')">
+            <div class="countdown-icon">🏮</div>
+            <div class="countdown-text">
+              <div class="countdown-t1">距 离 腊 月 二 十 三</div>
+              <div class="countdown-t2">还有 <strong>259</strong> 天 · 现在认养正好赶上过年</div>
+            </div>
+            <div class="countdown-arrow">›</div>
           </div>
-          <div class="farmer-card" onclick="goPage('page-farmer')">
-            <div class="farmer-av">👨‍🌾</div>
-            <div class="farmer-name">王叔</div>
-            <div class="farmer-star">★★★★★ 4.9</div>
-            <div class="farmer-loc">四川德阳</div>
+
+          <div class="hero-cta-row">
+            <div class="hero-cta primary" onclick="goPage('page-order1')">立 即 认 养</div>
+            <div class="hero-cta ghost" onclick="goPage('page-live')">🎥 看实景直播</div>
           </div>
         </div>
-        
-        <div class="sec-title">为什么选择我们</div>
-        <div class="features">
-          <div class="ft-item"><div class="ft-icon">🌿</div><div class="ft-text">天然养殖</div></div>
-          <div class="ft-item"><div class="ft-icon">📹</div><div class="ft-text">可视化</div></div>
-          <div class="ft-item"><div class="ft-icon">🍖</div><div class="ft-text">土猪肉质</div></div>
-          <div class="ft-item"><div class="ft-icon">💚</div><div class="ft-text">助农增收</div></div>
+
+        <!-- ========== 三大主张横滑 ========== -->
+        <div class="sec-title-pro">
+          <div class="stp-l">
+            <div class="stp-eyebrow">— 我 们 不 一 样 —</div>
+            <div class="stp-title">三件事 · 决定你能不能放心</div>
+          </div>
+          <div class="stp-r" onclick="goPage('page-about')">详情 ›</div>
         </div>
-        
-        <div class="btn-main" onclick="goPage('page-order1')">立即订猪</div>
-        <div style="height:80px"></div>
-        
+        <div class="value-row">
+          <div class="value-card v1" onclick="goPage('page-about')">
+            <div>
+              <div class="vc-tag">商 业 模 式</div>
+              <div class="vc-icon">🛡️</div>
+              <div class="vc-title">不卖肉<br/>只替你养</div>
+            </div>
+            <div class="vc-desc">猪从认领第一天就是你的<br/>我们没动机给它喂催肥料</div>
+          </div>
+          <div class="value-card v2" onclick="goPage('page-about')">
+            <div>
+              <div class="vc-tag">家 乡 仪 式</div>
+              <div class="vc-icon">🍲</div>
+              <div class="vc-title">村口大锅<br/>过年杀猪饭</div>
+            </div>
+            <div class="vc-desc">川北山区散养土猪<br/>腊月你的猪你做主</div>
+          </div>
+          <div class="value-card v3" onclick="goPage('page-about')">
+            <div>
+              <div class="vc-tag">全 程 透 明</div>
+              <div class="vc-icon">📹</div>
+              <div class="vc-title">24h 直播<br/>每餐都打卡</div>
+            </div>
+            <div class="vc-desc">从满月到上桌<br/>每一天你都看得见</div>
+          </div>
+        </div>
+
+        <!-- ========== 直播 + 农户混排 ========== -->
+        <div class="sec-title-pro">
+          <div class="stp-l">
+            <div class="stp-eyebrow">— 此 刻 在 山 里 —</div>
+            <div class="stp-title">看一眼你认下的那头猪</div>
+          </div>
+          <div class="stp-r" onclick="goPage('page-live')">全部直播 ›</div>
+        </div>
+        <div class="live-mix">
+          <div class="live-mix-left" onclick="goPage('page-live')">
+            <div class="lm-badge"><div class="lm-pulse"></div>LIVE</div>
+            <div class="lm-play">▶</div>
+            <div class="lm-info">
+              <div class="lm-info-t">张大爷的猪圈 · 四川广元</div>
+              <div class="lm-info-b">128 人正在观看</div>
+            </div>
+          </div>
+          <div class="live-mix-right">
+            <div class="farmer-mini" onclick="goPage('page-farmer')">
+              <div class="farmer-mini-av">👨‍🌾</div>
+              <div class="farmer-mini-info">
+                <div class="farmer-mini-name">张大爷</div>
+                <div class="farmer-mini-loc">四川广元</div>
+                <div class="farmer-mini-star">★ 4.9 · 散养 15 年</div>
+              </div>
+            </div>
+            <div class="farmer-mini" onclick="goPage('page-farmer')">
+              <div class="farmer-mini-av">👩‍🌾</div>
+              <div class="farmer-mini-info">
+                <div class="farmer-mini-name">李大妈</div>
+                <div class="farmer-mini-loc">四川绵阳</div>
+                <div class="farmer-mini-star">★ 4.8 · 散养 18 年</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== 4 步流程时间线 ========== -->
+        <div class="flow-section">
+          <div class="flow-title">从认领到上桌 · 走过这 4 步</div>
+          <div class="flow-sub">— 养 满 一 年  ·  一 头 你 的 年 猪 —</div>
+          <div class="flow-line">
+            <div class="flow-step on">
+              <div class="flow-step-ic">🐷</div>
+              <div class="flow-step-tx">认领猪仔</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-ic">📹</div>
+              <div class="flow-step-tx">直播看养</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-ic">🔥</div>
+              <div class="flow-step-tx">腊月出栏</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-ic">🥩</div>
+              <div class="flow-step-tx">送到家</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== 拼猪 ========== -->
+        <div class="share-section">
+          <div class="share-eb">— 一 家 吃 不 完 ? —</div>
+          <div class="share-h">拼 猪 · <em>两三家分一头</em></div>
+          <div class="share-sub">一头土猪 150–180 斤,一家未必吃得完<br/>约几家亲戚朋友合伙,正合适</div>
+
+          <div class="share-tier">
+            <div class="share-card">
+              <div class="share-tier-people">👤</div>
+              <div class="share-tier-name">一家独养</div>
+              <div class="share-tier-desc">整 猪 自 留</div>
+            </div>
+            <div class="share-card active">
+              <div class="share-tier-people">👤 👤</div>
+              <div class="share-tier-name">两家拼猪</div>
+              <div class="share-tier-desc">一 家 半 猪</div>
+            </div>
+            <div class="share-card">
+              <div class="share-tier-people">👤👤👤</div>
+              <div class="share-tier-name">三家拼猪</div>
+              <div class="share-tier-desc">各 分 一 份</div>
+            </div>
+          </div>
+
+          <div class="share-flow">
+            <div class="share-flow-row">
+              <div class="share-flow-num">1</div>
+              <div><span class="hl">主认领人</span>下单一头猪</div>
+            </div>
+            <div class="share-flow-row">
+              <div class="share-flow-num">2</div>
+              <div>生成<span class="hl">专属分享码</span>,发给亲朋好友</div>
+            </div>
+            <div class="share-flow-row">
+              <div class="share-flow-num">3</div>
+              <div>受邀人凭码加入,<span class="hl">同看一头猪</span>:直播 / 喂养记录 / 健康档案全部开放</div>
+            </div>
+            <div class="share-flow-row">
+              <div class="share-flow-num">4</div>
+              <div>腊月出栏,主认领人收货,<span class="hl">怎么分肉自家商量</span></div>
+            </div>
+          </div>
+
+          <div class="share-tip">
+            💡 <strong>关于钱和肉:</strong>每位拼猪人 AA 多少、最后怎么分肉、谁来取猪——<strong>这些都你们自家商量</strong>。平台只负责把猪养好、把肉送到主认领人手里,<strong>不参与、不抽成</strong>。
+          </div>
+
+          <div class="share-cta" onclick="goPage('page-order1')">🤝  发 起 拼 猪  →</div>
+        </div>
+
+        <!-- ========== 选你的猪 ========== -->
+        <div class="sec-title-pro">
+          <div class="stp-l">
+            <div class="stp-eyebrow">— 挑 一 头 你 的 猪 —</div>
+            <div class="stp-title">三个品种 · 都是慢养土猪</div>
+          </div>
+          <div class="stp-r" onclick="goPage('page-order1')">查看全部 ›</div>
+        </div>
+        <div class="breed-row">
+          <div class="breed-card" onclick="goPage('page-order1')">
+            <div class="breed-emoji">🐷</div>
+            <div class="breed-name">黑土猪</div>
+            <div class="breed-attr">出栏 150 斤 · 约 1 年</div>
+            <div class="breed-price">¥450<small>/起</small></div>
+            <div class="breed-tag">🔥 热销首选</div>
+          </div>
+          <div class="breed-card" onclick="goPage('page-order1')">
+            <div class="breed-emoji">🐖</div>
+            <div class="breed-name">长白猪</div>
+            <div class="breed-attr">出栏 180 斤 · 约 1 年</div>
+            <div class="breed-price">¥600<small>/起</small></div>
+            <div class="breed-tag">⚡ 生 长 快</div>
+          </div>
+          <div class="breed-card" onclick="goPage('page-order1')">
+            <div class="breed-emoji">🐽</div>
+            <div class="breed-name">花猪</div>
+            <div class="breed-attr">出栏 160 斤 · 约 1 年</div>
+            <div class="breed-price">¥540<small>/起</small></div>
+            <div class="breed-tag">🥩 肉 质 好</div>
+          </div>
+        </div>
+
+        <!-- ========== 关于我们入口 ========== -->
+        <div class="about-entry-pro" onclick="goPage('page-about')">
+          <div class="aep-deco">🏮</div>
+          <div class="aep-info">
+            <div class="aep-eb">— 关 于 我 们 —</div>
+            <div class="aep-h">认一头猪 · 过一个年</div>
+            <div class="aep-d">为什么我们做的不是肉,是仪式 ›</div>
+          </div>
+          <div class="aep-arrow">›</div>
+        </div>
+
+        <!-- ========== 信任带 ========== -->
+        <div class="trust-bar">
+          <div class="trust-item">
+            <div class="trust-num">1,234</div>
+            <div class="trust-label">服 务 客 户</div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-num">567</div>
+            <div class="trust-label">正 在 代 养</div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-num">89</div>
+            <div class="trust-label">合 作 农 户</div>
+          </div>
+        </div>
+
+        <!-- ========== 底部 CTA ========== -->
+        <div class="home-bottom-cta" onclick="goPage('page-order1')">🐷  认 一 头 你 的 猪</div>
+
+        <div style="height:96px"></div>
+
         <div class="tabbar">
           <div class="tabbar-item" onclick="switchTabClient('home')">
             <div class="tabbar-icon on">🏠</div>
@@ -1172,6 +2523,7 @@ body {
         </div>
         
         <div class="menu-box">
+          <div class="menu-line" onclick="goPage('page-about')"><div class="menu-left"><span class="menu-ic">🏮</span><span class="menu-tx">关于我们</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
           <div class="menu-line"><div class="menu-left"><span class="menu-ic">👥</span><span class="menu-tx">邀请好友</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
           <div class="menu-line"><div class="menu-left"><span class="menu-ic">❓</span><span class="menu-tx">帮助中心</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
           <div class="menu-line"><div class="menu-left"><span class="menu-ic">⚙️</span><span class="menu-tx">设置</span></div><div class="menu-right"><span class="menu-arrow">›</span></div></div>
@@ -1298,6 +2650,226 @@ body {
             <div style="font-size:14px;opacity:0.5;margin-top:8px;">128人正在观看</div>
           </div>
         </div>
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ==================== 关于我们(长页面) ==================== -->
+      <div class="page" id="page-about">
+
+        <!-- Hero -->
+        <div class="about-hero">
+          <span class="about-back" onclick="back()">←</span>
+          <div>
+            <div class="about-tag">🏮 关 于 私 人 订 猪</div>
+            <h1 class="about-title">认一头猪<br/><em>过一个年</em></h1>
+            <div class="about-subtitle">城里没有的年味<br/>我们在山里替你养着</div>
+          </div>
+        </div>
+
+        <!-- 故事缘起 -->
+        <div class="about-section">
+          <div class="about-eyebrow">— 故 事 缘 起 —</div>
+          <h2 class="about-h2">你有多少年<br/>没吃到<em>那种肉</em>了?</h2>
+          <p class="about-p">
+            不是超市里那种白生生的、煮出来一锅水的肉。
+          </p>
+          <p class="about-p">
+            是小时候,奶奶家锅里熬到油渗出来的那种。是过年回村,大铁锅炖了一上午、香味飘遍半个寨子的那种。是<span class="hl">真正吃粮食、晒太阳、走山路、慢慢长大</span>的猪。
+          </p>
+          <p class="about-p">
+            城市里没有这种肉,不是它消失了,是<span class="hl">没人愿意花上一整年去等一头猪</span>。
+          </p>
+          <div class="about-quote">"我们等。<br/>替你等。"</div>
+        </div>
+
+        <!-- 过年杀猪饭 -->
+        <div class="about-section cream">
+          <div class="about-eyebrow">— 一 年 一 次 的 仪 式 —</div>
+          <h2 class="about-h2">过年杀猪饭<br/>是我们做这件事的<em>原因</em></h2>
+          <p class="about-p">
+            在川北山区,腊月里最热闹的不是赶集,是<span class="hl">谁家今天杀年猪</span>。村口架起大铁锅,亲戚邻居围着烧水、烫毛、灌香肠;一群人喝刨汤、吃血旺、聊一年的收成——这叫<span class="hl">"杀猪饭"</span>,是中国人最朴素也最郑重的一场年。
+          </p>
+          <p class="about-p">
+            城里人有了空调有了车,却把这场年弄丢了。
+          </p>
+          <div class="about-scene">
+            <div class="scene-card scene-1"><span class="em">🏔️</span>雪后山坳<br/>一头黑猪</div>
+            <div class="scene-card scene-2"><span class="em">🔥</span>村口大锅<br/>热气腾天</div>
+            <div class="scene-card scene-3"><span class="em">🥩</span>房梁挂满<br/>腊肉香肠</div>
+            <div class="scene-card scene-4"><span class="em">🍲</span>一桌刨汤<br/>满屋是人</div>
+          </div>
+          <div class="about-quote">"你认下的<br/>不只是一头猪,<br/>是一个回不去的过年。"</div>
+        </div>
+
+        <!-- 拼猪 · 一头猪两三家分 -->
+        <div class="about-section">
+          <div class="about-eyebrow">— 一 头 猪  也 可 以 一 起 吃 —</div>
+          <h2 class="about-h2">两三家拼一头<br/><em>把年还给一桌人</em></h2>
+          <p class="about-p">
+            一头慢养土猪,出栏 150–180 斤。一家人未必吃得完,留多了浪费,留少了不够意思——这本来就是<span class="hl">一件该几家一起做的事</span>。
+          </p>
+          <p class="about-p">
+            你跟兄弟姐妹、几个老同学、楼上楼下相熟的邻居,<span class="hl">两三家拼一头猪</span>。一个人当主认领人,生成<span class="hl">分享码</span>发到群里,大家一起看着这头猪从满月长到出栏——<span class="hl">直播、喂养、健康档案对所有人开放</span>。
+          </p>
+          <p class="about-p">
+            <span class="hl">怎么 AA、谁出多少、最后怎么分肉、谁来取猪</span>——这些是你们之间的事,不是我们的事。<span class="hl">平台不参与、不抽成</span>,只负责把猪养好,把肉送到主认领人手里。
+          </p>
+          <div class="about-quote">"一头猪能让<br/>几家人凑到一桌——<br/>这才是过年的样子。"</div>
+        </div>
+
+        <!-- 核心差异:不是卖肉的 -->
+        <div class="about-section">
+          <div class="about-eyebrow">— 我 们 做 的 不 一 样 —</div>
+          <h2 class="about-h2">我们不是卖肉的,<br/>所以你<em>才能放心</em></h2>
+          <p class="about-p">
+            <span class="hl">为什么市面上的猪肉,你会担心?</span>
+          </p>
+          <p class="about-p">
+            因为卖肉的人,赚钱的方式是<span class="hl">"把肉卖得多、卖得快、卖得重"</span>。猪长得越快、出栏越早,他越赚钱。所以会有催肥饲料、激素、抗生素、瘦肉精——不是因为人坏,是因为<span class="hl">利益就站在你的对立面</span>。
+          </p>
+          <p class="about-p">
+            <span class="hl">私人订猪不一样。</span>从你认领那一刻起,这头猪就是你的。我们只赚两笔固定的钱:每天 ¥10 代养费、每天 ¥10 餐食代购费。<span class="hl">猪长多快、长多重,跟我们能赚多少钱,完全没关系。</span>
+          </p>
+          <p class="about-p">
+            给你的猪喂催肥饲料,等于<span class="hl">在害我们自己的客户</span>——这种事,我们不会做,也<span class="hl">没动机</span>做。
+          </p>
+
+          <div class="compare-table">
+            <div class="compare-row head">
+              <div></div>
+              <div>普通肉商</div>
+              <div class="ours-h">私人订猪</div>
+            </div>
+            <div class="compare-row">
+              <div class="label">这头猪归谁</div>
+              <div class="other">商家</div>
+              <div class="ours">你 本 人</div>
+            </div>
+            <div class="compare-row">
+              <div class="label">怎么赚钱</div>
+              <div class="other">卖得多/快/重</div>
+              <div class="ours">代养服务费</div>
+            </div>
+            <div class="compare-row">
+              <div class="label">催肥的动机</div>
+              <div class="other">有 ↑</div>
+              <div class="ours">没 有</div>
+            </div>
+            <div class="compare-row">
+              <div class="label">能不能监督</div>
+              <div class="other">不能</div>
+              <div class="ours">24h 可看</div>
+            </div>
+            <div class="compare-row">
+              <div class="label">出栏周期</div>
+              <div class="other">3–4 个月</div>
+              <div class="ours">10–12 个月 · 整 整 一 年</div>
+            </div>
+          </div>
+
+          <div class="about-quote">"商业模式决定立场,<br/>立场决定你能不能放心。"</div>
+        </div>
+
+        <!-- 全程可监控 -->
+        <div class="about-section dark">
+          <div class="about-eyebrow">— 不 是 承 诺 是 让 你 自 己 看 —</div>
+          <h2 class="about-h2">从满月到上桌<br/><em>每一天</em>你都看得见</h2>
+          <p class="about-p">
+            我们不要求你"相信我们"。我们做的,是<span class="hl">把猪圈打开给你</span>,你自己决定相不相信。
+          </p>
+
+          <div class="monitor-list">
+            <div class="monitor-item">
+              <div class="monitor-num">1</div>
+              <div class="monitor-info">
+                <div class="monitor-title">🎥 24 小时圈舍直播</div>
+                <div class="monitor-desc">摄像头全天候开放,白天黑夜你的猪在做什么,打开 App 就能看,可回放 30 天。</div>
+              </div>
+            </div>
+            <div class="monitor-item">
+              <div class="monitor-num">2</div>
+              <div class="monitor-info">
+                <div class="monitor-title">🍽️ 每餐喂养打卡</div>
+                <div class="monitor-desc">早 7 点 / 中 12 点 / 晚 18 点,代养农户现场拍照打卡。今天吃的玉米面粥、红薯、青菜还是粗粮,你都看得到。</div>
+              </div>
+            </div>
+            <div class="monitor-item">
+              <div class="monitor-num">3</div>
+              <div class="monitor-info">
+                <div class="monitor-title">🏥 健康档案全留存</div>
+                <div class="monitor-desc">每一次体检、每一次兽医上门、每一支疫苗,自动写入这头猪的电子档案,一辈子可查。</div>
+              </div>
+            </div>
+            <div class="monitor-item">
+              <div class="monitor-num">4</div>
+              <div class="monitor-info">
+                <div class="monitor-title">🚚 出栏屠宰运输全链</div>
+                <div class="monitor-desc">出栏当天直播,屠宰过程留档,冷链运输 GPS 全程追踪——直到肉送到你手里。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 替你养猪的人 -->
+        <div class="about-section cream">
+          <div class="about-eyebrow">— 替 你 养 猪 的 人 —</div>
+          <h2 class="about-h2">他们叫张大爷、<br/>李大妈、王叔——<br/><em>不是工人,是乡亲</em></h2>
+          <p class="about-p">
+            合作的全部是川北山区的<span class="hl">资深散养户</span>:广元、绵阳、德阳。平均养殖年限 15 年以上,熟悉每一头猪的脾气,知道哪头爱吃红薯、哪头偏爱青菜。
+          </p>
+
+          <div class="about-farmer">
+            <div class="about-farmer-av">👨‍🌾</div>
+            <div class="about-farmer-info">
+              <div class="about-farmer-name">张大爷</div>
+              <div class="about-farmer-line">四川广元 · 散养 15 年</div>
+              <div class="about-farmer-line">已代养 128 头 · ★ 4.9</div>
+              <div class="about-farmer-quote">"猪是有灵性的,你怎么待它,它就长成什么样。"</div>
+            </div>
+          </div>
+
+          <div class="about-farmer">
+            <div class="about-farmer-av">👩‍🌾</div>
+            <div class="about-farmer-info">
+              <div class="about-farmer-name">李大妈</div>
+              <div class="about-farmer-line">四川绵阳 · 散养 18 年</div>
+              <div class="about-farmer-line">已代养 96 头 · ★ 4.8</div>
+              <div class="about-farmer-quote">"这家娃娃今年要回来过年,我得把猪喂得壮壮的。"</div>
+            </div>
+          </div>
+
+          <p class="about-p" style="margin-top:18px;">
+            他们的收入,从一头猪每年才能多挣几千块的薄利,变成<span class="hl">每月稳定的代养工资</span>。这门生意,是城里人吃到了童年味道,山里人留住了年轻人——<span class="hl">两边都不亏</span>。
+          </p>
+        </div>
+
+        <!-- 五条朴素承诺 -->
+        <div class="about-section">
+          <div class="about-eyebrow">— 五 条 朴 素 承 诺 —</div>
+          <h2 class="about-h2">不喊口号,<br/>就五件<em>实在事</em></h2>
+
+          <div class="promise-list">
+            <div class="promise-item"><span class="check">✓</span><div><span class="hl">不喂催肥饲料、不打激素、不用抗生素催长。</span>每月独立检测一次,报告附在你猪的档案里。</div></div>
+            <div class="promise-item"><span class="check">✓</span><div><span class="hl">猪从认领第一天起,就是你的。</span>我们不卖肉,只收代养费。</div></div>
+            <div class="promise-item"><span class="check">✓</span><div><span class="hl">猪圈摄像头永不下线。</span>看不见,可投诉,我们退全款。</div></div>
+            <div class="promise-item"><span class="check">✓</span><div><span class="hl">出栏不强制。</span>你想接着养、想到场亲自杀年猪、想拉到别处屠宰,都行。</div></div>
+            <div class="promise-item"><span class="check">✓</span><div><span class="hl">意外死亡按市值赔付。</span>保险走平台,不让乡亲为难。</div></div>
+          </div>
+
+          <div class="about-stats">
+            <div class="about-stat"><div class="about-stat-num">1,234</div><div class="about-stat-label">服务客户</div></div>
+            <div class="about-stat"><div class="about-stat-num">567</div><div class="about-stat-label">正在代养</div></div>
+            <div class="about-stat"><div class="about-stat-num">89</div><div class="about-stat-label">合作农户</div></div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="about-cta">
+          <div class="cta-h">认下你的<br/>第一头猪</div>
+          <div class="cta-sub">从腊月倒数<br/>提前 10–12 个月,留给一场<strong style="color:#ffd89c;">整整一年的年</strong></div>
+          <div class="cta-btn" onclick="goPage('page-order1')">🐷 立 即 认 养</div>
+        </div>
+
         <div style="height:40px"></div>
       </div>
     </div>
