@@ -1,4 +1,8 @@
-import 'dotenv/config';
+// CLI 入口: 优先读 .env.${NODE_ENV}, 再覆盖 .env
+import * as dotenv from 'dotenv';
+dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+dotenv.config({ path: '.env' });
+
 import { DataSource } from 'typeorm';
 
 /**
