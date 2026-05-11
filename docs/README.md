@@ -8,6 +8,7 @@
 
 | 文档 | 作用 |
 |---|---|
+| **[`snapshot/`](./snapshot/)** | 📸 **项目快照** — 5 分钟知道项目 / 服务器现状(新人第一站) |
 | **[`TASKS.md`](./TASKS.md)** | 📋 **总任务清单(单一真相源)** — 按模块组织,每日站会用,完成打钩 |
 | **[`ROADMAP.md`](./ROADMAP.md)** | 🗺 **5/31 上线总路线图**(范围 / 时间线 / 合规依赖 / 风险) |
 | [`00-overview/mvp-scope.md`](./00-overview/mvp-scope.md) | 🎯 MVP v1.0.0 模块矩阵(做什么 / 不做什么 / 为什么) |
@@ -17,7 +18,7 @@
 | [`AUTO-RUN-2026-05-11.md`](./AUTO-RUN-2026-05-11.md) | 📜 W0(已完成归档)— 后端骨架 / JWT / uni-app 初始化 |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | 版本变更日志 |
 
-> **新人到岗第一件事**:打开 [`TASKS.md`](./TASKS.md) §0 大盘 → 看到当前所有模块进度 → 找到属于自己的未勾选项目开始做。
+> **新人到岗 30 分钟**:[`snapshot/project.md`](./snapshot/project.md)(5 min) → [`snapshot/server.md`](./snapshot/server.md)(5 min) → [`TASKS.md`](./TASKS.md)(找到自己的活)→ 开干。
 
 ---
 
