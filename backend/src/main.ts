@@ -1,4 +1,8 @@
 import 'reflect-metadata';
+// Sentry 必须在所有业务代码之前 init(才能捕获 module 加载阶段的错误)
+import { initSentry } from './common/sentry/sentry';
+initSentry();
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

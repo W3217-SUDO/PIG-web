@@ -77,6 +77,33 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - name: backend tests
-        run: npm -w backend run test || echo "skip-if-no-tests-yet"
+
+      - name: 等 MySQL 真就绪
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h127.0.0.1 -uroot -pci_pass --silent && break
+            echo "  MySQL not ready, sleep 2s ($i/30)..."
+            sleep 2
+          done
+
+      - name: 跑 migration 建表
+        working-directory: backend
+        run: npm run migration:run
+
+      - name: seed 测试数据(2 农户 + 5 猪 + 喂养/健康)
+        working-directory: backend
+        env:
+          # seed 脚本检查 NODE_ENV !== production,设 development 让它跑
+          NODE_ENV: development
+        run: npm run seed:dev
+
+      - name: backend 单元测试(暂无,占位)
+        run: npm -w backend run test
         continue-on-error: true
+
+      - name: backend e2e(supertest + 真 MySQL + 真 Redis,4 spec / 24 case)
+        working-directory: backend
+        env:
+          # e2e helper 内部固定调 dev-login,需要 NODE_ENV != production
+          NODE_ENV: development
+        run: npm run test:e2e

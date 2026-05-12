@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BusinessException } from '../exceptions/business.exception';
+import { captureException as sentryCapture } from '../sentry/sentry';
 
 interface ErrorPayload {
   code: number;
@@ -58,6 +59,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         { trace_id: traceId, err: { message: exception.message, stack: exception.stack } },
         'unhandled exception',
       );
+      // 仅 5xx / 未知错误上 Sentry, 业务异常(400/404 等)不上报噪音
+      sentryCapture(exception, {
+        trace_id: traceId,
+        url: req.url,
+        method: req.method,
+      });
     }
 
     const payload: ErrorPayload = {
