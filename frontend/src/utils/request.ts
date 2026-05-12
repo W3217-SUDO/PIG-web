@@ -82,6 +82,18 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
         const body = res.data as ApiResponse<T> | undefined;
         if (status === 401) {
           clearToken();
+          // 自动跳登录页(避开在登录页本身触发循环)
+          try {
+            const pages = getCurrentPages();
+            const cur = pages.length ? pages[pages.length - 1] : null;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const route = (cur as any)?.route || (cur as any)?.$page?.fullPath || '';
+            if (!route.includes('pages/login')) {
+              uni.navigateTo({ url: '/pages/login/index' });
+            }
+          } catch {
+            // 忽略
+          }
           reject(new ApiError(10001, '未登录或登录已过期', 401));
           return;
         }

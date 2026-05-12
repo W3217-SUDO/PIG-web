@@ -12,6 +12,7 @@ import { HealthModule } from './modules/health/health.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { AddressModule } from './modules/address/address.module';
 import { PigModule } from './modules/pig/pig.module';
 import { FarmerModule } from './modules/farmer/farmer.module';
 // 业务模块逐步加入(各自独立 PR)
@@ -114,6 +115,7 @@ import { FarmerModule } from './modules/farmer/farmer.module';
     HealthModule,
     UserModule,
     AuthModule,
+    AddressModule,
     FarmerModule,
     PigModule,
     // OrderModule,

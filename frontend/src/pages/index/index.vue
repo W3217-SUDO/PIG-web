@@ -284,11 +284,11 @@
         <text class="tabbar-icon">🐷</text>
         <text class="tabbar-text">订猪</text>
       </view>
-      <view class="tabbar-item" @tap="todo('我的猪圈 Tab')">
+      <view class="tabbar-item" @tap="todo('我的猪圈 Tab(S6)')">
         <text class="tabbar-icon">🐽</text>
         <text class="tabbar-text">我的猪圈</text>
       </view>
-      <view class="tabbar-item" @tap="todo('我的 Tab')">
+      <view class="tabbar-item" @tap="goMy">
         <text class="tabbar-icon">👤</text>
         <text class="tabbar-text">我的</text>
       </view>
@@ -350,6 +350,10 @@ function todo(name: string) {
     icon: 'none',
     duration: 1200,
   });
+}
+
+function goMy() {
+  uni.navigateTo({ url: '/pages/my/index' });
 }
 
 function onPigTap(p: PigCard) {
