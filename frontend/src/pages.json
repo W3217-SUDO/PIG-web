@@ -8,6 +8,15 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#2c1810"
       }
+    },
+    {
+      "path": "pages/pig/detail",
+      "style": {
+        "navigationBarTitleText": "猪详情",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
     }
   ],
   "globalStyle": {

@@ -353,11 +353,7 @@ function todo(name: string) {
 }
 
 function onPigTap(p: PigCard) {
-  uni.showToast({
-    title: `${p.title} (详情页 S2)`,
-    icon: 'none',
-    duration: 1200,
-  });
+  uni.navigateTo({ url: `/pages/pig/detail?id=${p.id}` });
 }
 
 async function loadList() {

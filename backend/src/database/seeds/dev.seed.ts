@@ -18,10 +18,12 @@ async function main() {
   // 清空(子表 → 父表的顺序;不动 user / wallet)
   // FK 没强制,所以可以并行清
   await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+  await AppDataSource.query('TRUNCATE TABLE `feeding_record`');
+  await AppDataSource.query('TRUNCATE TABLE `health_record`');
   await AppDataSource.query('TRUNCATE TABLE `pig`');
   await AppDataSource.query('TRUNCATE TABLE `farmer`');
   await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 1');
-  console.log('🧹 Truncated: pig, farmer');
+  console.log('🧹 Truncated: feeding_record, health_record, pig, farmer');
 
   // ─── 农户 ─────────────────────────────────────────────────
   const farmer1Id = ulid();
@@ -115,9 +117,13 @@ async function main() {
     ],
   ];
 
+  const pigIds: string[] = [];
   for (const [title, breed, farmerId, region, weight, expected, price, total, sold, _age, cover] of pigs) {
     const pigId = ulid();
+    pigIds.push(pigId);
     const status = sold >= total ? 'sold_out' : 'listed';
+    // 演示用视频(腾讯云公开 sample,各端都能播)
+    const mockVideo = 'https://media.w3.org/2010/05/sintel/trailer.mp4';
     await AppDataSource.query(
       `INSERT INTO pig (
         id, merchant_id, title, description, breed, farmer_id, region,
@@ -128,7 +134,7 @@ async function main() {
         pigId,
         merchantPlaceholder,
         title,
-        `${breed} · 来自${region}山区散养农户。10-12 个月慢养,粗粮 + 山泉,无催肥饲料。`,
+        `${breed} · 来自${region}山区散养农户。10-12 个月慢养,粗粮 + 山泉,无催肥饲料。每天三餐打卡上传,健康档案全程开放。`,
         breed,
         farmerId,
         region,
@@ -138,12 +144,66 @@ async function main() {
         total,
         sold,
         cover,
-        '',
+        mockVideo,
         status,
       ],
     );
     console.log(`  ✓ ${title}  (${sold}/${total} shares · ${status})`);
   }
+
+  // ─── 喂养打卡 mock ─────────────────────────────────────────
+  // 每只猪 5 条记录,跨越过去 3 天(早/中/晚循环)
+  const mealCycle = ['breakfast', 'lunch', 'dinner', 'breakfast', 'lunch'];
+  const foodOptions: Record<string, string> = {
+    breakfast: '玉米粉 + 苕藤 + 鲜南瓜 · 山泉水',
+    lunch: '甘薯 + 麦麸 + 嫩绿草 · 矿物盐',
+    dinner: '粗粮 + 萝卜青菜 + 玉米粒 · 山泉水',
+    snack: '甘蔗碎 + 苕藤',
+  };
+  let feedCount = 0;
+  for (const pigId of pigIds) {
+    for (let i = 0; i < 5; i++) {
+      const meal = mealCycle[i];
+      const hoursAgo = (4 - i) * 12 + (meal === 'breakfast' ? 0 : meal === 'lunch' ? 4 : 9);
+      const checkedAt = new Date(Date.now() - hoursAgo * 3600 * 1000);
+      await AppDataSource.query(
+        `INSERT INTO feeding_record (id, pig_id, meal_type, food_desc, image_url, checked_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          ulid(),
+          pigId,
+          meal,
+          foodOptions[meal],
+          '',
+          checkedAt,
+        ],
+      );
+      feedCount++;
+    }
+  }
+  console.log(`✓ Seeded ${feedCount} feeding records (5 per pig)`);
+
+  // ─── 健康档案 mock ─────────────────────────────────────────
+  const healthRecords: Array<[string, string]> = [
+    ['checkup', '入栏体检 · 体温 38.7℃ · 体况评分 4/5 · 一切正常'],
+    ['vaccine', '猪瘟疫苗(C 株冻干) · 第一针 · 兽医站存档'],
+    ['weight', '称重打卡 · 当前 38.5 kg · 比上次 +2.1 kg'],
+  ];
+  let healthCount = 0;
+  for (const pigId of pigIds) {
+    for (let i = 0; i < healthRecords.length; i++) {
+      const [type, detail] = healthRecords[i];
+      const daysAgo = (healthRecords.length - i) * 7;
+      const recordedAt = new Date(Date.now() - daysAgo * 24 * 3600 * 1000);
+      await AppDataSource.query(
+        `INSERT INTO health_record (id, pig_id, record_type, detail, image_url, recorded_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [ulid(), pigId, type, detail, '', recordedAt],
+      );
+      healthCount++;
+    }
+  }
+  console.log(`✓ Seeded ${healthCount} health records (3 per pig)`);
 
   await AppDataSource.destroy();
   console.log('✅ Seed done. 现在可以打开 http://localhost:5173/ 看猪列表');
