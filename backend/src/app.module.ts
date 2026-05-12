@@ -12,8 +12,9 @@ import { HealthModule } from './modules/health/health.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { PigModule } from './modules/pig/pig.module';
+import { FarmerModule } from './modules/farmer/farmer.module';
 // 业务模块逐步加入(各自独立 PR)
-// import { PigModule } from './modules/pig/pig.module';
 // import { OrderModule } from './modules/order/order.module';
 // import { ShareModule } from './modules/share/share.module';
 // import { WalletModule } from './modules/wallet/wallet.module';
@@ -113,7 +114,8 @@ import { UserModule } from './modules/user/user.module';
     HealthModule,
     UserModule,
     AuthModule,
-    // PigModule,
+    FarmerModule,
+    PigModule,
     // OrderModule,
     // ShareModule,
     // WalletModule,

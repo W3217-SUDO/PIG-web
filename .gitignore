@@ -53,6 +53,9 @@ temp/
 # 微信小程序工具
 .miniprogram/
 project.private.config.json
+# 每个开发者打开微信开发者工具后会本地生成此文件(含本地分配的测试 appid)
+# 真正应入仓的设置在 frontend/src/manifest.json
+project.config.json
 
 # 本地数据库 / 数据文件
 *.sqlite

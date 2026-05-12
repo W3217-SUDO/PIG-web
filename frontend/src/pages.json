@@ -1,16 +1,19 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "私人订猪",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#2c1810"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "私人订猪",
+    "navigationBarBackgroundColor": "#2c1810",
+    "backgroundColor": "#f5f3ec"
+  }
 }
