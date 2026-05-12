@@ -42,6 +42,28 @@
           <view class="action-btn ghost" @tap.stop="onCancel(o)"><text>取消</text></view>
           <view class="action-btn primary" @tap.stop="onPay(o)"><text>mock 支付</text></view>
         </view>
+        <view v-else-if="o.status === 'paid'" class="order-actions">
+          <view class="action-btn primary" @tap.stop="onShare(o)"><text>🤝 发起拼猪</text></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分享码弹层 -->
+    <view v-if="shareModal" class="share-modal-mask" @tap="shareModal = null">
+      <view class="share-modal" @tap.stop>
+        <text class="share-modal-title">拼猪邀请码</text>
+        <view class="share-code-box">
+          <text class="share-code">{{ shareModal.code }}</text>
+        </view>
+        <text class="share-modal-tip">复制下面链接发给亲戚朋友, 他们打开就能看到这头猪。</text>
+        <view class="share-link-box" @tap="onCopy(shareModal.link)">
+          <text class="share-link">{{ shareModal.link }}</text>
+          <view class="copy-btn"><text>复制</text></view>
+        </view>
+        <text class="share-modal-ttl">{{ shareModal.ttl }} 过期</text>
+        <view class="share-modal-close" @tap="shareModal = null">
+          <text>关闭</text>
+        </view>
       </view>
     </view>
   </view>
@@ -142,6 +164,33 @@ async function onPay(o: Order) {
   } catch (e) {
     uni.showToast({ title: e instanceof ApiError ? e.message : '支付失败', icon: 'none' });
   }
+}
+
+const shareModal = ref<{ code: string; link: string; ttl: string } | null>(null);
+
+async function onShare(o: Order) {
+  try {
+    const invite = await request<{ code: string; expiresAt: string }>(
+      `/orders/${o.id}/share`,
+      { method: 'POST' },
+    );
+    const days = Math.ceil((new Date(invite.expiresAt).getTime() - Date.now()) / 86400000);
+    // 链接基于当前 origin(H5) 或固定的线上地址(小程序/APP)
+    // #ifdef H5
+    const base = window.location.origin + '/#';
+    // #endif
+    // #ifndef H5
+    const base = 'https://www.rockingwei.online/#';
+    // #endif
+    const link = `${base}/pages/share/landing?code=${invite.code}`;
+    shareModal.value = { code: invite.code, link, ttl: `${days} 天后` };
+  } catch (e) {
+    uni.showToast({ title: e instanceof ApiError ? e.message : '生成失败', icon: 'none' });
+  }
+}
+
+function onCopy(text: string) {
+  uni.setClipboardData({ data: text, success: () => uni.showToast({ title: '已复制', icon: 'success' }) });
 }
 
 function goHome() {
@@ -303,4 +352,86 @@ onShow(load);
   background: linear-gradient(135deg, #c0392b, #e74c3c);
 }
 .action-btn.primary text { color: #fff; font-size: 22rpx; font-weight: 700; }
+
+/* ===== 分享弹层 ===== */
+.share-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.share-modal {
+  width: 80%;
+  max-width: 620rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 44rpx 36rpx 32rpx;
+  text-align: center;
+}
+.share-modal-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 24rpx;
+}
+.share-code-box {
+  background: linear-gradient(135deg, #2c1810, #5a2818);
+  border-radius: 24rpx;
+  padding: 32rpx 0;
+  margin-bottom: 24rpx;
+}
+.share-code {
+  color: #ffd89c;
+  font-size: 60rpx;
+  font-weight: 800;
+  letter-spacing: 8rpx;
+}
+.share-modal-tip {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.7;
+  display: block;
+  margin-bottom: 20rpx;
+}
+.share-link-box {
+  display: flex;
+  align-items: center;
+  background: #f5f3ec;
+  border-radius: 16rpx;
+  padding: 16rpx 16rpx 16rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+.share-link {
+  flex: 1;
+  font-size: 22rpx;
+  color: #444;
+  text-align: left;
+  word-break: break-all;
+}
+.copy-btn {
+  flex-shrink: 0;
+  background: #c0392b;
+  border-radius: 24rpx;
+  padding: 10rpx 20rpx;
+  margin-left: 12rpx;
+}
+.copy-btn text { color: #fff; font-size: 22rpx; font-weight: 700; }
+.share-modal-ttl {
+  display: block;
+  font-size: 22rpx;
+  color: #aaa;
+  margin-bottom: 24rpx;
+}
+.share-modal-close {
+  border-top: 2rpx solid #f0e8d4;
+  padding-top: 24rpx;
+}
+.share-modal-close text {
+  color: #999;
+  font-size: 26rpx;
+}
 </style>

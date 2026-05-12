@@ -89,6 +89,15 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#f5f3ec"
       }
+    },
+    {
+      "path": "pages/share/landing",
+      "style": {
+        "navigationBarTitleText": "拼猪邀请",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
     }
   ],
   "globalStyle": {
