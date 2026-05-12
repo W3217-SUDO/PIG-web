@@ -15,10 +15,10 @@ import { UserModule } from './modules/user/user.module';
 import { AddressModule } from './modules/address/address.module';
 import { PigModule } from './modules/pig/pig.module';
 import { FarmerModule } from './modules/farmer/farmer.module';
+import { OrderModule } from './modules/order/order.module';
+import { WalletModule } from './modules/wallet/wallet.module';
 // 业务模块逐步加入(各自独立 PR)
-// import { OrderModule } from './modules/order/order.module';
 // import { ShareModule } from './modules/share/share.module';
-// import { WalletModule } from './modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -118,9 +118,9 @@ import { FarmerModule } from './modules/farmer/farmer.module';
     AddressModule,
     FarmerModule,
     PigModule,
-    // OrderModule,
+    OrderModule,
+    WalletModule,
     // ShareModule,
-    // WalletModule,
   ],
 })
 export class AppModule {}

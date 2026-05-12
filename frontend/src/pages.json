@@ -53,6 +53,42 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#f5f3ec"
       }
+    },
+    {
+      "path": "pages/my/orders",
+      "style": {
+        "navigationBarTitleText": "我的订单",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/my/wallet",
+      "style": {
+        "navigationBarTitleText": "钱包",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/order/confirm",
+      "style": {
+        "navigationBarTitleText": "确认订单",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/order/result",
+      "style": {
+        "navigationBarTitleText": "订单结果",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
     }
   ],
   "globalStyle": {

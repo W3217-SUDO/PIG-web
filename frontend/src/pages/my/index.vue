@@ -23,16 +23,16 @@
 
     <!-- 我的资产快览 -->
     <view class="quick-row">
-      <view class="quick-item" @tap="todo('我的猪圈')">
-        <text class="quick-num">0</text>
+      <view class="quick-item" @tap="todo('我的猪圈(S6)')">
+        <text class="quick-num">{{ stats.pigs }}</text>
         <text class="quick-label">🐷 我的猪</text>
       </view>
-      <view class="quick-item" @tap="todo('订单')">
-        <text class="quick-num">0</text>
+      <view class="quick-item" @tap="goOrders">
+        <text class="quick-num">{{ stats.orders }}</text>
         <text class="quick-label">📦 订单</text>
       </view>
-      <view class="quick-item" @tap="todo('钱包')">
-        <text class="quick-num">¥0</text>
+      <view class="quick-item" @tap="goWallet">
+        <text class="quick-num">¥{{ stats.walletInt }}</text>
         <text class="quick-label">💰 钱包</text>
       </view>
     </view>
@@ -45,13 +45,13 @@
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-divider"></view>
-      <view class="menu-item" @tap="todo('订单管理')">
+      <view class="menu-item" @tap="goOrders">
         <text class="menu-icon">📦</text>
         <text class="menu-label">我的订单</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-divider"></view>
-      <view class="menu-item" @tap="todo('钱包')">
+      <view class="menu-item" @tap="goWallet">
         <text class="menu-icon">💰</text>
         <text class="menu-label">钱包流水</text>
         <text class="menu-arrow">›</text>
@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { request, getToken, clearToken, ApiError } from '../../utils/request';
 
@@ -103,22 +103,42 @@ interface UserInfo {
 }
 
 const user = ref<UserInfo | null>(null);
+const stats = reactive({ pigs: 0, orders: 0, walletInt: '0' });
 
 async function loadMe() {
   if (!getToken()) {
     user.value = null;
+    stats.pigs = 0;
+    stats.orders = 0;
+    stats.walletInt = '0';
     return;
   }
   try {
-    const u = await request<UserInfo>('/users/me');
+    const [u, ordersResp, walletResp] = await Promise.all([
+      request<UserInfo>('/users/me'),
+      request<{ total: number; items: Array<{ status: string }> }>('/orders/me?pageSize=50').catch(() => ({ total: 0, items: [] })),
+      request<{ wallet: { balance: string } }>('/wallet/me').catch(() => ({ wallet: { balance: '0.00' } })),
+    ]);
     user.value = u;
+    stats.orders = ordersResp.total || 0;
+    stats.pigs = ordersResp.items.filter((o) => o.status === 'paid').length;
+    stats.walletInt = walletResp.wallet.balance.split('.')[0] || '0';
   } catch (e) {
     user.value = null;
     if (!(e instanceof ApiError && e.bizCode === 10001)) {
-      // 不是 401 的情况才提示
       uni.showToast({ title: '加载失败', icon: 'none' });
     }
   }
+}
+
+function goOrders() {
+  if (!user.value) return onLogin();
+  uni.navigateTo({ url: '/pages/my/orders' });
+}
+
+function goWallet() {
+  if (!user.value) return onLogin();
+  uni.navigateTo({ url: '/pages/my/wallet' });
 }
 
 function onLogin() {

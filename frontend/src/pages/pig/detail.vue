@@ -248,8 +248,7 @@ function onOrder() {
     uni.showToast({ title: '已售罄,看看其他猪', icon: 'none' });
     return;
   }
-  // 下单页 S4 实现, 暂时 toast
-  uni.showToast({ title: '下单流程(S4 实现)', icon: 'none', duration: 1500 });
+  uni.navigateTo({ url: `/pages/order/confirm?pigId=${pig.value.id}` });
 }
 
 function onShareHint() {
