@@ -20,9 +20,15 @@
         <view class="btn-dev" @tap="onDevLogin">
           <text>{{ devLoading ? '登录中…' : 'dev 一键登录(自动建测试号)' }}</text>
         </view>
+        <view class="btn-dev" style="margin-top:16rpx;border-color:#888" @tap="onDiagnose">
+          <text style="color:#888">🔍 诊断小程序 AppID</text>
+        </view>
       </view>
 
       <view v-if="errMsg" class="err">{{ errMsg }}</view>
+      <view v-if="diagInfo" class="err" style="color:#444;background:#fff5e6;padding:16rpx;border-radius:12rpx;margin-top:16rpx;font-size:22rpx;line-height:1.6;text-align:left">
+        <text>{{ diagInfo }}</text>
+      </view>
     </view>
 
     <view class="footer">
@@ -46,6 +52,27 @@ interface LoginResp {
 
 const devLoading = ref(false);
 const errMsg = ref('');
+const diagInfo = ref('');
+
+function onDiagnose() {
+  // #ifdef MP-WEIXIN
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = (uni as any).getAccountInfoSync?.() || {};
+    const mp = info.miniProgram || {};
+    diagInfo.value =
+      `运行时 AppID: ${mp.appId || '(无)'}\n` +
+      `环境: ${mp.envVersion || '?'}\n` +
+      `版本: ${mp.version || '-'}\n` +
+      `期望 AppID: wx4409bb388ab1a03e\n` +
+      `是否一致: ${mp.appId === 'wx4409bb388ab1a03e' ? '✅ 一致' : '❌ 不一致, 这是登录失败的原因!'}`;
+  } catch (e) {
+    diagInfo.value = `getAccountInfoSync 失败: ${String(e)}`;
+  }
+  return;
+  // #endif
+  diagInfo.value = '此功能仅小程序端可用';
+}
 
 async function onWxLogin() {
   // #ifdef MP-WEIXIN
