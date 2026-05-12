@@ -55,7 +55,8 @@ cd "$REL"
 npm install --no-audit --no-fund --prefer-offline
 
 echo
-echo "═══ 4/6 backend build ═══"
+echo "═══ 4/6 backend build (先清 dist 避免 incremental cache 错位) ═══"
+cd "$REL/backend"; rm -rf dist tsconfig.tsbuildinfo
 cd "$REL/backend"
 NODE_ENV=production npm run build
 [ -f dist/main.js ] || { echo "❌ dist/main.js 不存在"; exit 3; }
