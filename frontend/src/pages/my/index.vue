@@ -23,7 +23,7 @@
 
     <!-- 我的资产快览 -->
     <view class="quick-row">
-      <view class="quick-item" @tap="todo('我的猪圈(S6)')">
+      <view class="quick-item" @tap="goMyPigs">
         <text class="quick-num">{{ stats.pigs }}</text>
         <text class="quick-label">🐷 我的猪</text>
       </view>
@@ -57,7 +57,7 @@
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-divider"></view>
-      <view class="menu-item" @tap="todo('消息')">
+      <view class="menu-item" @tap="goMessages">
         <text class="menu-icon">🔔</text>
         <text class="menu-label">消息中心</text>
         <text class="menu-arrow">›</text>
@@ -139,6 +139,16 @@ function goOrders() {
 function goWallet() {
   if (!user.value) return onLogin();
   uni.navigateTo({ url: '/pages/my/wallet' });
+}
+
+function goMessages() {
+  if (!user.value) return onLogin();
+  uni.navigateTo({ url: '/pages/messages/index' });
+}
+
+function goMyPigs() {
+  if (!user.value) return onLogin();
+  uni.navigateTo({ url: '/pages/my/pigs' });
 }
 
 function onLogin() {

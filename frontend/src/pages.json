@@ -73,6 +73,15 @@
       }
     },
     {
+      "path": "pages/my/pigs",
+      "style": {
+        "navigationBarTitleText": "我的猪圈",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
       "path": "pages/order/confirm",
       "style": {
         "navigationBarTitleText": "确认订单",
@@ -94,6 +103,15 @@
       "path": "pages/share/landing",
       "style": {
         "navigationBarTitleText": "拼猪邀请",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/messages/index",
+      "style": {
+        "navigationBarTitleText": "消息中心",
         "navigationBarBackgroundColor": "#2c1810",
         "navigationBarTextStyle": "white",
         "backgroundColor": "#f5f3ec"

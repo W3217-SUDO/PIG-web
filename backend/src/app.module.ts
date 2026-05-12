@@ -18,6 +18,7 @@ import { FarmerModule } from './modules/farmer/farmer.module';
 import { OrderModule } from './modules/order/order.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { ShareModule } from './modules/share/share.module';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -117,6 +118,7 @@ import { ShareModule } from './modules/share/share.module';
     AddressModule,
     FarmerModule,
     PigModule,
+    MessageModule,
     OrderModule,
     WalletModule,
     ShareModule,

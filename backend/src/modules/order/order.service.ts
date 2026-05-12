@@ -12,6 +12,8 @@ import {
   PaymentStatus,
 } from './order-payment.entity';
 import { Pig, PigStatus } from '../pig/pig.entity';
+import { MessageService } from '../message/message.service';
+import { MessageType } from '../message/message.entity';
 
 export interface CreateOrderInput {
   pigId: string;
@@ -26,6 +28,7 @@ export class OrderService {
     @InjectRepository(OrderPayment)
     private readonly paymentRepo: Repository<OrderPayment>,
     private readonly dataSource: DataSource,
+    private readonly messages: MessageService,
   ) {}
 
   /**
@@ -147,7 +150,17 @@ export class OrderService {
       });
       await payRepo.save(payment);
 
-      return { order: o, payment };
+      return { order: o, payment, pigTitle: pig.title };
+    }).then(async (r) => {
+      // 异步触发站内消息(失败不影响主流程)
+      await this.messages.notify({
+        userId,
+        type: MessageType.ORDER_PAID,
+        title: `🎉 认领成功:${r.pigTitle}`,
+        content: `订单已支付 ¥${r.order.totalPrice}, 这头猪从今天起就是你的了。`,
+        relatedId: r.order.id,
+      });
+      return { order: r.order, payment: r.payment };
     });
   }
 }

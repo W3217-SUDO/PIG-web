@@ -9,7 +9,7 @@
 
       <view class="hero-top">
         <text class="hero-brand" @tap="todo('关于我们')">私 人 订 猪</text>
-        <view class="hero-bell" @tap="todo('消息中心')">
+        <view class="hero-bell" @tap="goMessages">
           <text class="hero-bell-icon">🔔</text>
           <view class="hero-bell-dot"></view>
         </view>
@@ -284,7 +284,7 @@
         <text class="tabbar-icon">🐷</text>
         <text class="tabbar-text">订猪</text>
       </view>
-      <view class="tabbar-item" @tap="todo('我的猪圈 Tab(S6)')">
+      <view class="tabbar-item" @tap="goMyPigs">
         <text class="tabbar-icon">🐽</text>
         <text class="tabbar-text">我的猪圈</text>
       </view>
@@ -354,6 +354,14 @@ function todo(name: string) {
 
 function goMy() {
   uni.navigateTo({ url: '/pages/my/index' });
+}
+
+function goMessages() {
+  uni.navigateTo({ url: '/pages/messages/index' });
+}
+
+function goMyPigs() {
+  uni.navigateTo({ url: '/pages/my/pigs' });
 }
 
 function onPigTap(p: PigCard) {
