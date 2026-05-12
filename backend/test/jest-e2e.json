@@ -11,5 +11,6 @@
   },
   "testTimeout": 30000,
   "globalSetup": "<rootDir>/setup.ts",
+  "setupFiles": ["<rootDir>/setup-env.ts"],
   "setupFilesAfterEach": []
 }

@@ -38,12 +38,18 @@
           <text class="order-time">{{ fmtTime(o.createdAt) }}</text>
           <text class="order-total">¥{{ o.totalPrice }}</text>
         </view>
+
+        <!-- 按状态展示操作按钮 -->
         <view v-if="o.status === 'pending'" class="order-actions">
           <view class="action-btn ghost" @tap.stop="onCancel(o)"><text>取消</text></view>
-          <view class="action-btn primary" @tap.stop="onPay(o)"><text>mock 支付</text></view>
+          <view class="action-btn primary" @tap.stop="onPay(o)"><text>去支付</text></view>
         </view>
         <view v-else-if="o.status === 'paid'" class="order-actions">
-          <view class="action-btn primary" @tap.stop="onShare(o)"><text>🤝 发起拼猪</text></view>
+          <view class="action-btn ghost" @tap.stop="onRefund(o)"><text>申请退款</text></view>
+          <view class="action-btn primary" @tap.stop="onShare(o)"><text>🤝 拼猪</text></view>
+        </view>
+        <view v-else-if="o.status === 'shipped'" class="order-actions">
+          <view class="action-btn primary" @tap.stop="onConfirmReceived(o)"><text>确认收货</text></view>
         </view>
       </view>
     </view>
@@ -66,6 +72,24 @@
         </view>
       </view>
     </view>
+
+    <!-- 退款弹层 -->
+    <view v-if="refundOpen" class="share-modal-mask" @tap="refundOpen = null">
+      <view class="share-modal" @tap.stop>
+        <text class="share-modal-title">申请退款</text>
+        <text class="share-modal-tip">请简要说明退款原因(2~256 字)</text>
+        <textarea
+          v-model="refundReason"
+          class="refund-textarea"
+          placeholder="如:尺寸不合适、暂时不需要…"
+          maxlength="256"
+        />
+        <view class="refund-actions">
+          <view class="action-btn ghost" @tap="refundOpen = null"><text>取消</text></view>
+          <view class="action-btn primary" @tap="onRefundSubmit"><text>提交</text></view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -81,6 +105,14 @@ interface PigBrief {
   region: string;
   coverImage: string;
 }
+type OrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'refund_pending'
+  | 'refunded';
 interface Order {
   id: string;
   createdAt: string;
@@ -88,7 +120,7 @@ interface Order {
   sharesCount: number;
   unitPrice: string;
   totalPrice: string;
-  status: 'pending' | 'paid' | 'cancelled' | 'refunded';
+  status: OrderStatus;
   paidAt: string | null;
   pig?: PigBrief | null;
 }
@@ -96,19 +128,26 @@ interface Order {
 const tabs: Array<{ label: string; value: string }> = [
   { label: '全部', value: '' },
   { label: '待支付', value: 'pending' },
-  { label: '已支付', value: 'paid' },
-  { label: '已取消', value: 'cancelled' },
+  { label: '代养中', value: 'paid' },
+  { label: '发货中', value: 'shipped' },
+  { label: '已完成', value: 'delivered' },
+  { label: '售后', value: 'refund_pending' },
 ];
 const activeTab = ref<string>('');
 const list = ref<Order[]>([]);
 const loading = ref(true);
 
 function statusLabel(s: string) {
-  return s === 'pending' ? '待支付'
-    : s === 'paid' ? '已支付'
-    : s === 'cancelled' ? '已取消'
-    : s === 'refunded' ? '已退款'
-    : s;
+  const m: Record<string, string> = {
+    pending: '待支付',
+    paid: '代养中',
+    shipped: '已发货',
+    delivered: '已完成',
+    cancelled: '已取消',
+    refund_pending: '退款审核中',
+    refunded: '已退款',
+  };
+  return m[s] || s;
 }
 
 function fmtTime(iso: string) {
@@ -136,7 +175,7 @@ function onTab(v: string) {
 }
 
 function onOpen(o: Order) {
-  uni.navigateTo({ url: `/pages/pig/detail?id=${o.pigId}` });
+  uni.navigateTo({ url: `/pages/order/detail?id=${o.id}` });
 }
 
 function onCancel(o: Order) {
@@ -157,6 +196,7 @@ function onCancel(o: Order) {
 }
 
 async function onPay(o: Order) {
+  // 简化:列表里 mock 支付;真实流程在订单详情页选支付方式
   try {
     await request(`/orders/${o.id}/mock-paid`, { method: 'POST' });
     uni.showToast({ title: '支付成功', icon: 'success' });
@@ -166,6 +206,53 @@ async function onPay(o: Order) {
   }
 }
 
+// ===== 退款 =====
+const refundOpen = ref<Order | null>(null);
+const refundReason = ref('');
+
+function onRefund(o: Order) {
+  refundReason.value = '';
+  refundOpen.value = o;
+}
+
+async function onRefundSubmit() {
+  if (!refundOpen.value) return;
+  const reason = refundReason.value.trim();
+  if (reason.length < 2) {
+    uni.showToast({ title: '请填写退款原因(≥2 字)', icon: 'none' });
+    return;
+  }
+  try {
+    await request(`/orders/${refundOpen.value.id}/refund-request`, {
+      method: 'POST',
+      data: { reason },
+    });
+    uni.showToast({ title: '已提交退款申请', icon: 'success' });
+    refundOpen.value = null;
+    await load();
+  } catch (e) {
+    uni.showToast({ title: e instanceof ApiError ? e.message : '提交失败', icon: 'none' });
+  }
+}
+
+async function onConfirmReceived(o: Order) {
+  uni.showModal({
+    title: '确认收货',
+    content: '请收到货检查无误后再确认收货',
+    success: async (res) => {
+      if (!res.confirm) return;
+      try {
+        await request(`/orders/${o.id}/confirm-received`, { method: 'POST' });
+        uni.showToast({ title: '🐖 已确认收货', icon: 'success' });
+        await load();
+      } catch (e) {
+        uni.showToast({ title: e instanceof ApiError ? e.message : '操作失败', icon: 'none' });
+      }
+    },
+  });
+}
+
+// ===== 拼猪 =====
 const shareModal = ref<{ code: string; link: string; ttl: string } | null>(null);
 
 async function onShare(o: Order) {
@@ -175,7 +262,6 @@ async function onShare(o: Order) {
       { method: 'POST' },
     );
     const days = Math.ceil((new Date(invite.expiresAt).getTime() - Date.now()) / 86400000);
-    // 链接基于当前 origin(H5) 或固定的线上地址(小程序/APP)
     // #ifdef H5
     const base = window.location.origin + '/#';
     // #endif
@@ -208,12 +294,13 @@ onShow(load);
 .tabs {
   background: #fff;
   display: flex;
-  padding: 0 16rpx;
+  padding: 0 8rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
 }
 .tab {
-  flex: 1;
-  padding: 24rpx 0;
+  flex-shrink: 0;
+  padding: 24rpx 28rpx;
   text-align: center;
   position: relative;
 }
@@ -225,7 +312,7 @@ onShow(load);
 .tab-on::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 30%; right: 30%;
+  bottom: 0; left: 25%; right: 25%;
   height: 4rpx;
   background: #c0392b;
   border-radius: 2rpx;
@@ -280,7 +367,10 @@ onShow(load);
 }
 .status-pending { background: #fff5e6; color: #ff9800; }
 .status-paid { background: #e7f7ee; color: #1aad19; }
+.status-shipped { background: #e3f2fd; color: #1976d2; }
+.status-delivered { background: #e8f5e9; color: #2e7d32; }
 .status-cancelled { background: #f3f3f3; color: #999; }
+.status-refund_pending { background: #ececec; color: #757575; }
 .status-refunded { background: #fde8e7; color: #c0392b; }
 
 .order-body {
@@ -353,7 +443,7 @@ onShow(load);
 }
 .action-btn.primary text { color: #fff; font-size: 22rpx; font-weight: 700; }
 
-/* ===== 分享弹层 ===== */
+/* ===== 分享 / 退款 弹层 ===== */
 .share-modal-mask {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -433,5 +523,29 @@ onShow(load);
 .share-modal-close text {
   color: #999;
   font-size: 26rpx;
+}
+
+.refund-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  background: #f5f3ec;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  box-sizing: border-box;
+  text-align: left;
+}
+.refund-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0e8d4;
+}
+.refund-actions .action-btn {
+  flex: 1;
+  padding: 20rpx 0;
+  text-align: center;
 }
 </style>

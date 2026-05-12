@@ -13,6 +13,7 @@ import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import type { Request } from 'express';
 import { User } from '../user/user.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { RefundRequestDto } from './dto/refund-request.dto';
 import { OrderStatus } from './order.entity';
 import { OrderService } from './order.service';
 
@@ -32,7 +33,12 @@ export class OrderController {
   @ApiOperation({ summary: '创建订单(状态 pending)' })
   async create(@Req() req: Request, @Body() dto: CreateOrderDto) {
     const u = req.user as User;
-    return this.orders.create(u.id, { pigId: dto.pigId, sharesCount: dto.sharesCount });
+    return this.orders.create(u.id, {
+      pigId: dto.pigId,
+      sharesCount: dto.sharesCount,
+      addressId: dto.addressId,
+      remark: dto.remark,
+    });
   }
 
   @Get('me')
@@ -43,7 +49,7 @@ export class OrderController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: '订单详情(含 pig 嵌套)' })
+  @ApiOperation({ summary: '订单详情(含 pig + payments 嵌套)' })
   async detail(@Req() req: Request, @Param('id') id: string) {
     const u = req.user as User;
     return this.orders.getOrder(u.id, id);
@@ -54,6 +60,31 @@ export class OrderController {
   async cancel(@Req() req: Request, @Param('id') id: string) {
     const u = req.user as User;
     return this.orders.cancel(u.id, id);
+  }
+
+  @Post(':id/wallet-pay')
+  @ApiOperation({ summary: '钱包余额支付(pending → paid)' })
+  async walletPay(@Req() req: Request, @Param('id') id: string) {
+    const u = req.user as User;
+    return this.orders.payByWallet(u.id, id);
+  }
+
+  @Post(':id/refund-request')
+  @ApiOperation({ summary: '申请退款(paid → refund_pending)' })
+  async refundRequest(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: RefundRequestDto,
+  ) {
+    const u = req.user as User;
+    return this.orders.requestRefund(u.id, id, dto.reason);
+  }
+
+  @Post(':id/confirm-received')
+  @ApiOperation({ summary: '确认收货(shipped → delivered)' })
+  async confirmReceived(@Req() req: Request, @Param('id') id: string) {
+    const u = req.user as User;
+    return this.orders.confirmReceived(u.id, id);
   }
 
   @Post(':id/mock-paid')

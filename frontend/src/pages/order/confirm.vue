@@ -69,9 +69,46 @@
         </view>
       </view>
 
+      <!-- 支付方式 -->
+      <view class="pay-card">
+        <text class="pay-title">支付方式</text>
+        <view
+          v-for="opt in payOptions"
+          :key="opt.value"
+          :class="['pay-option', payMethod === opt.value && 'pay-option-on', opt.disabled && 'pay-option-disabled']"
+          @tap="onPickPay(opt)"
+        >
+          <text class="pay-icon">{{ opt.icon }}</text>
+          <view class="pay-info">
+            <text class="pay-name">{{ opt.label }}</text>
+            <text class="pay-sub">{{ opt.sub }}</text>
+          </view>
+          <view :class="['pay-radio', payMethod === opt.value && 'pay-radio-on']">
+            <text v-if="payMethod === opt.value">✓</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="card">
+        <text class="card-label">备注(选填)</text>
+        <textarea
+          v-model="remark"
+          class="remark-input"
+          placeholder="给农户的话,如:晚点屠宰、留排骨等"
+          maxlength="200"
+        />
+      </view>
+
       <!-- 提示 -->
-      <view class="tip-card">
-        <text>💡 当前是 <text class="bold">开发测试环境</text>,点击"提交"使用 mock 支付——不真实扣钱,只记账。</text>
+      <view v-if="payMethod === 'mock'" class="tip-card">
+        <text>💡 <text class="bold">开发测试</text>使用 mock 支付,不真实扣钱。</text>
+      </view>
+      <view v-else-if="payMethod === 'wallet'" class="tip-card">
+        <text>💳 钱包余额支付,当前余额 <text class="bold">¥{{ walletBalance }}</text></text>
+      </view>
+      <view v-else class="tip-card">
+        <text>📱 微信支付暂未接入(待真实小程序帐号 + 商户号),将自动降级为 mock 支付。</text>
       </view>
 
       <view class="bottom-spacer"></view>
@@ -123,6 +160,41 @@ const address = ref<Address | null>(null);
 const loading = ref(true);
 const errMsg = ref('');
 const submitting = ref(false);
+const remark = ref('');
+const walletBalance = ref('0.00');
+
+type PayMethod = 'wallet' | 'wxpay' | 'mock';
+const payMethod = ref<PayMethod>('mock');
+
+const payOptions = computed(() => {
+  const opts: Array<{ value: PayMethod; label: string; sub: string; icon: string; disabled?: boolean }> = [
+    {
+      value: 'wallet',
+      label: '钱包余额',
+      sub: `当前余额 ¥${walletBalance.value}`,
+      icon: '💳',
+    },
+    {
+      value: 'wxpay',
+      label: '微信支付',
+      sub: '暂未接入,将走 mock 支付',
+      icon: '💚',
+      disabled: false,
+    },
+    {
+      value: 'mock',
+      label: '开发 mock',
+      sub: '不真实扣钱,仅记账',
+      icon: '🧪',
+    },
+  ];
+  return opts;
+});
+
+function onPickPay(opt: { value: PayMethod; disabled?: boolean }) {
+  if (opt.disabled) return;
+  payMethod.value = opt.value;
+}
 
 const priceInt = computed(() => (pig.value ? Math.round(parseFloat(pig.value.pricePerShare)) : 0));
 const remainShares = computed(() => (pig.value ? pig.value.totalShares - pig.value.soldShares : 0));
@@ -164,6 +236,16 @@ async function loadDefaultAddress() {
   }
 }
 
+async function loadWallet() {
+  if (!getToken()) return;
+  try {
+    const r = await request<{ wallet: { balance: string } }>('/wallet/me');
+    walletBalance.value = r.wallet.balance;
+  } catch {
+    walletBalance.value = '0.00';
+  }
+}
+
 function onPickAddress() {
   // 简易版:直接跳地址管理页;v1.5 做"选地址"页
   uni.navigateTo({ url: '/pages/my/addresses' });
@@ -180,15 +262,42 @@ async function onSubmit() {
     uni.showToast({ title: '请先选择收货地址', icon: 'none' });
     return;
   }
+  // 钱包支付前预检
+  if (payMethod.value === 'wallet') {
+    if (parseFloat(walletBalance.value) < parseFloat(totalAmount.value)) {
+      uni.showModal({
+        title: '余额不足',
+        content: `当前钱包余额 ¥${walletBalance.value},不足以支付 ¥${totalAmount.value}。是否切换为 mock 支付?`,
+        confirmText: '切换',
+        success: (res) => {
+          if (res.confirm) payMethod.value = 'mock';
+        },
+      });
+      return;
+    }
+  }
+
   submitting.value = true;
   try {
-    // 1. 创建订单
+    // 1. 创建订单(带 addressId + remark)
     const order = await request<{ id: string }>('/orders', {
       method: 'POST',
-      data: { pigId: pig.value.id, sharesCount: shares.value },
+      data: {
+        pigId: pig.value.id,
+        sharesCount: shares.value,
+        addressId: address.value.id,
+        remark: remark.value || undefined,
+      },
     });
-    // 2. mock 支付
-    await request(`/orders/${order.id}/mock-paid`, { method: 'POST' });
+
+    // 2. 按支付方式调对应接口
+    if (payMethod.value === 'wallet') {
+      await request(`/orders/${order.id}/wallet-pay`, { method: 'POST' });
+    } else {
+      // wxpay 暂未接入 → 降级 mock-paid
+      await request(`/orders/${order.id}/mock-paid`, { method: 'POST' });
+    }
+
     // 3. 跳结果页
     uni.redirectTo({ url: `/pages/order/result?id=${order.id}&ok=1` });
   } catch (e) {
@@ -213,6 +322,7 @@ onLoad((opts: Record<string, string | undefined>) => {
 
 onShow(() => {
   loadDefaultAddress();
+  loadWallet();
 });
 </script>
 
@@ -413,6 +523,63 @@ onShow(() => {
   line-height: 1.75;
 }
 .tip-card .bold { color: #c0392b; font-weight: 700; }
+
+/* ===== 支付方式 ===== */
+.pay-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+.pay-title {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 16rpx;
+}
+.pay-option {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 16rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  margin-bottom: 8rpx;
+  background: #fafafa;
+}
+.pay-option-on {
+  background: rgba(192, 57, 43, 0.06);
+  border-color: #c0392b;
+}
+.pay-option-disabled { opacity: 0.5; }
+.pay-icon { font-size: 40rpx; margin-right: 16rpx; }
+.pay-info { flex: 1; display: flex; flex-direction: column; }
+.pay-name { font-size: 28rpx; font-weight: 700; color: #1a1a1a; }
+.pay-sub { font-size: 22rpx; color: #888; margin-top: 4rpx; }
+.pay-radio {
+  width: 36rpx; height: 36rpx;
+  border-radius: 50%;
+  border: 2rpx solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pay-radio-on { background: #c0392b; border-color: #c0392b; }
+.pay-radio text { color: #fff; font-size: 22rpx; font-weight: 800; }
+
+/* ===== 备注 ===== */
+.remark-input {
+  width: 100%;
+  min-height: 140rpx;
+  background: #f5f3ec;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  box-sizing: border-box;
+  margin-top: 12rpx;
+}
 
 .bottom-spacer { height: 24rpx; }
 
