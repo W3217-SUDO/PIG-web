@@ -72,3 +72,10 @@ data/
 # 测试覆盖率
 coverage/
 .nyc_output/
+
+# backend e2e 测试编译产物(ts-jest 在某些场景会生成,不入仓)
+backend/test/**/*.js
+backend/test/**/*.d.ts
+backend/test/**/*.js.map
+backend/test/**/*.d.ts.map
+!backend/test/**/*.e2e-spec.ts
