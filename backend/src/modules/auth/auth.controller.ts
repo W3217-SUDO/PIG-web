@@ -29,9 +29,13 @@ export class AuthController {
 
   @Public()
   @Post('dev-login')
-  @ApiOperation({ summary: '开发旁路登录(仅 NODE_ENV !== production)' })
+  @ApiOperation({ summary: '开发旁路登录(默认仅 NODE_ENV !== production, DEV_LOGIN_ENABLED=true 可在生产临时打开)' })
   async devLogin(@Body() dto: DevLoginDto) {
-    if (process.env.NODE_ENV === 'production') {
+    // 默认生产环境禁用
+    // 临时旁路: DEV_LOGIN_ENABLED=true 允许(等真实小程序帐号注册下来再关掉)
+    const isProd = process.env.NODE_ENV === 'production';
+    const devEnabled = process.env.DEV_LOGIN_ENABLED === 'true';
+    if (isProd && !devEnabled) {
       throw new ForbiddenException('dev-login disabled in production');
     }
     const { user, tokens } = await this.auth.devLogin(dto.openid);
