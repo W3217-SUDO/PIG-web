@@ -205,6 +205,59 @@ async function main() {
   }
   console.log(`✓ Seeded ${healthCount} health records (3 per pig)`);
 
+  // ─── 代养人任务 & 收益 ──────────────────────────────────────
+  await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+  await AppDataSource.query('TRUNCATE TABLE `farmer_task`');
+  await AppDataSource.query('TRUNCATE TABLE `farmer_earning`');
+  await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 1');
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayStart = new Date(); todayStart.setHours(7, 30, 0, 0); // 早餐已打卡时间
+
+  // 老李的任务(早餐已完成,午餐进行中,晚餐待完成)
+  await AppDataSource.query(
+    `INSERT INTO farmer_task (id, farmer_id, meal_type, food_desc, area, time_slot, scheduled_date, checked_at) VALUES
+     (?, ?, 'breakfast', '玉米面粥+青菜', 'A区-01栏', '07:00-08:00', ?, ?),
+     (?, ?, 'lunch',     '红薯+豆类',    'A区-01栏', '12:00-13:00', ?, NULL),
+     (?, ?, 'dinner',    '粗粮+蔬菜',    'A区-01栏', '18:00-19:00', ?, NULL)`,
+    [
+      ulid(), farmer1Id, today, todayStart,
+      ulid(), farmer1Id, today,
+      ulid(), farmer1Id, today,
+    ],
+  );
+
+  // 老王的任务(全部待完成)
+  await AppDataSource.query(
+    `INSERT INTO farmer_task (id, farmer_id, meal_type, food_desc, area, time_slot, scheduled_date, checked_at) VALUES
+     (?, ?, 'breakfast', '苕藤+玉米粉', 'B区-02栏', '07:00-08:00', ?, NULL),
+     (?, ?, 'lunch',     '甘薯+麦麸',  'B区-02栏', '12:00-13:00', ?, NULL),
+     (?, ?, 'dinner',    '粗粮+萝卜',  'B区-02栏', '18:00-19:00', ?, NULL)`,
+    [
+      ulid(), farmer2Id, today,
+      ulid(), farmer2Id, today,
+      ulid(), farmer2Id, today,
+    ],
+  );
+  console.log('✓ Seeded farmer_task (6 tasks for today)');
+
+  // 收益数据(过去 6 个月)
+  const earningData: Array<[string, number, number, number]> = [
+    [farmer1Id, 2026, 4, 8650],  [farmer1Id, 2026, 3, 7820],
+    [farmer1Id, 2026, 2, 9120],  [farmer1Id, 2026, 1, 8300],
+    [farmer1Id, 2025, 12, 9500], [farmer1Id, 2025, 11, 7600],
+    [farmer2Id, 2026, 4, 7200],  [farmer2Id, 2026, 3, 6800],
+    [farmer2Id, 2026, 2, 7500],  [farmer2Id, 2026, 1, 6500],
+    [farmer2Id, 2025, 12, 8100], [farmer2Id, 2025, 11, 6200],
+  ];
+  for (const [fId, yr, mo, amt] of earningData) {
+    await AppDataSource.query(
+      `INSERT INTO farmer_earning (id, farmer_id, year, month, amount) VALUES (?, ?, ?, ?, ?)`,
+      [ulid(), fId, yr, mo, amt],
+    );
+  }
+  console.log('✓ Seeded farmer_earning (6 months × 2 farmers)');
+
   await AppDataSource.destroy();
   console.log('✅ Seed done. 现在可以打开 http://localhost:5173/ 看猪列表');
 }

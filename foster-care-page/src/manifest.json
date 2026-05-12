@@ -1,0 +1,16 @@
+{
+  "name": "私人订猪·代养人端",
+  "appid": "",
+  "description": "代养人工作台 — 任务打卡 · 猪只管理 · 收益查看",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "wx4409bb388ab1a03e",
+    "setting": {
+      "urlCheck": false
+    },
+    "usingComponents": true
+  },
+  "vueVersion": "3"
+}

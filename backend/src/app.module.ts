@@ -19,6 +19,7 @@ import { OrderModule } from './modules/order/order.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { ShareModule } from './modules/share/share.module';
 import { MessageModule } from './modules/message/message.module';
+import { FosterModule } from './modules/foster/foster.module';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { MessageModule } from './modules/message/message.module';
     OrderModule,
     WalletModule,
     ShareModule,
+    FosterModule,
   ],
 })
 export class AppModule {}

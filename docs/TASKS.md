@@ -12,7 +12,7 @@
 
 > **更新规则**:复制 `### 大盘 - YYYY-MM-DD` 块在最下方追加,旧的保留作历史。
 
-### 大盘 - 2026-05-12(W1 全部完成 + AppID 到位)
+### 大盘 - 2026-05-12(W1 全部完成 + 代养人端 v1 上线)
 
 | 模块 | 任务数 | 已完成 | 进度 | 责任 | 风险 |
 |---|---|---|---|---|---|
@@ -27,6 +27,8 @@
 | share | 3 | 3 | 🟢 100% | 后端 | — |
 | farmer / feeding / health / live | 8 | 6 | 🟡 75% | 后端 | live 真直播 v1.5 |
 | message / upload | 5 | 3 | 🟡 60% | 后端 | upload 推 v1.5 |
+| **代养人端后端(新增)** | **6** | **6** | **🟢 100%** | **后端** | — |
+| **代养人端前端(新增)** | **5** | **5** | **🟢 100%** | **前端** | — |
 | 前端骨架 | 4 | 4 | 🟢 100% | 前端 | — |
 | 前端页面(11→14) | 28 | 25 | 🟢 89% | 前端 | 缺 11 页双端真机走查截图 |
 | 部署运维 | 8 | 5 | 🟡 62% | 后端 | Actions 实跑 + 生产 nginx 反代待补 |
@@ -34,9 +36,10 @@
 | 监控告警 | 5 | 0 | ⚪ 0% | 后端 | W3 接入 |
 | APP 打包 | 4 | 0 | ⚪ 0% | 前端 | iOS 账号 C9 |
 | 测试 | 6 | 1 | 🟡 16% | 共同 | curl 一条龙手验,自动化测试待补 |
-| **合计** | **129** | **91** | **🟢 71%** | | |
+| **合计** | **140** | **102** | **🟢 73%** | | |
 
 > 🎉 **W1 全切片(S1-S6)端到端完成**,GitHub 已 push 到 `5026ce2`
+> ✅ **代养人端小程序 v1 上线**(后端 6 接口 + 前端 5 页面,实时数据驱动)
 > 🚨 **当前瓶颈**:仍是合规依赖(AppSecret / 微信支付商户号 / ICP 备案)
 
 ---
@@ -81,6 +84,28 @@
 - [x] `request.ts` 跨端封装(uni.request)(05-11)
 - [x] H5 dev server 跑通(`http://localhost:5173/`)(05-11)
 - [x] 首页演示 `/api/health` 探活 + dev-login 拿 token 调 `/me`(05-11)
+
+### 1.5 代养人端后端 🟢 6/6 · (2026-05-12 · Claude)
+
+> 独立 FosterModule，全部路由 `@Public()`，使用 farmerId 标识，不走 JWT。
+
+- [x] `FarmerTask` entity + `FarmerEarning` entity(05-12 · Claude) ✓
+- [x] `1778580000000-FosterCare.ts` migration(farmer_task + farmer_earning 建表)(05-12 · Claude) ✓
+- [x] `FosterService`：getFarmers / getDashboard / getTodayTasks / checkinTask / getFarmerPigs / getEarnings(05-12 · Claude) ✓
+- [x] `FosterController`：6 条 REST 路由全部 @Public()(05-12 · Claude) ✓
+- [x] `FosterModule` 注入 7 个 Repository，接入 AppModule(05-12 · Claude) ✓
+- [x] Seed 数据：6 条今日喂养任务 + 12 条月度收益记录(05-12 · Claude) ✓
+
+### 1.6 代养人端前端(foster-care-page) 🟢 5/5 · (2026-05-12 · Claude)
+
+> 独立 uni-app 项目，路径 `foster-care-page/`，编译产物 `dist/build/mp-weixin/`。
+
+- [x] 项目初始化：package.json / vite.config.ts / manifest.json / pages.json(05-12 · Claude) ✓
+- [x] `pages/login/index.vue`：农户选择登录，farmerId 写 Storage(05-12 · Claude) ✓
+- [x] `pages/workbench/index.vue`：工作台总览，托管猪只数 + 待完成任务数 + 今日任务列表(05-12 · Claude) ✓
+- [x] `pages/tasks/index.vue`：喂养任务列表，实时打卡 POST /checkin(05-12 · Claude) ✓
+- [x] `pages/pigs/index.vue`：我的猪只，健康状态 / 体重 / 饲养天数 / 主人姓名(05-12 · Claude) ✓
+- [x] `pages/earnings/index.vue`：收益中心，本月 + 累计 + 月度条形图(05-12 · Claude) ✓
 
 ---
 
