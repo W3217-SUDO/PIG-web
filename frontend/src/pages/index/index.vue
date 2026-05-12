@@ -41,8 +41,8 @@
       </view>
 
       <view class="hero-cta-row">
-        <view class="hero-cta primary" @tap="todo('立即认养')"><text>立 即 认 养</text></view>
-        <view class="hero-cta ghost" @tap="todo('看直播')"><text>🎥 看实景直播</text></view>
+        <view class="hero-cta primary" @tap="goFirstPig"><text>立 即 认 养</text></view>
+        <view class="hero-cta ghost" @tap="goFirstLive"><text>🎥 看实景直播</text></view>
       </view>
     </view>
 
@@ -366,6 +366,26 @@ function goMyPigs() {
 
 function goAbout() {
   uni.navigateTo({ url: '/pages/static/about' });
+}
+
+/** 取列表第一头猪,跳详情(立即认养 CTA 用) */
+function goFirstPig() {
+  const first = list.value[0];
+  if (first) {
+    uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
+  } else {
+    uni.showToast({ title: '猪还没上架', icon: 'none' });
+  }
+}
+
+/** 取列表第一头猪的直播 */
+function goFirstLive() {
+  const first = list.value[0];
+  if (first) {
+    uni.navigateTo({ url: `/pages/live/index?pigId=${first.id}` });
+  } else {
+    uni.showToast({ title: '没有可看的直播', icon: 'none' });
+  }
 }
 
 function onPigTap(p: PigCard) {

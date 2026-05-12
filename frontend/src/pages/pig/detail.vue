@@ -55,8 +55,8 @@
         </view>
       </view>
 
-      <!-- ========== 农户卡片 ========== -->
-      <view v-if="pig.farmer" class="farmer-card">
+      <!-- ========== 农户卡片(可点) ========== -->
+      <view v-if="pig.farmer" class="farmer-card" @tap="goFarmer">
         <text class="section-title">— 替你养的人 —</text>
         <view class="farmer-row">
           <image class="farmer-avatar" :src="pig.farmer.avatarUrl" mode="aspectFill" />
@@ -68,6 +68,7 @@
             </view>
           </view>
           <text class="farmer-star">★ 4.9</text>
+          <text class="farmer-arrow">›</text>
         </view>
         <text v-if="pig.farmer.story" class="farmer-story">{{ pig.farmer.story }}</text>
       </view>
@@ -231,15 +232,13 @@ async function loadDetail(id: string) {
 }
 
 function onPlayVideo() {
-  if (!pig.value?.mockVideoUrl) return;
-  // 小程序: video 组件;H5: 直接弹个浏览
-  // #ifdef H5
-  window.open(pig.value.mockVideoUrl, '_blank');
-  return;
-  // #endif
-  // #ifdef MP-WEIXIN || APP-PLUS
-  uni.showToast({ title: '直播预览(完整版 v1.5)', icon: 'none' });
-  // #endif
+  if (!pig.value) return;
+  uni.navigateTo({ url: `/pages/live/index?pigId=${pig.value.id}` });
+}
+
+function goFarmer() {
+  if (!pig.value?.farmer?.id) return;
+  uni.navigateTo({ url: `/pages/farmer/detail?id=${pig.value.farmer.id}` });
 }
 
 function onOrder() {
@@ -497,6 +496,11 @@ onLoad((opts: Record<string, string | undefined>) => {
   font-size: 26rpx;
   color: #FF9800;
   font-weight: 700;
+}
+.farmer-arrow {
+  font-size: 36rpx;
+  color: #c0392b;
+  margin-left: 12rpx;
 }
 .farmer-story {
   margin-top: 24rpx;

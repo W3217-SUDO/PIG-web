@@ -112,7 +112,7 @@ import { FosterModule } from './modules/foster/foster.module';
     // Redis (全局, 提供 REDIS_CLIENT)
     RedisModule,
 
-    // 业务模块
+    // 业务模块(FarmerModule 现在含 Controller, 不再是 entity-only)
     HealthModule,
     UserModule,
     AuthModule,

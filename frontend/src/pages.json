@@ -143,6 +143,24 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#f5f3ec"
       }
+    },
+    {
+      "path": "pages/farmer/detail",
+      "style": {
+        "navigationBarTitleText": "农户",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/live/index",
+      "style": {
+        "navigationBarTitleText": "实景直播",
+        "navigationBarBackgroundColor": "#0f1115",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#0f1115"
+      }
     }
   ],
   "globalStyle": {
