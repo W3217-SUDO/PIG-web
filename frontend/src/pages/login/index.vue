@@ -27,9 +27,9 @@
 
     <view class="footer">
       <text class="footer-tip">登录即表示同意</text>
-      <text class="footer-link" @tap="todo('用户协议')">《用户协议》</text>
+      <text class="footer-link" @tap="goStatic('terms')">《用户协议》</text>
       <text class="footer-tip">和</text>
-      <text class="footer-link" @tap="todo('隐私政策')">《隐私政策》</text>
+      <text class="footer-link" @tap="goStatic('privacy')">《隐私政策》</text>
     </view>
   </view>
 </template>
@@ -102,8 +102,8 @@ async function onDevLogin() {
   }
 }
 
-function todo(name: string) {
-  uni.showToast({ title: `${name}(W2 提审前补)`, icon: 'none' });
+function goStatic(name: 'terms' | 'privacy') {
+  uni.navigateTo({ url: `/pages/static/${name}` });
 }
 </script>
 

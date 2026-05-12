@@ -10,8 +10,61 @@
 - 制定 5/31 上线总路线图 `docs/ROADMAP.md`
 - MVP v1.0.0 范围矩阵 `docs/00-overview/mvp-scope.md`
 - W1 / W2 / W3 自动执行任务清单(`docs/AUTO-RUN-2026-05-12.md` / `-19.md` / `-26.md`)
-- **总任务清单 `docs/TASKS.md`(单一真相源,按模块组织,123 任务追踪,每日站会用)**
+- 总任务清单 `docs/TASKS.md`(单一真相源,按模块组织)
+- 项目快照文件夹 `docs/snapshot/`(项目状态 + 服务器现状速读)
 - 文档总索引更新,顶部增加"当前进行中"区块 + 新人入职引导
+
+### W1 切片完成(2026-05-12,6 个端到端 commit)
+
+**S1 - 猪列表 + 首页原型像素级复刻** (`00f6ea5`)
+- pig.entity 加字段:farmer_id / region / expected_weight_kg / mock_video_url
+- 新建 farmer 模块(entity + module)
+- 新建 PigModule:`GET /api/pigs` 列表(分页 + 地区筛选)
+- seed 脚本:2 农户 + 5 头猪(Unsplash 真实图)
+- 首页 11 个区块按原型像素级复刻(Hero / 三大主张 / 直播 / 4 步流程 / 拼猪 / 选你的猪 / 关于我们 / 信任带 / Tabbar)
+- 全部用 view/text/image + rpx,三端兼容
+
+**S2 - 猪详情 + 时间线** (`869c8ff`)
+- feeding_record + health_record entity(meal_type / record_type 枚举)
+- migration S2Detail
+- seed 扩展:每只猪 5 条喂养(过去 3 天循环)+ 3 条健康(体检/疫苗/称重)
+- `GET /api/pigs/:id` 详情(含农户全字段 + story)
+- `GET /api/pigs/:id/timeline` 喂养+健康聚合时间线
+- pages/pig/detail.vue:封面 + 基础卡 + 农户卡 + 拼猪入口 + 时间线 tab + 底部 CTA
+
+**S3 - 用户 + 地址 + 我的中心** (`1865c65`)
+- address.entity + UpsertAddressDto(手机号正则校验 / is_default 互斥)
+- AddressController + AddressService(CRUD,删除默认时自动提下一条)
+- UserController:`PATCH /api/users/me`(部分字段更新)
+- pages/login/index.vue + my/index.vue + my/profile.vue + my/addresses.vue
+- request.ts 401 自动跳登录(避免在登录页本身循环)
+
+**S4 - 下单 + 钱包 + mock 支付** (`0a3f47f`)
+- order_payment + wallet_transaction entity(direction / type / balance_after)
+- migration S4Order
+- OrderService:create / list / detail / cancel / mockPay(事务包裹)
+- WalletService:ensureWallet / getOverview / credit / debit(事务)
+- mockPay 流程:校验份额 → order=paid → pig.sold_shares+= → SOLD_OUT 自动转 → 落 payment 流水
+- pages:order/confirm + order/result + my/orders(4 状态 tab)+ my/wallet(暗红余额卡)
+- pig/detail 立即认养 CTA 实跳
+
+**S5 - 拼猪邀请短链** (`a825d39`)
+- share_invite entity:8 位短码(去 IO01 易混)+ 30 天 TTL
+- ShareService:createInvite(同订单复用未过期 code)+ lookup(@Public)
+- pages/share/landing.vue:暗红邀请 hero + 浮起猪卡 + 四大卖点 + v1 说明
+- 订单列表 paid 状态加 '🤝 发起拼猪' + 邀请码 modal(大字短码 + 一键复制)
+
+**S6 - 消息中心 + 我的猪圈** (`709cadb`)
+- message.entity:type 五枚举 + is_read + read_at + (user_id, is_read, created_at) 复合索引
+- MessageService.notify():失败仅 log,异步触发,不影响主流程
+- OrderService.mockPay 接入:支付成功自动触发 '🎉 认领成功' 消息
+- pages/messages/index.vue:统计 + 全部已读 + 类型 icon + 红点 + 自动 mark-read
+- pages/my/pigs.vue:从 paid 订单反查(份额 / 已养天数 / 已付)+ LIVE 红标
+
+### W2 进行中
+- 真实小程序 AppID `wx4409bb388ab1a03e` 配入 `frontend/src/manifest.json`(`5026ce2`)
+- 静态页 3 张:`pages/static/about` + `terms` + `privacy`(提审必需)
+- ICP 备案号占位,Owner 拿到后回填 about 页
 
 ## [0.2.0] - 2026-05-11
 

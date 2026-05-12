@@ -53,8 +53,10 @@
 | 文档 | 看完知道 |
 |---|---|
 | [`03-backend/modules.md`](./03-backend/modules.md) | 后端模块划分(auth / user / pig / order / share / live …) |
-| [`03-backend/api-spec.md`](./03-backend/api-spec.md) | REST API 规范、字段约定、错误码、分页 |
-| [`03-backend/database.md`](./03-backend/database.md) | ER 图、全表 schema、索引策略、迁移流程 |
+| [`03-backend/api-spec.md`](./03-backend/api-spec.md) | REST API 规范、字段约定、错误码、分页(设计层) |
+| **[`03-backend/api-status.md`](./03-backend/api-status.md)** | **当前已实现的所有 endpoint(代码即真相)** |
+| [`03-backend/database.md`](./03-backend/database.md) | ER 图、全表 schema、索引策略、迁移流程(设计层) |
+| **[`03-backend/db-status.md`](./03-backend/db-status.md)** | **当前已建的 13 张表 + entity 链接 + 状态机** |
 | [`03-backend/auth.md`](./03-backend/auth.md) | 微信登录流程、JWT、角色权限、拼猪权限 |
 | [`03-backend/logging.md`](./03-backend/logging.md) | 日志分级、落盘、切割、检索 |
 | [`03-backend/security.md`](./03-backend/security.md) | 鉴权、限流、防注入、敏感字段、密钥轮换 |
@@ -83,6 +85,7 @@
 | [`06-deployment/ci-cd.md`](./06-deployment/ci-cd.md) | GitHub Actions 流水线 |
 | [`06-deployment/release.md`](./06-deployment/release.md) | 发版流程、蓝绿、回滚 |
 | [`06-deployment/monitoring.md`](./06-deployment/monitoring.md) | 监控、告警、日志检索 |
+| **[`06-deployment/admin-sop.md`](./06-deployment/admin-sop.md)** | **运营 SOP(v1 无 GUI 后台,所有操作走 Navicat)** |
 
 ### 🤝 7. 协作规范
 

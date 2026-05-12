@@ -65,13 +65,25 @@
     </view>
 
     <view class="menu-card">
-      <view class="menu-item" @tap="todo('帮助')">
+      <view class="menu-item" @tap="todo('帮助与反馈')">
         <text class="menu-icon">❓</text>
         <text class="menu-label">帮助与反馈</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-divider"></view>
-      <view class="menu-item" @tap="todo('关于')">
+      <view class="menu-item" @tap="goStatic('terms')">
+        <text class="menu-icon">📜</text>
+        <text class="menu-label">用户协议</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-divider"></view>
+      <view class="menu-item" @tap="goStatic('privacy')">
+        <text class="menu-icon">🔒</text>
+        <text class="menu-label">隐私政策</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-divider"></view>
+      <view class="menu-item" @tap="goStatic('about')">
         <text class="menu-icon">ℹ️</text>
         <text class="menu-label">关于「私人订猪」</text>
         <text class="menu-arrow">›</text>
@@ -149,6 +161,10 @@ function goMessages() {
 function goMyPigs() {
   if (!user.value) return onLogin();
   uni.navigateTo({ url: '/pages/my/pigs' });
+}
+
+function goStatic(name: 'terms' | 'privacy' | 'about') {
+  uni.navigateTo({ url: `/pages/static/${name}` });
 }
 
 function onLogin() {

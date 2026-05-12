@@ -242,7 +242,7 @@
     </scroll-view>
 
     <!-- ========== 关于我们入口 ========== -->
-    <view class="about-entry-pro" @tap="todo('关于我们')">
+    <view class="about-entry-pro" @tap="goAbout">
       <view class="aep-deco"><text>🏮</text></view>
       <view class="aep-info">
         <text class="aep-eb">— 关 于 我 们 —</text>
@@ -362,6 +362,10 @@ function goMessages() {
 
 function goMyPigs() {
   uni.navigateTo({ url: '/pages/my/pigs' });
+}
+
+function goAbout() {
+  uni.navigateTo({ url: '/pages/static/about' });
 }
 
 function onPigTap(p: PigCard) {

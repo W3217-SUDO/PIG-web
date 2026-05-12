@@ -116,6 +116,33 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#f5f3ec"
       }
+    },
+    {
+      "path": "pages/static/about",
+      "style": {
+        "navigationBarTitleText": "关于私人订猪",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/static/terms",
+      "style": {
+        "navigationBarTitleText": "用户协议",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
+    },
+    {
+      "path": "pages/static/privacy",
+      "style": {
+        "navigationBarTitleText": "隐私政策",
+        "navigationBarBackgroundColor": "#2c1810",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#f5f3ec"
+      }
     }
   ],
   "globalStyle": {
