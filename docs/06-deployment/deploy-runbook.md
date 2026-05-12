@@ -176,7 +176,22 @@ EOF
 
 **预期行为,不是坑**——是安全设计。
 
-### 坑 5:生产库初始空,前端不显示猪
+### 坑 5:PM2 `reload` 不重读 .env(改密钥踩过)
+
+修改 `~/.pig-secrets` 或 `.env.production` 后,**只跑 `pm2 reload` 没用** ——
+新 env 不会被 worker 进程读到,接口仍用旧值。
+
+**正确**:
+```bash
+ssh pig 'bash -s' < infra/deploy/reload-env.sh
+# 或直接:
+ssh pig 'pm2 restart pig-backend --update-env'
+```
+
+部署脚本 `backend.sh` 用的是 `pm2 start --update-env` 不踩此坑;
+但**日常单独改 env 不重部署代码**时记住要 `restart --update-env`,不要 reload。
+
+### 坑 6:生产库初始空,前端不显示猪
 
 新部署 MySQL pig 库只有 13 张表(migration 跑完),没数据。
 

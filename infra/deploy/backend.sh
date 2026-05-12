@@ -65,15 +65,18 @@ echo "═══ 5/6 跑 migration(增量) ═══"
 NODE_ENV=production npm run migration:run
 
 echo
-echo "═══ 6/6 PM2 重启(fork 模式,cluster 与 NestJS ConfigModule 有 cwd 兼容问题)═══"
+echo "═══ 6/6 PM2 重启(fork + --update-env 强制重读 .env.production)═══"
 ln -sfn "$REL" /opt/pig/current
 cd "$REL/backend"
 pm2 delete pig-backend 2>/dev/null || true
+# 关键:从 release 目录启动,这样 ConfigModule 能正确找到 .env.production
+# --update-env 让 PM2 daemon 把当前 shell env 传给 worker
 NODE_ENV=production pm2 start dist/main.js \
   --name pig-backend \
   --cwd "$REL/backend" \
   --log "$LOG_DIR/pig-backend.log" \
-  --time
+  --time \
+  --update-env
 pm2 save
 
 echo
