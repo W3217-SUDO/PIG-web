@@ -66,6 +66,24 @@
 - 静态页 3 张:`pages/static/about` + `terms` + `privacy`(提审必需)
 - ICP 备案号占位,Owner 拿到后回填 about 页
 
+### 生产部署 + 运维 (2026-05-12, commits `8c70767` / `318fe52`)
+- **首次生产部署完成** · `/opt/pig/releases/20260512-*/` · pm2 fork 模式
+- nginx `/api/` 反代修复(去 proxy_pass 末尾 `/`)
+- 生产 MySQL 14 张表 + seed mock 数据(2 农户 / 5 猪 / 40 时间线记录)
+- H5 上线到 `/var/www/html/pig/`(原型备份到 `pig-prototype-*`)
+- 公网 https://www.rockingwei.online/ 全链路 200
+- `infra/deploy/{backend.sh,h5.sh,ecosystem.config.cjs}` 部署自动化
+- `docs/06-deployment/deploy-runbook.md` 实战手册(含 5 个踩过的坑)
+- `scripts/smoke-prod.sh` 23 项 curl 测试(全绿才算上线 OK)
+- `infra/backup/mysql-backup.sh` + cron 0 3 * * * 每日备份(保留 30 天)
+- `/api/health.system.*` 加 8 字段(pid/node/rss/load/mem/cpu/uptime)
+- **微信小程序登录链路真实跑通** · AppSecret 写服务器 `~/.pig-secrets`
+  与 `.env.production`(均 mode 600)· 后端调微信 `jscode2session`
+  通过 AppID+Secret 配对验证(用假 code 测试,返回 invalid code 而非
+  invalid appsecret = 配对正确)
+  → 待 Owner 在微信公众平台后台加 `https://www.rockingwei.online`
+    到「request 合法域名」即可完整端到端真实登录
+
 ## [0.2.0] - 2026-05-11
 
 ### Added
