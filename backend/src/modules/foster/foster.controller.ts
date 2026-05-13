@@ -53,6 +53,20 @@ export class FosterController {
     return { code: 0, message: 'ok', data };
   }
 
+  // ─────────────────────── 农户端 写操作 ───────────────────────
+
+  /** 农户：更新猪只体重（必须上传称重图片） / 修改主人备注 */
+  @Patch('pigs/:id')
+  async farmerUpdatePig(
+    @Param('id') id: string,
+    @Query('farmerId') farmerId: string,
+    @Body() body: { weightKg?: number; weightImage?: string; ownerNote?: string },
+  ) {
+    if (!farmerId) throw new BadRequestException('farmerId 不能为空');
+    const data = await this.fosterService.farmerUpdatePig(id, farmerId, body);
+    return { code: 0, message: '更新成功', data };
+  }
+
   // ─────────────────────── 管理员 CRUD ───────────────────────
 
   /** 管理：获取全部农户（含所有字段） */

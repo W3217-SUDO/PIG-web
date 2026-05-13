@@ -1,33 +1,36 @@
 /**
- * Sentry 错误上报(后端)
- * 设计:
- * - 无 SENTRY_DSN 时 init() 是 no-op,不增加任何开销
- * - 显式调 captureException(err, ctx?) 上报
- * - 自动捕获 traceId 关联请求
- *
- * 使用:
- *   import { initSentry, captureException } from './common/sentry/sentry';
- *   initSentry();   // main.ts 启动时
- *   captureException(err, { trace_id, url, user });
+ * Sentry 错误上报(后端) — 可选依赖
+ * 无 @sentry/node 包或无 SENTRY_DSN 时全部为 no-op
  */
-import * as Sentry from '@sentry/node';
 
 let inited = false;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SentryLib: any = null;
+
+function getSentry() {
+  if (SentryLib) return SentryLib;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    SentryLib = require('@sentry/node');
+  } catch {
+    SentryLib = null;
+  }
+  return SentryLib;
+}
 
 export function initSentry(): boolean {
   const dsn = process.env.SENTRY_DSN;
   if (!dsn) return false;
   if (inited) return true;
+  const S = getSentry();
+  if (!S) return false;
 
-  Sentry.init({
+  S.init({
     dsn,
     environment: process.env.NODE_ENV || 'development',
     release: process.env.APP_VERSION || process.env.GIT_COMMIT || '0.1.0',
-    // 性能采样(慢请求 trace),v1 用低采样率
     tracesSampleRate: 0.05,
-    // 屏蔽敏感字段
-    beforeSend(event) {
-      // 移除请求头里的 Authorization
+    beforeSend(event: Record<string, any>) {
       if (event.request?.headers) {
         delete event.request.headers['authorization'];
         delete event.request.headers['cookie'];
@@ -43,7 +46,9 @@ export function initSentry(): boolean {
 
 export function captureException(err: unknown, ctx?: Record<string, unknown>): void {
   if (!inited) return;
-  Sentry.withScope((scope) => {
+  const S = getSentry();
+  if (!S) return;
+  S.withScope((scope: any) => {
     if (ctx) {
       for (const [k, v] of Object.entries(ctx)) {
         if (k === 'user' && v) {
@@ -53,11 +58,13 @@ export function captureException(err: unknown, ctx?: Record<string, unknown>): v
         }
       }
     }
-    Sentry.captureException(err);
+    S.captureException(err);
   });
 }
 
 export function flushSentry(timeoutMs = 2000): Promise<boolean> {
   if (!inited) return Promise.resolve(true);
-  return Sentry.flush(timeoutMs);
+  const S = getSentry();
+  if (!S) return Promise.resolve(true);
+  return S.flush(timeoutMs);
 }

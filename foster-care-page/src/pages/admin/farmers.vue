@@ -119,7 +119,7 @@ async function doSave() {
   try {
     const payload = { ...form, years: Number(form.years) };
     if (isEdit.value) {
-      await request(`/foster/admin/farmers/${editId.value}`, { method: 'PUT', data: payload });
+      await request(`/foster/admin/farmers/${editId.value}`, { method: 'PATCH', data: payload });
     } else {
       await request('/foster/admin/farmers', { method: 'POST', data: payload });
     }

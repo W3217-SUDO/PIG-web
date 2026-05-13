@@ -35,10 +35,10 @@ async function main() {
        (?, '老王', '绵阳', 12, ?, ?, '')`,
     [
       farmer1Id,
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
+      '',
       '广元市朝天区临溪乡养猪 18 年,只用粗粮 + 山泉。家里 3 代都是养猪人。',
       farmer2Id,
-      'https://images.unsplash.com/photo-1559548331-f9cb98280344?w=400&q=80',
+      '',
       '绵阳市平武县白马藏族乡,海拔 1800 米山区散养。',
     ],
   );
@@ -61,7 +61,7 @@ async function main() {
       10,
       2,
       4,
-      'https://images.unsplash.com/photo-1593179357196-705d7578b1d0?w=800&q=80',
+      '',
     ],
     [
       '香猪 · 老王村口',
@@ -74,7 +74,7 @@ async function main() {
       10,
       0,
       3,
-      'https://images.unsplash.com/photo-1605063709404-13ce0e2ed8d8?w=800&q=80',
+      '',
     ],
     [
       '藏香猪 · 白马藏寨',
@@ -87,7 +87,7 @@ async function main() {
       10,
       5,
       3,
-      'https://images.unsplash.com/photo-1568864148878-5fff7c4b6b1f?w=800&q=80',
+      '',
     ],
     [
       '川北黑猪 · 朝天散养',
@@ -100,7 +100,7 @@ async function main() {
       10,
       7,
       5,
-      'https://images.unsplash.com/photo-1546193988-fd7eaa75ff03?w=800&q=80',
+      '',
     ],
     [
       '内江猪 · 第二头',
@@ -113,7 +113,7 @@ async function main() {
       10,
       10,
       4,
-      'https://images.unsplash.com/photo-1518443855757-dfadac7101ae?w=800&q=80',
+      '',
     ],
   ];
 

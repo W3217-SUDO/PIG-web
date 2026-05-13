@@ -188,7 +188,7 @@ async function doSave() {
       coverImage: form.coverImage, description: form.description,
     };
     if (isEdit.value) {
-      await request(`/foster/admin/pigs/${editId.value}`, { method: 'PUT', data: payload });
+      await request(`/foster/admin/pigs/${editId.value}`, { method: 'PATCH', data: payload });
     } else {
       await request('/foster/admin/pigs', { method: 'POST', data: payload });
     }
@@ -203,7 +203,7 @@ async function doSave() {
 async function toggleStatus(p: Pig) {
   const newStatus = p.status === 'listed' ? 'closed' : 'listed';
   try {
-    await request(`/foster/admin/pigs/${p.id}`, { method: 'PUT', data: { status: newStatus } });
+    await request(`/foster/admin/pigs/${p.id}`, { method: 'PATCH', data: { status: newStatus } });
     await load();
     uni.showToast({ title: newStatus === 'listed' ? '已上架' : '已下架', icon: 'success' });
   } catch (e: any) {
