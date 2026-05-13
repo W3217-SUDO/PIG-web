@@ -170,7 +170,7 @@ export class FosterService {
           stallNo,
           healthStatus,
           ownerName,
-          ownerNote: pig.description || '',  // 农户手填的主人备注
+          ownerNote: (pig as any).ownerNote || '',  // 农户手填的主人备注
           daysRaised: Math.max(0, daysRaised),
           weightKg: pig.weightKg ? Number(pig.weightKg) : null,
         };
@@ -214,18 +214,18 @@ export class FosterService {
         throw new Error('修改体重必须上传称重图片');
       }
       (pig as any).weightKg = String(dto.weightKg);
-      // 将称重图片记录到 photos 字段
+      // 将称重图片记录到 photos 字段（保留最近10张）
       const existing: string[] = (pig.photos as string[]) || [];
-      pig.photos = [...existing, dto.weightImage].slice(-10); // 最多保留 10 张
+      pig.photos = [...existing, dto.weightImage].slice(-10);
     }
     if (dto.ownerNote !== undefined) {
-      pig.description = dto.ownerNote;
+      (pig as any).ownerNote = dto.ownerNote;  // 使用专用 owner_note 列
     }
     await this.pigRepo.save(pig);
     return {
       id: pig.id,
       weightKg: pig.weightKg ? Number(pig.weightKg) : null,
-      ownerNote: pig.description || '',
+      ownerNote: (pig as any).ownerNote || '',
     };
   }
 

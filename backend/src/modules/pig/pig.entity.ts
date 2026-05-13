@@ -61,6 +61,10 @@ export class Pig extends BaseEntity {
   @Column({ type: 'json', nullable: true })
   photos!: string[] | null;
 
+  /** 农户手填的主人备注（如"张大爷的猪"，与订单无关） */
+  @Column({ type: 'varchar', length: 128, default: '', name: 'owner_note' })
+  ownerNote!: string;
+
   @Index()
   @Column({ type: 'enum', enum: PigStatus, default: PigStatus.DRAFT })
   status!: PigStatus;
