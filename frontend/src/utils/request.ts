@@ -16,6 +16,9 @@ function readBaseUrl(): string {
 const BASE_URL = readBaseUrl();
 const TOKEN_KEY = 'pig:access_token';
 
+// 401 并发跳登录去重:多个请求同时 401 时,只跳一次
+let redirectingToLogin = false;
+
 export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
@@ -82,17 +85,27 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
         const body = res.data as ApiResponse<T> | undefined;
         if (status === 401) {
           clearToken();
-          // 自动跳登录页(避开在登录页本身触发循环)
-          try {
-            const pages = getCurrentPages();
-            const cur = pages.length ? pages[pages.length - 1] : null;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const route = (cur as any)?.route || (cur as any)?.$page?.fullPath || '';
-            if (!route.includes('pages/login')) {
-              uni.navigateTo({ url: '/pages/login/index' });
+          // 自动跳登录页(避开在登录页本身触发循环;并发 401 只跳一次)
+          if (!redirectingToLogin) {
+            try {
+              const pages = getCurrentPages();
+              const cur = pages.length ? pages[pages.length - 1] : null;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const route = (cur as any)?.route || (cur as any)?.$page?.fullPath || '';
+              if (!route.includes('pages/login')) {
+                redirectingToLogin = true;
+                uni.navigateTo({
+                  url: '/pages/login/index',
+                  complete: () => {
+                    setTimeout(() => {
+                      redirectingToLogin = false;
+                    }, 500);
+                  },
+                });
+              }
+            } catch {
+              // 忽略
             }
-          } catch {
-            // 忽略
           }
           reject(new ApiError(10001, '未登录或登录已过期', 401));
           return;
