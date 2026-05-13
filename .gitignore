@@ -79,3 +79,12 @@ backend/test/**/*.d.ts
 backend/test/**/*.js.map
 backend/test/**/*.d.ts.map
 !backend/test/**/*.e2e-spec.ts
+
+# TypeScript 增量编译缓存(本地生成,不入仓)
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# 临时调试文件
+*.log
+backend.log
+backend.err
