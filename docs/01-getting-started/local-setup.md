@@ -212,6 +212,13 @@ Output: dist/dev/mp-weixin/
 
 → 微信开发者工具右上角 → 详情 → 本地设置 → 勾「不校验合法域名」
 
+### 微信开发者工具报 `模拟器启动失败 Error: app.json: 在项目根目录未找到 app.json`
+
+→ 你打开的是 `frontend/` 源码目录,而 uni-app 必须先**编译**才能给微信工具用。
+1. 终端跑 `npm run dev:mp-weixin`(在 `frontend/` 下),保持不关
+2. 微信工具 → 导入项目 → 选 `frontend/dist/dev/mp-weixin/`(不是 `frontend/`)
+3. 之后微信工具只认产物目录,源码改动由 vite 监听自动重编
+
 ### 后端启动报 `Cannot find module 'typeorm'`
 
 → `cd backend && npm install`
