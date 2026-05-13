@@ -199,4 +199,128 @@ export class FosterService {
       })),
     };
   }
+
+  // ─────────────────────────── 管理员 CRUD ───────────────────────────
+
+  /** 管理员：获取全部农户（含 id，用于编辑） */
+  async adminGetFarmers() {
+    return this.farmerRepo.find({ order: { createdAt: 'ASC' } });
+  }
+
+  /** 管理员：创建农户 */
+  async adminCreateFarmer(dto: {
+    name: string; region: string; years: number;
+    avatarUrl?: string; story?: string; videoUrl?: string;
+  }) {
+    const farmer = this.farmerRepo.create({
+      name: dto.name, region: dto.region, years: dto.years || 0,
+      avatarUrl: dto.avatarUrl || '', story: dto.story || null,
+      videoUrl: dto.videoUrl || '',
+    });
+    return this.farmerRepo.save(farmer);
+  }
+
+  /** 管理员：更新农户 */
+  async adminUpdateFarmer(id: string, dto: Partial<{
+    name: string; region: string; years: number;
+    avatarUrl: string; story: string; videoUrl: string;
+  }>) {
+    const farmer = await this.farmerRepo.findOne({ where: { id } });
+    if (!farmer) throw new NotFoundException('农户不存在');
+    Object.assign(farmer, dto);
+    return this.farmerRepo.save(farmer);
+  }
+
+  /** 管理员：删除农户 */
+  async adminDeleteFarmer(id: string) {
+    const farmer = await this.farmerRepo.findOne({ where: { id } });
+    if (!farmer) throw new NotFoundException('农户不存在');
+    await this.farmerRepo.remove(farmer);
+    return { ok: true };
+  }
+
+  /** 管理员：获取全部猪只（所有状态） */
+  async adminGetPigs() {
+    const pigs = await this.pigRepo.find({ order: { createdAt: 'DESC' } });
+    const farmers = await this.farmerRepo.find();
+    const farmerMap = new Map(farmers.map(f => [f.id, f.name]));
+    return pigs.map(p => ({
+      id: p.id, title: p.title, breed: p.breed,
+      farmerId: p.farmerId, farmerName: farmerMap.get(p.farmerId ?? '') || '未分配',
+      region: p.region, weightKg: Number(p.weightKg),
+      expectedWeightKg: Number(p.expectedWeightKg),
+      pricePerShare: Number(p.pricePerShare),
+      totalShares: p.totalShares, soldShares: p.soldShares,
+      status: p.status, coverImage: p.coverImage,
+    }));
+  }
+
+  /** 管理员：创建猪只 */
+  async adminCreatePig(dto: {
+    title: string; breed: string; farmerId: string; region: string;
+    weightKg: number; expectedWeightKg?: number;
+    pricePerShare: number; totalShares: number;
+    coverImage?: string; description?: string;
+  }) {
+    const pig = this.pigRepo.create({
+      title: dto.title, breed: dto.breed,
+      farmerId: dto.farmerId, region: dto.region,
+      weightKg: String(dto.weightKg),
+      expectedWeightKg: String(dto.expectedWeightKg ?? dto.weightKg * 4),
+      pricePerShare: String(dto.pricePerShare),
+      totalShares: dto.totalShares, soldShares: 0,
+      coverImage: dto.coverImage || '',
+      description: dto.description || null,
+      merchantId: dto.farmerId, // v1 用 farmerId 兼容
+      status: 'listed' as any,
+    });
+    return this.pigRepo.save(pig);
+  }
+
+  /** 管理员：更新猪只 */
+  async adminUpdatePig(id: string, dto: Partial<{
+    title: string; breed: string; farmerId: string; region: string;
+    weightKg: number; expectedWeightKg: number;
+    pricePerShare: number; totalShares: number;
+    coverImage: string; description: string; status: string;
+  }>) {
+    const pig = await this.pigRepo.findOne({ where: { id } });
+    if (!pig) throw new NotFoundException('猪只不存在');
+    if (dto.weightKg !== undefined) (pig as any).weightKg = String(dto.weightKg);
+    if (dto.expectedWeightKg !== undefined) (pig as any).expectedWeightKg = String(dto.expectedWeightKg);
+    if (dto.pricePerShare !== undefined) (pig as any).pricePerShare = String(dto.pricePerShare);
+    const { weightKg, expectedWeightKg, pricePerShare, ...rest } = dto;
+    Object.assign(pig, rest);
+    return this.pigRepo.save(pig);
+  }
+
+  /** 管理员：删除猪只 */
+  async adminDeletePig(id: string) {
+    const pig = await this.pigRepo.findOne({ where: { id } });
+    if (!pig) throw new NotFoundException('猪只不存在');
+    await this.pigRepo.remove(pig);
+    return { ok: true };
+  }
+
+  /** 管理员：为指定农户生成今日任务 */
+  async adminCreateTodayTasks(farmerId: string, tasks: Array<{
+    mealType: 'breakfast' | 'lunch' | 'dinner';
+    foodDesc: string; area: string; timeSlot: string;
+  }>) {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    // 清除今日已有任务
+    await this.taskRepo
+      .createQueryBuilder()
+      .delete()
+      .where('farmer_id = :farmerId AND scheduled_date = :today', { farmerId, today })
+      .execute();
+    const rows = tasks.map(t =>
+      this.taskRepo.create({ farmerId, mealType: t.mealType as any,
+        foodDesc: t.foodDesc, area: t.area, timeSlot: t.timeSlot,
+        scheduledDate: today, checkedAt: null, imageUrl: '' })
+    );
+    await this.taskRepo.save(rows);
+    return rows.map(r => this.formatTask(r));
+  }
 }

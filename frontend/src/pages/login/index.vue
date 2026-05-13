@@ -95,17 +95,19 @@ async function onWxLogin() {
     uni.reLaunch({ url: '/pages/index/index' });
   } catch (e) {
     uni.hideLoading();
-    errMsg.value = e instanceof ApiError ? `[${e.bizCode}] ${e.message}` : String(e);
+    // 本地开发: AppSecret 未配置时自动走 dev-login
+    const msg = e instanceof ApiError ? e.message : String(e);
+    if (msg.includes('appid/secret') || msg.includes('占位') || msg.includes('BadGateway') || (e instanceof ApiError && e.bizCode === 502)) {
+      await onDevLogin();
+    } else {
+      errMsg.value = msg;
+    }
   }
   return;
   // #endif
 
-  // H5 / 其他: 用 dev-login 兜底(占位)
-  uni.showToast({
-    title: '请在微信小程序里使用此按钮,H5 请点下方 dev 通道',
-    icon: 'none',
-    duration: 2500,
-  });
+  // H5 / 其他: 用 dev-login 兜底
+  await onDevLogin();
 }
 
 async function onDevLogin() {

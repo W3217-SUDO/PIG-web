@@ -1,10 +1,14 @@
 {
   "pages": [
-    { "path": "pages/login/index",     "style": { "navigationBarTitleText": "代养人登录", "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
+    { "path": "pages/login/index",     "style": { "navigationBarTitleText": "代养人登录",   "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
     { "path": "pages/workbench/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/tasks/index",     "style": { "navigationBarTitleText": "喂养任务", "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
-    { "path": "pages/pigs/index",      "style": { "navigationBarTitleText": "我的猪只", "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
-    { "path": "pages/earnings/index",  "style": { "navigationBarTitleText": "收益中心", "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } }
+    { "path": "pages/tasks/index",     "style": { "navigationBarTitleText": "喂养任务",     "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
+    { "path": "pages/pigs/index",      "style": { "navigationBarTitleText": "我的猪只",     "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
+    { "path": "pages/earnings/index",  "style": { "navigationBarTitleText": "收益中心",     "navigationBarBackgroundColor": "#2d8a4e", "navigationBarTextStyle": "white" } },
+    { "path": "pages/admin/index",     "style": { "navigationBarTitleText": "数据管理中心", "navigationBarBackgroundColor": "#1a6b35", "navigationBarTextStyle": "white" } },
+    { "path": "pages/admin/farmers",   "style": { "navigationBarTitleText": "农户管理",     "navigationBarBackgroundColor": "#1a6b35", "navigationBarTextStyle": "white" } },
+    { "path": "pages/admin/pigs",      "style": { "navigationBarTitleText": "猪只管理",     "navigationBarBackgroundColor": "#1a6b35", "navigationBarTextStyle": "white" } },
+    { "path": "pages/admin/tasks",     "style": { "navigationBarTitleText": "任务管理",     "navigationBarBackgroundColor": "#1a6b35", "navigationBarTextStyle": "white" } }
   ],
   "tabBar": {
     "color": "#999999",
@@ -12,7 +16,7 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/workbench/index", "text": "工作台" },
+      { "pagePath": "pages/workbench/index", "text": "工作台"  },
       { "pagePath": "pages/tasks/index",     "text": "喂养任务" },
       { "pagePath": "pages/pigs/index",      "text": "我的猪只" },
       { "pagePath": "pages/earnings/index",  "text": "收益中心" }

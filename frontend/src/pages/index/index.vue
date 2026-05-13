@@ -115,18 +115,18 @@
         </view>
       </view>
       <view class="live-mix-right">
-        <view class="farmer-mini" @tap="todo('农户:张大爷')">
+        <view class="farmer-mini" @tap="goFarmerPig('广元')">
           <view class="farmer-mini-av"><text>👨‍🌾</text></view>
           <view class="farmer-mini-info">
-            <text class="farmer-mini-name">张大爷</text>
+            <text class="farmer-mini-name">广元农户</text>
             <text class="farmer-mini-loc">四川广元</text>
             <text class="farmer-mini-star">★ 4.9 · 散养 15 年</text>
           </view>
         </view>
-        <view class="farmer-mini" @tap="todo('农户:李大妈')">
+        <view class="farmer-mini" @tap="goFarmerPig('绵阳')">
           <view class="farmer-mini-av"><text>👩‍🌾</text></view>
           <view class="farmer-mini-info">
-            <text class="farmer-mini-name">李大妈</text>
+            <text class="farmer-mini-name">绵阳农户</text>
             <text class="farmer-mini-loc">四川绵阳</text>
             <text class="farmer-mini-star">★ 4.8 · 散养 18 年</text>
           </view>
@@ -345,11 +345,26 @@ function tagFor(p: PigCard, i: number): string {
 }
 
 function todo(name: string) {
-  uni.showToast({
-    title: `${name}(后续切片实现)`,
-    icon: 'none',
-    duration: 1200,
-  });
+  // 根据功能名称做实际路由，非关键的显示提示
+  if (name.includes('农户')) {
+    // 跳到首个匹配的农户猪详情
+    const first = list.value[0];
+    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
+    else uni.showToast({ title: '暂无猪只数据', icon: 'none' });
+  } else if (name.includes('发起拼猪')) {
+    const first = list.value[0];
+    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
+    else uni.showToast({ title: '请先认领一头猪', icon: 'none' });
+  } else if (name.includes('查看全部') || name.includes('认一头猪') || name.includes('订猪')) {
+    // 滚动到猪列表区域，或直接跳到第一头猪
+    const first = list.value[0];
+    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
+    else uni.showToast({ title: '暂无在售猪只', icon: 'none' });
+  } else if (name.includes('直播')) {
+    goFirstLive();
+  } else {
+    uni.showToast({ title: name, icon: 'none', duration: 1200 });
+  }
 }
 
 function goMy() {
@@ -390,6 +405,13 @@ function goFirstLive() {
 
 function onPigTap(p: PigCard) {
   uni.navigateTo({ url: `/pages/pig/detail?id=${p.id}` });
+}
+
+function goFarmerPig(region: string) {
+  // 找该地区的第一头猪跳转详情
+  const pig = list.value.find(p => p.region === region) || list.value[0];
+  if (pig) uni.navigateTo({ url: `/pages/pig/detail?id=${pig.id}` });
+  else uni.showToast({ title: '该地区暂无在售猪只', icon: 'none' });
 }
 
 async function loadList() {
