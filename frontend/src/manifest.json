@@ -52,7 +52,9 @@
     "mp-weixin" : {
         "appid" : "wx4409bb388ab1a03e",
         "setting" : {
-            "urlCheck" : false
+            "urlCheck" : false,
+            "packNpmManually" : true,
+            "packNpmRelationList" : []
         },
         "usingComponents" : true
     },
