@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
+import * as crypto from 'crypto';
+import * as https from 'https';
 import { FarmerTask, FarmerMealType } from './farmer-task.entity';
 import { FarmerEarning } from './farmer-earning.entity';
 import { Pig, PigStatus } from '../pig/pig.entity';
@@ -66,6 +68,141 @@ export class FosterService {
       checkedAt: task.checkedAt,
       imageUrl: task.imageUrl,
     };
+  }
+
+  // ─────────────────────────── 认证 Auth ───────────────────────────
+
+  /** 生成 30 天有效的农户 Token */
+  generateFosterToken(farmerId: string): string {
+    const secret = process.env.JWT_SECRET || 'dev_secret_change_before_prod_32chars_min';
+    const expires = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const payload = `${farmerId}:${expires}`;
+    const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex').slice(0, 16);
+    return Buffer.from(`${payload}:${sig}`).toString('base64url');
+  }
+
+  /** 验证 Token，返回 farmerId 或 null */
+  validateFosterToken(token: string): string | null {
+    try {
+      const decoded = Buffer.from(token, 'base64url').toString();
+      const lastColon = decoded.lastIndexOf(':');
+      const secondLastColon = decoded.lastIndexOf(':', lastColon - 1);
+      const farmerId = decoded.slice(0, secondLastColon);
+      const expires = parseInt(decoded.slice(secondLastColon + 1, lastColon));
+      const sig = decoded.slice(lastColon + 1);
+      if (Date.now() > expires) return null;
+      const secret = process.env.JWT_SECRET || 'dev_secret_change_before_prod_32chars_min';
+      const payload = `${farmerId}:${expires}`;
+      const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex').slice(0, 16);
+      return sig === expected ? farmerId : null;
+    } catch { return null; }
+  }
+
+  /** 微信 code 换 openid（生产）；开发环境返回 devMode */
+  async wxLoginByCode(code: string): Promise<
+    | { type: 'success'; farmerId: string; farmerName: string; token: string }
+    | { type: 'new_user'; openid: string; wxNickname: string; wxAvatar: string }
+    | { type: 'unbound'; openid: string; farmers: { id: string; name: string; region: string }[] }
+    | { type: 'dev_mode' }
+  > {
+    const appid = process.env.WX_MP_APPID;
+    const secret = process.env.WX_MP_SECRET;
+
+    // 没有真实 AppSecret → 开发模式
+    if (!secret || secret === 'placeholder_secret' || !appid) {
+      return { type: 'dev_mode' };
+    }
+
+    // 调用微信 code2session
+    const openidResult = await new Promise<any>((resolve, reject) => {
+      const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${code}&grant_type=authorization_code`;
+      https.get(url, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          try { resolve(JSON.parse(data)); } catch { reject(new Error('解析微信响应失败')); }
+        });
+      }).on('error', reject);
+    });
+
+    if (openidResult.errcode) {
+      throw new BadRequestException(`微信登录失败(${openidResult.errcode}): ${openidResult.errmsg}`);
+    }
+
+    const openid: string = openidResult.openid;
+
+    // 查找已绑定此 openid 的农户
+    const farmer = await this.farmerRepo.findOne({ where: { openid } });
+    if (farmer) {
+      const token = this.generateFosterToken(farmer.id);
+      return { type: 'success', farmerId: farmer.id, farmerName: farmer.name, token };
+    }
+
+    // openid 未绑定 → 让用户选择绑定哪个农户，或新建
+    const unboundFarmers = await this.farmerRepo.find({
+      where: { openid: IsNull() },
+      order: { createdAt: 'ASC' },
+    });
+
+    if (unboundFarmers.length > 0) {
+      return {
+        type: 'unbound',
+        openid,
+        farmers: unboundFarmers.map(f => ({ id: f.id, name: f.name, region: f.region })),
+      };
+    }
+
+    return { type: 'new_user', openid, wxNickname: '', wxAvatar: '' };
+  }
+
+  /** 绑定 openid 到已有农户（首次认领） */
+  async bindFarmerOpenid(farmerId: string, openid: string, wxNickname?: string, wxAvatar?: string): Promise<{
+    farmerId: string; farmerName: string; token: string;
+  }> {
+    const farmer = await this.farmerRepo.findOne({ where: { id: farmerId } });
+    if (!farmer) throw new NotFoundException('农户不存在');
+    if (farmer.openid && farmer.openid !== openid) {
+      throw new BadRequestException('此农户账号已被其他微信号绑定');
+    }
+    farmer.openid = openid;
+    if (wxNickname) farmer.wxNickname = wxNickname;
+    if (wxAvatar) farmer.wxAvatar = wxAvatar;
+    await this.farmerRepo.save(farmer);
+    const token = this.generateFosterToken(farmer.id);
+    return { farmerId: farmer.id, farmerName: farmer.name, token };
+  }
+
+  /** 新建农户并绑定 openid */
+  async registerNewFarmer(dto: {
+    openid: string;
+    name: string;
+    region: string;
+    years: number;
+    wxNickname?: string;
+    wxAvatar?: string;
+  }): Promise<{ farmerId: string; farmerName: string; token: string }> {
+    // 再次检查 openid 是否已绑定
+    const existing = await this.farmerRepo.findOne({ where: { openid: dto.openid } });
+    if (existing) {
+      const token = this.generateFosterToken(existing.id);
+      return { farmerId: existing.id, farmerName: existing.name, token };
+    }
+    const farmer = this.farmerRepo.create({
+      name: dto.name, region: dto.region, years: dto.years || 1,
+      avatarUrl: dto.wxAvatar || '', story: null, videoUrl: '',
+      openid: dto.openid, wxNickname: dto.wxNickname || null, wxAvatar: dto.wxAvatar || null,
+    });
+    await this.farmerRepo.save(farmer);
+    const token = this.generateFosterToken(farmer.id);
+    return { farmerId: farmer.id, farmerName: farmer.name, token };
+  }
+
+  /** 开发模式：按姓名直接登录（不校验 openid） */
+  async devLoginByName(name: string): Promise<{ farmerId: string; farmerName: string; token: string }> {
+    const farmer = await this.farmerRepo.findOne({ where: { name } });
+    if (!farmer) throw new NotFoundException(`找不到农户"${name}"，请确认姓名或先创建账号`);
+    const token = this.generateFosterToken(farmer.id);
+    return { farmerId: farmer.id, farmerName: farmer.name, token };
   }
 
   /** 获取所有农户列表(用于代养人选择登录) */

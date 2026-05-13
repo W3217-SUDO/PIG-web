@@ -3,8 +3,7 @@ import { BaseEntity } from '../../common/entities/base.entity';
 
 /**
  * 农户档案
- * v1 由运营手工 Navicat 录入,无写入 API。
- * 公开 `GET /api/farmers/:id` 只读。
+ * v1 支持微信 openid 绑定登录，openid 唯一确定农户身份。
  */
 @Entity('farmer')
 export class Farmer extends BaseEntity {
@@ -31,4 +30,21 @@ export class Farmer extends BaseEntity {
   /** 农户介绍视频 URL(选填) */
   @Column({ type: 'varchar', length: 512, default: '', name: 'video_url' })
   videoUrl!: string;
+
+  /** 微信 openid（绑定后唯一标识此农户；NULL 表示尚未绑定微信） */
+  @Index()
+  @Column({ type: 'varchar', length: 64, nullable: true, unique: true })
+  openid!: string | null;
+
+  /** 绑定的微信手机号（选填） */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone!: string | null;
+
+  /** 微信昵称（首次授权时记录） */
+  @Column({ type: 'varchar', length: 64, nullable: true, name: 'wx_nickname' })
+  wxNickname!: string | null;
+
+  /** 微信头像（首次授权时记录） */
+  @Column({ type: 'varchar', length: 512, nullable: true, name: 'wx_avatar' })
+  wxAvatar!: string | null;
 }

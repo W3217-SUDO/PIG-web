@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
-import { request, getFarmerId } from '../../utils/request';
+import { request, getFarmerId, clearAuth } from '../../utils/request';
 
 interface Task { id: string; label: string; icon: string; area: string; timeSlot: string; status: string; }
 interface Dashboard { pigCount: number; pendingTaskCount: number; todayTasks: Task[]; }
@@ -101,7 +101,7 @@ function logout() {
     content: '确定要切换农户身份吗？',
     success: (res) => {
       if (res.confirm) {
-        uni.removeStorageSync('pig:farmer_id');
+        clearAuth();
         uni.reLaunch({ url: '/pages/login/index' });
       }
     },

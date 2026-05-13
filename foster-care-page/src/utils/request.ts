@@ -1,5 +1,6 @@
 const BASE_URL = 'http://127.0.0.1:3000/api';
 const FARMER_KEY = 'pig:farmer_id';
+const TOKEN_KEY = 'pig:foster_token';
 
 export function getFarmerId(): string {
   return (uni.getStorageSync(FARMER_KEY) as string) || '';
@@ -13,17 +14,39 @@ export function clearFarmerId() {
   uni.removeStorageSync(FARMER_KEY);
 }
 
+export function getFosterToken(): string {
+  return (uni.getStorageSync(TOKEN_KEY) as string) || '';
+}
+
+export function setFosterToken(token: string) {
+  uni.setStorageSync(TOKEN_KEY, token);
+}
+
+export function clearFosterToken() {
+  uni.removeStorageSync(TOKEN_KEY);
+}
+
+/** 清除所有登录态 */
+export function clearAuth() {
+  clearFarmerId();
+  clearFosterToken();
+}
+
 export function request<T = unknown>(
   url: string,
   opts: { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; data?: unknown } = {},
 ): Promise<T> {
   const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+  const token = getFosterToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['X-Foster-Token'] = token;
+
   return new Promise((resolve, reject) => {
     uni.request({
       url: fullUrl,
       method: opts.method || 'GET',
       data: opts.data as never,
-      header: { 'Content-Type': 'application/json' },
+      header: headers,
       timeout: 15000,
       success: (res) => {
         const body = res.data as { code: number; message: string; data: T };

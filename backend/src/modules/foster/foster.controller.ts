@@ -11,6 +11,40 @@ import { Public } from '../../common/decorators/public.decorator';
 export class FosterController {
   constructor(private readonly fosterService: FosterService) {}
 
+  // ─────────────────────── 认证接口 ───────────────────────
+
+  /** 微信 code 登录：返回 success / unbound / new_user / dev_mode */
+  @Post('auth/login')
+  async farmerLogin(@Body() body: { code: string }) {
+    if (!body.code) throw new BadRequestException('code 不能为空');
+    const data = await this.fosterService.wxLoginByCode(body.code);
+    return { code: 0, message: 'ok', data };
+  }
+
+  /** 绑定 openid 到已有农户（首次认领） */
+  @Post('auth/bind')
+  async bindFarmer(@Body() body: { openid: string; farmerId: string; wxNickname?: string; wxAvatar?: string }) {
+    if (!body.openid || !body.farmerId) throw new BadRequestException('openid 和 farmerId 必填');
+    const data = await this.fosterService.bindFarmerOpenid(body.farmerId, body.openid, body.wxNickname, body.wxAvatar);
+    return { code: 0, message: '绑定成功', data };
+  }
+
+  /** 新建农户并绑定 openid */
+  @Post('auth/register')
+  async registerFarmer(@Body() body: { openid: string; name: string; region: string; years: number; wxNickname?: string; wxAvatar?: string }) {
+    if (!body.openid || !body.name || !body.region) throw new BadRequestException('openid、name、region 必填');
+    const data = await this.fosterService.registerNewFarmer(body);
+    return { code: 0, message: '注册成功', data };
+  }
+
+  /** 开发模式：按姓名直接登录 */
+  @Post('auth/dev-login')
+  async devLogin(@Body() body: { name: string }) {
+    if (!body.name) throw new BadRequestException('name 不能为空');
+    const data = await this.fosterService.devLoginByName(body.name);
+    return { code: 0, message: 'ok', data };
+  }
+
   // ─────────────────────── 代养人只读接口 ───────────────────────
 
   @Get('farmers')
