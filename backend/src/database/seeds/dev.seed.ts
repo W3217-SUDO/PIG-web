@@ -211,7 +211,9 @@ async function main() {
   await AppDataSource.query('TRUNCATE TABLE `farmer_earning`');
   await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 1');
 
-  const today = new Date().toISOString().slice(0, 10);
+  // 用本地时间日期，避免 UTC 时区差导致日期变昨天
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const todayStart = new Date(); todayStart.setHours(7, 30, 0, 0); // 早餐已打卡时间
 
   // 老李的任务(早餐已完成,午餐进行中,晚餐待完成)
