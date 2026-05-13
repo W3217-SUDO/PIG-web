@@ -61,6 +61,42 @@
 - pages/messages/index.vue:统计 + 全部已读 + 类型 icon + 红点 + 自动 mark-read
 - pages/my/pigs.vue:从 paid 订单反查(份额 / 已养天数 / 已付)+ LIVE 红标
 
+### 代养人端微信认证系统(2026-05-13 · Claude, commits `ae2a9d5` / `2a9b0fc`)
+
+**农户账号体系**
+- `farmer.entity` 新增 4 个微信字段：`openid`(唯一索引) / `phone` / `wx_nickname` / `wx_avatar`
+- 每个农户账号绑定唯一 openid，无法跨账号登录（独立隔离）
+
+**后端认证接口（`/api/foster/auth/*`）**
+- `POST /foster/auth/login`：wx.login code → 调微信 code2session → 四分支返回
+  - `success`：openid 已绑定 → 直接返回 farmerId + 30天 Token
+  - `unbound`：openid 未绑定 → 返回可选农户列表（供用户认领身份）
+  - `new_user`：无未绑定农户 → 走注册流程
+  - `dev_mode`：无 AppSecret → 开发模式，按姓名直接登录
+- `POST /foster/auth/bind`：首次认领，把 openid 写入已有农户
+- `POST /foster/auth/register`：新建农户并绑定 openid（openid 幂等检查）
+- `POST /foster/auth/dev-login`：开发模式按姓名直接登录（无 AppSecret 时）
+- Token：HMAC-SHA256 + farmerId + 过期时间戳，base64url 编码，30天有效
+
+**前端代养人端全面升级（`foster-care-page/`）**
+- `utils/request.ts`：新增 `setFosterToken` / `getFosterToken` / `clearAuth`；所有请求自动携带 `X-Foster-Token` 头
+- `pages/login/index.vue`：完全重写，四路分流登录：
+  - 微信一键登录 → 自动路由到 success/unbound/new_user/dev_mode 流程
+  - 已登录状态：绿色当前身份栏 + "进入工作台" 快捷按钮 + 切换账号入口
+  - unbound 流程：农户列表选择 → 一键绑定认领
+  - new_user 流程：填写姓名/地区/散养年限 → 注册并绑定
+  - dev_mode 流程：输入姓名或快速点选列表，无需微信授权
+- `pages/workbench/index.vue`：退出时调用 `clearAuth()` 同时清除 farmerId 和 Token
+- `pages/pigs/index.vue`：体重修改必须上传称重图片验证；ownerNote 专用列（不混入 description）
+
+**错误修复**
+- 修复 `GET /foster/pigs 500`（order 表缺少多个列，逐一 ALTER TABLE 补全）
+- 修复 ownerNote 显示猪 description 内容（改用专用 `owner_note` 列）
+- 修复 PUT→PATCH 方法不匹配导致 405（admin 页面所有 update 改 PATCH）
+- 修复 Unsplash 图片在微信小程序 404（seed 数据改为空字符串，前端文字头像回退）
+- 修复 TypeScript 编译阻塞（`@sentry/node` 改为 dynamic require，`null` 过滤改 `IsNull()`）
+- 说明 `Error: timeout` 根因：微信开发者工具须勾选"不校验合法域名"
+
 ### W2 进行中
 - 真实小程序 AppID `wx4409bb388ab1a03e` 配入 `frontend/src/manifest.json`(`5026ce2`)
 - 静态页 3 张:`pages/static/about` + `terms` + `privacy`(提审必需)

@@ -12,7 +12,40 @@
 
 > **更新规则**:复制 `### 大盘 - YYYY-MM-DD` 块在最下方追加,旧的保留作历史。
 
-### 大盘 - 2026-05-13(Admin CRUD + 错误修复 + 主端功能完善)
+### 大盘 - 2026-05-13 晚(代养人端微信认证系统 + 独立账号体系)
+
+| 模块 | 任务数 | 已完成 | 进度 | 责任 | 风险 |
+|---|---|---|---|---|---|
+| 基础设施 | 6 | 6 | 🟢 100% | 后端 | — |
+| 文档体系 | 8 | 8 | 🟢 100% | 共同 | — |
+| auth（主端） | 7 | 5 | 🟡 71% | 后端 | AppSecret 待 C3 |
+| user | 5 | 5 | 🟢 100% | 后端 | — |
+| pig | 6 | 6 | 🟢 100% | 后端 | — |
+| order | 7 | 7 | 🟢 100% | 后端 | — |
+| pay | 5 | 1 | 🟡 20% | 后端 | 真实微信支付待 C4-C5,mock 已通 |
+| wallet | 4 | 4 | 🟢 100% | 后端 | — |
+| share | 3 | 3 | 🟢 100% | 后端 | — |
+| farmer / feeding / health / live | 8 | 6 | 🟡 75% | 后端 | live 真直播 v1.5 |
+| message / upload | 5 | 3 | 🟡 60% | 后端 | upload 推 v1.5 |
+| **代养人端后端** | **6** | **6** | **🟢 100%** | **后端** | — |
+| **代养人端认证系统(新增)** | **6** | **6** | **🟢 100%** | **后端** | 生产需 WX_MP_SECRET |
+| **代养人端前端** | **6** | **6** | **🟢 100%** | **前端** | — |
+| **代养人端管理后台** | **4** | **4** | **🟢 100%** | **前端+后端** | — |
+| 前端骨架 | 4 | 4 | 🟢 100% | 前端 | — |
+| 前端页面(11→14) | 28 | 26 | 🟢 93% | 前端 | 缺真机走查截图 |
+| 部署运维 | 8 | 5 | 🟡 62% | 后端 | Actions 实跑 + 生产 nginx 反代待补 |
+| **合规依赖** | 10 | 2 | 🔴 20% | **Owner** | AppID ✓,AppSecret/商户号/ICP/资质 ⏳ |
+| 监控告警 | 5 | 0 | ⚪ 0% | 后端 | W3 接入 |
+| APP 打包 | 4 | 0 | ⚪ 0% | 前端 | iOS 账号 C9 |
+| 测试 | 6 | 1 | 🟡 16% | 共同 | curl 一条龙手验,自动化测试待补 |
+| **合计** | **151** | **113** | **🟢 75%** | | |
+
+> ✅ **代养人端微信认证系统完成**：openid 绑定农户 / 首次注册 / dev 模式三分支，Token 30天有效
+> ✅ **代养人端登录页全面重构**：微信一键登录 → success/unbound/new_user/dev_mode 四路分流
+> ✅ **每个农户账号独立隔离**：openid 唯一索引绑定，无法跨账号登录
+> 🚨 **当前瓶颈**：合规依赖(AppSecret / 微信支付商户号 / ICP 备案)
+
+### 大盘 - 2026-05-13 上午(Admin CRUD + 错误修复 + 主端功能完善)
 
 | 模块 | 任务数 | 已完成 | 进度 | 责任 | 风险 |
 |---|---|---|---|---|---|
@@ -127,15 +160,16 @@
 - [x] `FosterModule` 注入 7 个 Repository，接入 AppModule(05-12 · Claude) ✓
 - [x] Seed 数据：6 条今日喂养任务 + 12 条月度收益记录(05-12 · Claude) ✓
 
-### 1.6 代养人端前端(foster-care-page) 🟢 5/5 · (2026-05-12 · Claude)
+### 1.6 代养人端前端(foster-care-page) 🟢 6/6 · (2026-05-12–13 · Claude)
 
 > 独立 uni-app 项目，路径 `foster-care-page/`，编译产物 `dist/build/mp-weixin/`。
+> AppID：`wx4409bb388ab1a03e`，tabBar 4 项（工作台/喂养任务/我的猪只/收益中心）。
 
 - [x] 项目初始化：package.json / vite.config.ts / manifest.json / pages.json(05-12 · Claude) ✓
-- [x] `pages/login/index.vue`：农户选择登录，farmerId 写 Storage(05-12 · Claude) ✓
+- [x] `pages/login/index.vue`：微信一键登录（四路分流）+ 已登录快捷入口 + 切换账号(05-13 · Claude) ✓
 - [x] `pages/workbench/index.vue`：工作台总览，托管猪只数 + 待完成任务数 + 今日任务列表(05-12 · Claude) ✓
 - [x] `pages/tasks/index.vue`：喂养任务列表，实时打卡 POST /checkin(05-12 · Claude) ✓
-- [x] `pages/pigs/index.vue`：我的猪只，健康状态 / 体重 / 饲养天数 / 主人姓名(05-12 · Claude) ✓
+- [x] `pages/pigs/index.vue`：我的猪只，健康状态 / 体重修改（必须上传称重图片）/ 主人备注(05-13 · Claude) ✓
 - [x] `pages/earnings/index.vue`：收益中心，本月 + 累计 + 月度条形图(05-12 · Claude) ✓
 
 ### 1.7 代养人端管理后台 🟢 4/4 · (2026-05-13 · Claude)
@@ -150,6 +184,26 @@
 - [x] 登录页新增管理员入口按钮 + 图片 404 文字头像回退(05-13 · Claude) ✓
 - [x] 主端 wx-login 502 自动回退 devLogin(05-13 · Claude) ✓
 - [x] 主端 todo() 占位替换为真实导航逻辑(05-13 · Claude) ✓
+
+### 1.8 代养人端认证系统(Farmer Auth) 🟢 6/6 · (2026-05-13 · Claude)
+
+> 独立于主端 JWT；农户用微信 openid 唯一标识，HMAC 30 天 Token；开发环境支持按姓名直接登录。
+
+- [x] `farmer.entity` 扩展 4 个微信字段：openid(唯一索引) / phone / wxNickname / wxAvatar(05-13 · Claude) ✓
+- [x] `foster.service`：`generateFosterToken` / `validateFosterToken`（HMAC-SHA256，30天，base64url）(05-13 · Claude) ✓
+- [x] `foster.service`：`wxLoginByCode(code)` → 调用微信 code2session，返回 success/unbound/new_user/dev_mode 四分支(05-13 · Claude) ✓
+- [x] `foster.service`：`bindFarmerOpenid` / `registerNewFarmer` / `devLoginByName`(05-13 · Claude) ✓
+- [x] `foster.controller`：新增 4 条认证路由 `POST /foster/auth/login|bind|register|dev-login`(05-13 · Claude) ✓
+- [x] `utils/request.ts`：新增 `setFosterToken` / `getFosterToken` / `clearAuth`；所有请求自动带 `X-Foster-Token` 头(05-13 · Claude) ✓
+
+**认证流程说明：**
+```
+wx.login() → code → POST /foster/auth/login
+  ├─ type:success   → farmerId+token → 直接进工作台
+  ├─ type:unbound   → 展示未绑定农户列表 → POST /foster/auth/bind → 进工作台
+  ├─ type:new_user  → 填写姓名/地区/年限 → POST /foster/auth/register → 进工作台
+  └─ type:dev_mode  → 姓名输入或快速选列表 → POST /foster/auth/dev-login → 进工作台
+```
 
 ---
 
