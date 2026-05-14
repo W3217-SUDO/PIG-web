@@ -192,10 +192,32 @@ onMounted(async () => {
     } catch { /* ignore */ }
     clearAuth();
   }
+  // #ifndef MP-WEIXIN
+  // H5 模式：直接加载农户列表供选择
+  await loadDevFarmers();
+  if (devFarmerList.value.length > 0) {
+    step.value = 'dev_mode';
+    return;
+  }
+  // #endif
   step.value = 'init';
 });
 
 async function startWxLogin() {
+  // #ifndef MP-WEIXIN
+  // H5 / 其他平台：直接进入开发者选择模式
+  wxLoading.value = true;
+  try {
+    await loadDevFarmers();
+    step.value = 'dev_mode';
+  } catch {
+    step.value = 'init';
+  } finally {
+    wxLoading.value = false;
+  }
+  return;
+  // #endif
+
   wxLoading.value = true;
   step.value = 'loading';
   loadingText.value = '正在获取微信授权…';

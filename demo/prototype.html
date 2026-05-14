@@ -5,679 +5,145 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>私人订猪 · 完整原型</title>
 <style>
-/* ═══════════════ 全局重置 ═══════════════ */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
   min-height:100vh;
-  background:linear-gradient(135deg,#d6d6d6 0%,#e8e8e8 60%,#d0d0d0 100%);
-  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
+  background:linear-gradient(135deg,#d4d4d4 0%,#e8e8e8 50%,#cfcfcf 100%);
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
   display:flex;flex-direction:column;align-items:center;
 }
 
-/* ═══════════════ 顶部栏 ═══════════════ */
+/* 顶部栏 */
 .top-bar{
-  width:100%;height:60px;
-  background:#fff;
+  width:100%;height:60px;background:#fff;
   box-shadow:0 1px 12px rgba(0,0,0,0.1);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 36px;position:sticky;top:0;z-index:200;
 }
-.top-logo{display:flex;align-items:center;gap:10px;}
-.top-logo-icon{font-size:28px;}
-.top-logo-title{font-size:17px;font-weight:800;color:#1a6b35;}
-.top-logo-sub{font-size:11px;color:#aaa;margin-top:1px;}
-.top-nav{display:flex;gap:10px;}
-.top-btn{
-  height:36px;padding:0 22px;
-  border-radius:18px;border:2px solid #2d8a4e;
-  background:transparent;color:#2d8a4e;
-  font-size:14px;font-weight:700;cursor:pointer;
-  transition:all .2s;outline:none;
-}
-.top-btn:hover{background:#f0faf4;}
-.top-btn.active{background:#2d8a4e;color:#fff;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{font-size:28px;}
+.logo-text{font-size:17px;font-weight:800;color:#1a6b35;}
+.logo-sub{font-size:11px;color:#aaa;margin-top:1px;}
 
-/* ═══════════════ 主体 ═══════════════ */
-.main{
-  display:flex;justify-content:center;align-items:flex-start;
-  padding:36px 20px 60px;gap:32px;
-  width:100%;
+.nav-tabs{display:flex;gap:10px;}
+.nav-btn{
+  height:36px;padding:0 22px;border-radius:18px;
+  border:2px solid #2d8a4e;background:transparent;
+  color:#2d8a4e;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;outline:none;
 }
+.nav-btn:hover{background:#f0faf4;}
+.nav-btn.active{background:#2d8a4e;color:#fff;}
 
-/* ═══════════════ 手机外壳 ═══════════════ */
-.phone-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.sync-badge{
+  display:flex;align-items:center;gap:6px;
+  background:#f0faf4;border:1px solid #b7e5c8;
+  border-radius:20px;padding:4px 14px;
+  font-size:12px;color:#2d8a4e;
+}
+.sync-dot{width:7px;height:7px;background:#52c41a;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+.sync-badge.offline{background:#fff2f0;border-color:#ffc9c9;color:#cf1322;}
+.sync-badge.offline .sync-dot{background:#ff4d4f;animation:none;}
+
+/* 主体 */
+.main{display:flex;justify-content:center;padding:36px 20px 60px;width:100%;}
+
+/* 手机外壳 */
+.phone-wrap{display:flex;flex-direction:column;align-items:center;}
 .phone-frame{
-  position:relative;
-  width:390px;height:820px;
-  background:#0d0d0d;
-  border-radius:56px;
-  box-shadow:
-    0 0 0 2px #2a2a2a,
-    0 0 0 9px #111,
-    0 40px 100px rgba(0,0,0,0.5),
-    0 15px 40px rgba(0,0,0,0.25);
-  overflow:hidden;
+  position:relative;width:390px;height:820px;
+  background:#0d0d0d;border-radius:56px;
+  box-shadow:0 0 0 2px #2a2a2a,0 0 0 9px #111,0 40px 100px rgba(0,0,0,0.5);
+  overflow:hidden;flex-shrink:0;
 }
-/* 侧键 */
 .pb-r{position:absolute;right:-4px;top:150px;width:4px;height:75px;background:#222;border-radius:2px 0 0 2px;}
 .pb-l1{position:absolute;left:-4px;top:115px;width:4px;height:40px;background:#222;border-radius:0 2px 2px 0;}
 .pb-l2{position:absolute;left:-4px;top:170px;width:4px;height:65px;background:#222;border-radius:0 2px 2px 0;}
 .pb-l3{position:absolute;left:-4px;top:250px;width:4px;height:65px;background:#222;border-radius:0 2px 2px 0;}
 
-/* 刘海 */
 .notch{
   position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:126px;height:34px;
-  background:#0d0d0d;border-radius:0 0 26px 26px;z-index:30;
+  width:126px;height:34px;background:#0d0d0d;
+  border-radius:0 0 26px 26px;z-index:30;
   display:flex;align-items:center;justify-content:space-between;padding:6px 14px 6px 16px;
 }
 .notch-cam{width:12px;height:12px;background:#1a1a1a;border-radius:50%;border:2px solid #2d2d2d;}
 .notch-sp{width:62px;height:5px;background:#1a1a1a;border-radius:3px;}
 
-/* 状态栏 */
 .statusbar{
   position:absolute;top:0;left:0;right:0;height:44px;z-index:20;
   display:flex;align-items:flex-end;justify-content:space-between;
   padding:0 18px 5px;pointer-events:none;
 }
-.sb-time{font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);}
+.sb-time{font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);}
 .sb-icons{display:flex;gap:4px;align-items:center;}
-.sb-icon{font-size:11px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);}
+.sb-icon{font-size:11px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);}
 
-/* 屏幕 */
-.phone-screen{
-  position:absolute;inset:0;
-  border-radius:56px;overflow:hidden;
-  background:#f5f5f5;
-}
+.phone-screen{position:absolute;inset:0;border-radius:56px;overflow:hidden;background:#fff;}
 
-/* ═══════════════ 区段 (section) ═══════════════ */
-.section{
-  position:absolute;inset:0;border-radius:56px;overflow:hidden;
-  display:none;flex-direction:column;
-}
-.section.show{display:flex;}
-
-/* 内容滚动区 */
-.scroll-area{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  margin-top:44px;/* statusbar 高度 */
-  margin-bottom:60px;/* tabbar 高度 */
-  -webkit-overflow-scrolling:touch;
-}
-.scroll-area::-webkit-scrollbar{display:none;}
-.scroll-area.no-tab{margin-bottom:0;}
-.scroll-area.no-status{margin-top:0;}
-
-/* ── 页面（screen） ── */
-.screen{display:none;}
-.screen.show{display:block;}
-
-/* ── 底部 tabbar ── */
-.tabbar{
-  position:absolute;bottom:0;left:0;right:0;
-  height:60px;background:#fff;
-  border-top:1px solid #eee;
-  display:flex;z-index:10;
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.tab-item{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  cursor:pointer;gap:2px;
-  transition:opacity .15s;
-}
-.tab-item:active{opacity:.7;}
-.tab-icon{font-size:22px;line-height:1;}
-.tab-label{font-size:11px;color:#999;font-weight:500;}
-.tab-item.active .tab-label{color:#2d8a4e;font-weight:700;}
-
-/* ═══════════════ 客户端 — 首页 ═══════════════ */
-.home-hero{
-  background:linear-gradient(160deg,#2c1810,#4a2c1a);
-  padding:0 0 24px;
-}
-.home-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 20px 16px;
-}
-.home-title{font-size:22px;font-weight:800;color:#fff;}
-.home-bell{font-size:26px;cursor:pointer;}
-.home-foster-btn{
-  background:rgba(45,138,78,0.9);color:#fff;
-  font-size:12px;font-weight:700;
-  border-radius:14px;padding:5px 12px;cursor:pointer;
-}
-/* 直播卡片 */
-.live-card{
-  margin:0 16px 20px;
-  background:linear-gradient(135deg,#1a0a05,#3d1a0a);
-  border-radius:16px;overflow:hidden;
-  position:relative;height:180px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-}
-.live-badge{
-  position:absolute;top:12px;left:12px;
-  background:#ff4d4f;color:#fff;
-  font-size:11px;font-weight:700;
-  padding:3px 8px;border-radius:10px;
-  display:flex;align-items:center;gap:4px;
-}
-.live-badge::before{content:'●';font-size:8px;}
-.live-count{
-  position:absolute;bottom:10px;left:12px;
-  color:rgba(255,255,255,0.8);font-size:12px;
-}
-.live-play{
-  width:52px;height:52px;border-radius:50%;
-  background:rgba(255,255,255,0.25);
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;color:#fff;
-}
-/* 统计 */
-.stats-row{
-  display:flex;background:#fff;
-  margin:0 16px 20px;border-radius:14px;
-  padding:20px 0;
-  box-shadow:0 2px 10px rgba(0,0,0,0.06);
-}
-.stat-box{flex:1;text-align:center;}
-.stat-num{font-size:28px;font-weight:900;color:#2d8a4e;}
-.stat-label2{font-size:12px;color:#888;margin-top:4px;}
-.stat-divider{width:1px;background:#eee;margin:4px 0;}
-/* 板块标题 */
-.sec-title{
-  font-size:16px;font-weight:700;color:#222;
-  padding:0 20px 12px;
-}
-/* 农户故事 */
-.farmers-row{
-  display:flex;gap:12px;padding:0 16px 20px;
-  overflow-x:auto;
-}
-.farmers-row::-webkit-scrollbar{display:none;}
-.farmer-card{
-  flex-shrink:0;width:100px;
-  background:#fff;border-radius:14px;
-  padding:14px 10px;text-align:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-  cursor:pointer;
-}
-.farmer-avatar{font-size:36px;margin-bottom:8px;}
-.farmer-name{font-size:13px;font-weight:700;color:#222;}
-.farmer-stars{color:#fa8c16;font-size:11px;margin:3px 0;}
-.farmer-region{font-size:11px;color:#aaa;}
-/* 为什么选择 */
-.why-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:12px;padding:0 16px 24px;
-}
-.why-item{
-  background:#fff;border-radius:12px;padding:12px 6px;
-  text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.why-icon{font-size:24px;margin-bottom:6px;}
-.why-label{font-size:10px;color:#666;}
-/* 精选猪只 */
-.pig-list{padding:0 16px 20px;display:flex;flex-direction:column;gap:12px;}
-.pig-card2{
-  background:#fff;border-radius:14px;
-  overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);
-  cursor:pointer;display:flex;
-}
-.pig-img{width:110px;height:90px;background:linear-gradient(135deg,#f5e6d3,#e8c9a0);
-  display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;}
-.pig-info2{padding:12px 14px;flex:1;}
-.pig-name2{font-size:14px;font-weight:700;color:#222;}
-.pig-meta2{font-size:11px;color:#888;margin:3px 0;}
-.pig-price{font-size:16px;font-weight:800;color:#e74c3c;margin-top:4px;}
-.pig-price span{font-size:11px;font-weight:400;color:#aaa;}
-.pig-btn{
-  display:inline-block;background:#2d8a4e;color:#fff;
-  font-size:11px;padding:4px 10px;border-radius:10px;margin-top:6px;
+/* iframe */
+.phone-screen iframe{
+  width:390px;height:820px;border:none;display:block;
+  /* 模拟顶部状态栏偏移 */
+  margin-top:0;
 }
 
-/* ═══════════════ 客户端 — 订猪页 ═══════════════ */
-.order-header{
-  background:linear-gradient(135deg,#2c1810,#4a2c1a);
-  padding:16px 20px 20px;
+/* 离线遮罩 */
+.offline-mask{
+  position:absolute;inset:0;border-radius:56px;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;z-index:50;
 }
-.order-title{font-size:20px;font-weight:800;color:#fff;margin-bottom:12px;}
-.filter-row{display:flex;gap:8px;overflow-x:auto;}
-.filter-row::-webkit-scrollbar{display:none;}
-.filter-chip{
-  flex-shrink:0;padding:6px 14px;border-radius:20px;
-  border:1.5px solid rgba(255,255,255,0.4);
-  color:rgba(255,255,255,0.85);font-size:12px;cursor:pointer;
-  white-space:nowrap;
+.offline-mask.hidden{display:none;}
+.om-pig{font-size:56px;animation:bounce 1.2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.om-title{font-size:16px;font-weight:700;color:#333;}
+.om-sub{font-size:12px;color:#999;text-align:center;line-height:1.8;padding:0 30px;}
+.om-code{background:#f5f5f5;border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px;color:#555;}
+.om-btn{
+  margin-top:8px;background:#2d8a4e;color:#fff;border:none;
+  border-radius:24px;padding:10px 28px;font-size:14px;
+  font-weight:700;cursor:pointer;
 }
-.filter-chip.active{background:rgba(255,255,255,0.2);border-color:#fff;color:#fff;font-weight:700;}
-.order-pig-list{padding:16px;display:flex;flex-direction:column;gap:14px;}
-.order-pig-card{
-  background:#fff;border-radius:16px;overflow:hidden;
-  box-shadow:0 2px 10px rgba(0,0,0,0.07);cursor:pointer;
-}
-.opc-banner{height:120px;background:linear-gradient(135deg,#f5e6d3,#deb887);
-  display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
-.opc-tag{
-  position:absolute;top:10px;left:10px;
-  background:#2d8a4e;color:#fff;
-  font-size:11px;padding:3px 8px;border-radius:8px;font-weight:700;
-}
-.opc-body{padding:12px 14px 14px;}
-.opc-name{font-size:15px;font-weight:700;color:#222;}
-.opc-sub{font-size:12px;color:#888;margin:4px 0 8px;}
-.opc-row{display:flex;align-items:center;justify-content:space-between;}
-.opc-price{font-size:20px;font-weight:900;color:#e74c3c;}
-.opc-price small{font-size:12px;font-weight:400;color:#aaa;}
-.opc-shares{font-size:12px;color:#aaa;}
-.opc-progress{height:5px;background:#f0f0f0;border-radius:3px;margin-top:8px;}
-.opc-progress-bar{height:100%;background:linear-gradient(90deg,#2d8a4e,#52c41a);border-radius:3px;}
-.opc-buy-btn{
-  width:100%;height:40px;margin-top:10px;
-  background:linear-gradient(90deg,#2c1810,#4a2c1a);
-  color:#fff;border:none;border-radius:10px;
-  font-size:14px;font-weight:700;cursor:pointer;
-}
+.om-btn:hover{background:#1a6b35;}
 
-/* ═══════════════ 客户端 — 我的猪圈 ═══════════════ */
-.mine-header{
-  background:linear-gradient(135deg,#2c1810,#4a2c1a);
-  padding:16px 20px 24px;
-}
-.mine-title{font-size:20px;font-weight:800;color:#fff;margin-bottom:16px;}
-.mine-stats{display:flex;gap:12px;}
-.mine-stat{
-  flex:1;background:rgba(255,255,255,0.15);
-  border-radius:12px;padding:12px;text-align:center;
-}
-.mine-num{font-size:24px;font-weight:800;color:#fff;}
-.mine-lbl{font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;}
-.mine-pig-list{padding:16px;display:flex;flex-direction:column;gap:12px;}
-.mine-pig-card{
-  background:#fff;border-radius:16px;padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-.mpc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.mpc-pig{font-size:40px;}
-.mpc-info{flex:1;}
-.mpc-name{font-size:15px;font-weight:700;color:#222;}
-.mpc-sub{font-size:12px;color:#888;margin-top:2px;}
-.mpc-status{
-  padding:4px 10px;border-radius:10px;
-  font-size:11px;font-weight:600;
-}
-.mpc-status.healthy{background:#f6ffed;color:#52c41a;}
-.mpc-status.growing{background:#fff7e6;color:#fa8c16;}
-.mpc-row{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid #f5f5f5;}
-.mpc-metric{text-align:center;}
-.mpc-val{font-size:16px;font-weight:700;color:#222;}
-.mpc-key{font-size:11px;color:#aaa;margin-top:2px;}
-.mpc-action{
-  display:flex;gap:8px;margin-top:12px;
-}
-.mpc-btn{
-  flex:1;height:34px;border-radius:8px;
-  font-size:12px;font-weight:600;cursor:pointer;
-  border:1.5px solid #2d8a4e;color:#2d8a4e;background:#f0faf4;
-}
-.mpc-btn.primary{background:#2d8a4e;color:#fff;border-color:#2d8a4e;}
-
-/* ═══════════════ 客户端 — 我的 ═══════════════ */
-.my-header{
-  background:linear-gradient(160deg,#2c1810,#4a2c1a);
-  padding:28px 20px 48px;
-  display:flex;align-items:center;gap:16px;
-}
-.my-avatar{
-  width:72px;height:72px;border-radius:36px;
-  background:linear-gradient(135deg,#f5e6d3,#e8c9a0);
-  display:flex;align-items:center;justify-content:center;font-size:32px;
-  border:3px solid rgba(255,255,255,0.3);
-}
-.my-name{font-size:20px;font-weight:800;color:#fff;}
-.my-id{font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;}
-.my-vip{
-  display:inline-flex;align-items:center;gap:4px;
-  background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.5);
-  border-radius:10px;padding:2px 8px;
-  font-size:11px;color:#ffd700;margin-top:6px;
-}
-.my-cards{
-  margin:-24px 16px 16px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-  position:relative;z-index:5;
-}
-.my-card{
-  background:#fff;border-radius:12px;padding:14px 8px;
-  text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.1);
-  cursor:pointer;
-}
-.my-card-num{font-size:22px;font-weight:800;color:#2d8a4e;}
-.my-card-lbl{font-size:11px;color:#888;margin-top:3px;}
-.my-menu{margin:0 16px;background:#fff;border-radius:16px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-.my-menu-item{
-  display:flex;align-items:center;gap:14px;
-  padding:16px 20px;border-bottom:1px solid #f5f5f5;cursor:pointer;
-}
-.my-menu-item:last-child{border-bottom:none;}
-.my-menu-icon{font-size:20px;width:24px;}
-.my-menu-name{font-size:14px;color:#333;flex:1;font-weight:500;}
-.my-menu-arrow{font-size:16px;color:#ccc;}
-
-/* ═══════════════ 代养人端 — 登录 ═══════════════ */
-.foster-login-page{
-  min-height:100%;
-  background:linear-gradient(160deg,#1a6b35,#2d8a4e,#3da862);
-  display:flex;flex-direction:column;align-items:center;
-  padding:60px 24px 40px;
-}
-.fl-logo{font-size:72px;margin-bottom:8px;}
-.fl-title{font-size:36px;font-weight:800;color:#fff;margin-bottom:4px;}
-.fl-sub{font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:40px;}
-.fl-card{
-  background:#fff;border-radius:20px;width:100%;
-  padding:28px 24px 32px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.15);
-}
-.fl-card-title{font-size:18px;font-weight:700;color:#222;margin-bottom:20px;}
-.fl-farmer-item{
-  display:flex;align-items:center;gap:12px;
-  padding:14px;border-radius:12px;border:2px solid #eee;
-  margin-bottom:10px;cursor:pointer;background:#fafafa;
-}
-.fl-farmer-item.selected{border-color:#2d8a4e;background:#f0faf4;}
-.fl-av{
-  width:48px;height:48px;border-radius:24px;
-  background:#88c4a0;color:#fff;font-size:18px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.fl-fi-info{flex:1;}
-.fl-fi-name{font-size:14px;font-weight:700;color:#222;}
-.fl-fi-sub{font-size:12px;color:#888;margin-top:2px;}
-.fl-fi-check{font-size:20px;color:#2d8a4e;font-weight:700;}
-.fl-btn{
-  width:100%;height:52px;border-radius:26px;
-  background:#2d8a4e;color:#fff;border:none;
-  font-size:16px;font-weight:700;cursor:pointer;
-  margin-top:20px;
-}
-.fl-admin{text-align:center;margin-top:16px;font-size:13px;color:#2d8a4e;cursor:pointer;}
-
-/* ═══════════════ 代养人端 — 工作台 ═══════════════ */
-.wb-nav{
-  background:linear-gradient(135deg,#1a6b35,#2d8a4e);
-  padding:10px 20px 14px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:absolute;top:44px;left:0;right:0;z-index:5;
-}
-.wb-back{font-size:13px;color:rgba(255,255,255,0.85);font-weight:500;cursor:pointer;}
-.wb-title{font-size:17px;font-weight:700;color:#fff;}
-.wb-bell{font-size:22px;cursor:pointer;}
-.wb-scroll{margin-top:88px!important;}/* 44+44 */
-.wb-stats{
-  margin:16px;background:#fff;border-radius:16px;
-  display:flex;padding:24px 0;
-  box-shadow:0 2px 10px rgba(0,0,0,0.06);
-}
-.wb-stat{flex:1;text-align:center;}
-.wb-num{font-size:44px;font-weight:800;display:block;}
-.wb-num.green{color:#2d8a4e;}
-.wb-num.orange{color:#fa8c16;}
-.wb-lbl{font-size:13px;color:#888;margin-top:5px;display:block;}
-.wb-divider{width:2px;background:#eee;margin:4px 0;}
-.sec-title2{font-size:15px;font-weight:700;color:#333;padding:8px 20px 10px;}
-.task-card-inner{
-  margin:0 16px 16px;background:#fff;border-radius:16px;
-  padding:4px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);
-}
-.task-row2{
-  display:flex;align-items:center;padding:14px 0;
-  border-bottom:1px solid #f5f5f5;cursor:pointer;
-}
-.task-row2:last-child{border-bottom:none;}
-.task-ic{font-size:30px;margin-right:12px;}
-.task-inf{flex:1;}
-.task-nm{font-size:14px;font-weight:600;color:#222;display:block;}
-.task-tm{font-size:12px;color:#999;margin-top:3px;display:block;}
-.st-badge{
-  padding:4px 10px;border-radius:12px;font-size:11px;
-}
-.st-badge.done{background:#f6ffed;color:#52c41a;}
-.st-badge.in_progress{background:#fff7e6;color:#fa8c16;}
-.st-badge.pending{background:#f5f5f5;color:#999;}
-.quick-grid{
-  display:flex;margin:0 16px 16px;gap:10px;
-}
-.quick-card{
-  flex:1;background:#fff;border-radius:14px;
-  padding:20px 0;display:flex;flex-direction:column;
-  align-items:center;gap:6px;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-.quick-ic2{font-size:28px;}
-.quick-lb2{font-size:11px;color:#555;font-weight:600;}
-.logout-row{text-align:center;padding:16px;}
-.logout-text{font-size:13px;color:#aaa;cursor:pointer;border-bottom:1px solid #ddd;padding-bottom:3px;}
-
-/* ═══════════════ 代养人端 — 喂养任务 ═══════════════ */
-.page-bg{background:#f5f5f5;min-height:100%;padding:16px 16px 16px;}
-.task-card3{
-  background:#fff;border-radius:14px;padding:18px;
-  margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-.tc3-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.tc3-left{display:flex;align-items:center;gap:10px;}
-.tc3-icon{font-size:28px;}
-.tc3-name{font-size:17px;font-weight:700;color:#222;}
-.tc3-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:14px;}
-.tc3-tag{font-size:12px;color:#666;}
-.tc3-sep{font-size:12px;color:#ddd;}
-.tc3-btn{
-  width:100%;height:44px;border-radius:22px;
-  font-size:14px;font-weight:700;border:none;cursor:pointer;
-}
-.tc3-btn.done{background:#d9d9d9;color:#fff;}
-.tc3-btn.in_progress{background:#2d8a4e;color:#fff;}
-.tc3-btn.pending{background:#f0f0f0;color:#aaa;}
-.date-foot{text-align:center;padding:16px;font-size:13px;color:#bbb;}
-
-/* ═══════════════ 代养人端 — 我的猪只 ═══════════════ */
-.fpig-card{
-  background:#fff;border-radius:14px;padding:18px;
-  margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-.fpc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpc-left{display:flex;align-items:center;gap:12px;}
-.fpc-icon{font-size:34px;}
-.fpc-nm{font-size:16px;font-weight:700;color:#222;}
-.fpc-stall{font-size:12px;color:#2d8a4e;margin-top:2px;font-weight:600;}
-.fpc-ht{padding:5px 14px;border-radius:14px;font-size:12px;font-weight:600;}
-.fpc-ht.healthy{background:#f6ffed;color:#52c41a;}
-.fpc-ht.sick{background:#fff1f0;color:#ff4d4f;}
-.fpc-divider{height:1px;background:#f0f0f0;margin-bottom:14px;}
-.fpc-stats{display:flex;align-items:center;}
-.fpc-stat{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.fpc-val{font-size:26px;font-weight:800;color:#222;}
-.fpc-unit{font-size:11px;color:#aaa;margin-top:1px;}
-.fpc-key{font-size:12px;color:#aaa;margin-top:4px;}
-.fpc-owner{font-size:17px;font-weight:700;color:#2d8a4e;}
-.fpc-sep{width:1px;height:40px;background:#eee;}
-.fpc-edit-bar{margin-top:14px;border-top:1px solid #f5f5f5;padding-top:12px;}
-.fpc-edit-btn{
-  width:100%;height:40px;border-radius:20px;
-  background:#f0faf4;color:#2d8a4e;
-  font-size:13px;font-weight:700;border:none;cursor:pointer;
-}
-
-/* ═══════════════ 代养人端 — 收益中心 ═══════════════ */
-.earn-summary{
-  background:linear-gradient(135deg,#1a6b35,#2d8a4e);
-  margin:16px;border-radius:18px;padding:28px 24px;
-  display:flex;align-items:center;
-  box-shadow:0 4px 20px rgba(45,138,78,0.35);
-}
-.earn-item{flex:1;text-align:center;}
-.earn-lbl{font-size:13px;color:rgba(255,255,255,0.8);display:block;margin-bottom:10px;}
-.earn-row{display:flex;align-items:baseline;justify-content:center;}
-.earn-cur{font-size:16px;color:#fff;margin-right:3px;font-weight:600;}
-.earn-amt{font-size:36px;font-weight:900;color:#fff;line-height:1;}
-.earn-div{width:1px;height:50px;background:rgba(255,255,255,0.3);}
-.earn-title{font-size:15px;font-weight:700;color:#333;padding:4px 20px 12px;}
-.earn-list{margin:0 16px 16px;background:#fff;border-radius:14px;padding:4px 16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-.earn-row2{
-  display:flex;align-items:center;padding:14px 0;
-  border-bottom:1px solid #f5f5f5;
-}
-.earn-row2:last-child{border-bottom:none;}
-.earn-month{width:80px;flex-shrink:0;font-size:13px;color:#555;font-weight:600;}
-.earn-bar-wrap{flex:1;height:10px;background:#f0f0f0;border-radius:5px;margin:0 12px;overflow:hidden;}
-.earn-bar-fill{height:100%;background:linear-gradient(90deg,#2d8a4e,#52c41a);border-radius:5px;}
-.earn-val{width:80px;text-align:right;font-size:14px;font-weight:700;color:#2d8a4e;}
-.earn-note{text-align:center;padding:16px;font-size:12px;color:#bbb;}
-
-/* ═══════════════ 管理端 ═══════════════ */
-.admin-header{
-  background:linear-gradient(135deg,#1a6b35,#2d8a4e);
-  padding:20px;
-}
-.admin-title{font-size:24px;font-weight:900;color:#fff;}
-.admin-sub{font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px;}
-.admin-menu{margin:16px;display:flex;flex-direction:column;gap:12px;}
-.admin-item{
-  background:#fff;border-radius:14px;padding:18px;
-  display:flex;align-items:center;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-.admin-item-icon{
-  width:52px;height:52px;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;margin-right:16px;flex-shrink:0;
-}
-.admin-item-icon.green{background:#f0faf4;}
-.admin-item-icon.orange{background:#fff7e6;}
-.admin-item-icon.blue{background:#e8f4ff;}
-.admin-item-info{flex:1;}
-.admin-item-name{font-size:15px;font-weight:700;color:#222;}
-.admin-item-desc{font-size:12px;color:#888;margin-top:3px;}
-.admin-arrow{font-size:22px;color:#ccc;}
-.admin-back-btn{
-  text-align:center;margin:8px 16px 20px;
-  font-size:14px;color:#888;cursor:pointer;
-  padding:12px;background:#fff;border-radius:12px;
-}
-/* 管理子页面 */
-.admin-sub-header{
-  background:linear-gradient(135deg,#1a6b35,#2d8a4e);
-  padding:12px 20px 16px;
-  display:flex;align-items:center;gap:12px;
-}
-.admin-sub-back{font-size:22px;color:rgba(255,255,255,0.8);cursor:pointer;}
-.admin-sub-title{font-size:17px;font-weight:700;color:#fff;flex:1;}
-.admin-add-btn{
-  background:rgba(255,255,255,0.2);color:#fff;
-  font-size:12px;font-weight:700;padding:6px 14px;
-  border-radius:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);
-}
-.admin-list{padding:12px;}
-.admin-card{
-  background:#fff;border-radius:12px;padding:14px;
-  margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  display:flex;align-items:center;gap:12px;
-}
-.admin-card-av{
-  width:48px;height:48px;border-radius:12px;
-  background:linear-gradient(135deg,#88c4a0,#2d8a4e);
-  color:#fff;font-size:18px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.admin-card-info{flex:1;}
-.admin-card-name{font-size:14px;font-weight:700;color:#222;}
-.admin-card-sub{font-size:12px;color:#888;margin-top:2px;}
-.admin-card-actions{display:flex;gap:6px;}
-.ac-btn{
-  padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;
-  border:1.5px solid #eee;color:#666;background:#fafafa;
-}
-.ac-btn.del{border-color:#ffccc7;color:#ff4d4f;background:#fff2f0;}
-
-/* 任务生成表单 */
-.task-form{padding:16px;}
-.task-form-card{
-  background:#fff;border-radius:14px;padding:16px;
-  margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-.tf-label{font-size:13px;font-weight:700;color:#333;margin-bottom:10px;display:block;}
-.farmer-chips{display:flex;flex-wrap:wrap;gap:8px;}
-.farmer-chip2{
-  padding:6px 14px;border-radius:20px;
-  border:1.5px solid #eee;font-size:12px;color:#555;cursor:pointer;
-}
-.farmer-chip2.active{border-color:#2d8a4e;background:#f0faf4;color:#2d8a4e;font-weight:700;}
-.task-row-form{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid #f5f5f5;
-}
-.task-row-form:last-child{border-bottom:none;}
-.tf-icon{font-size:22px;width:28px;}
-.tf-info{flex:1;}
-.tf-name{font-size:13px;font-weight:600;color:#222;}
-.tf-time{font-size:11px;color:#aaa;margin-top:2px;}
-.gen-btn{
-  width:100%;height:46px;border-radius:23px;
-  background:#2d8a4e;color:#fff;border:none;
-  font-size:15px;font-weight:700;cursor:pointer;
-  margin-top:4px;
-}
-
-/* ═══════════════ 通用 ═══════════════ */
-.page-header-nav{
-  background:linear-gradient(135deg,#2c1810,#4a2c1a);
-  padding:12px 20px 14px;
-  display:flex;align-items:center;gap:12px;
-}
-.phn-back{font-size:20px;color:rgba(255,255,255,0.8);cursor:pointer;}
-.phn-title{font-size:17px;font-weight:700;color:#fff;}
+/* 手机下标签 */
+.phone-label{margin-top:18px;text-align:center;}
+.pl-name{font-size:14px;font-weight:700;color:#333;}
+.pl-path{font-size:11px;color:#aaa;margin-top:3px;font-family:monospace;}
 </style>
 </head>
 <body>
 
-<!-- ═══════════ 顶部导航 ═══════════ -->
 <div class="top-bar">
-  <div class="top-logo">
-    <span class="top-logo-icon">🐷</span>
+  <div class="logo">
+    <span class="logo-icon">🐷</span>
     <div>
-      <div class="top-logo-title">私人订猪</div>
-      <div class="top-logo-sub">完整原型预览 · 离线可用</div>
+      <div class="logo-text">私人订猪</div>
+      <div class="logo-sub">完整原型预览 · H5 实时同步</div>
     </div>
   </div>
-  <div class="top-nav">
-    <button class="top-btn active" onclick="switchSection('client',this)">客户端</button>
-    <button class="top-btn" onclick="switchSection('foster',this)">代养人端</button>
-    <button class="top-btn" onclick="switchSection('admin',this)">管理端</button>
+
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="goSection('client',this)">客户端</button>
+    <button class="nav-btn" onclick="goSection('foster',this)">代养人端</button>
+    <button class="nav-btn" onclick="goSection('admin',this)">管理端</button>
   </div>
-  <div style="width:90px"></div><!-- 占位保持居中 -->
+
+  <div class="sync-badge" id="syncBadge">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncText">检测中…</span>
+  </div>
 </div>
 
-<!-- ═══════════ 主体 ═══════════ -->
 <div class="main">
 <div class="phone-wrap">
-
-  <!-- 手机外壳 -->
   <div class="phone-frame">
-    <div class="pb-r"></div><div class="pb-l1"></div><div class="pb-l2"></div><div class="pb-l3"></div>
-
-    <!-- 刘海 -->
-    <div class="notch">
-      <div class="notch-cam"></div>
-      <div class="notch-sp"></div>
-    </div>
-
-    <!-- 状态栏 -->
-    <div class="statusbar" id="statusbar">
+    <div class="pb-r"></div><div class="pb-l1"></div>
+    <div class="pb-l2"></div><div class="pb-l3"></div>
+    <div class="notch"><div class="notch-cam"></div><div class="notch-sp"></div></div>
+    <div class="statusbar">
       <span class="sb-time" id="clockEl">15:00</span>
       <div class="sb-icons">
         <span class="sb-icon">●●●</span>
@@ -687,837 +153,107 @@ body{
     </div>
 
     <div class="phone-screen">
+      <iframe id="appFrame"
+        src="about:blank"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation">
+      </iframe>
 
-      <!-- ══════════════════════════════
-           客户端
-      ══════════════════════════════ -->
-      <div class="section show" id="sec-client">
-        <div class="scroll-area" id="sa-client">
-
-          <!-- 首页 -->
-          <div class="screen show" id="scr-c-home">
-            <div class="home-hero">
-              <div class="home-nav">
-                <span class="home-title">私人订猪</span>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <span class="home-foster-btn" onclick="switchSection('foster',null)">代养人端</span>
-                  <span class="home-bell">🔔</span>
-                </div>
-              </div>
-              <!-- 直播卡片 -->
-              <div class="live-card" onclick="showClientPage('c-live')">
-                <div class="live-badge">直播中</div>
-                <div class="live-count">🔴 128人正在观看</div>
-                <div class="live-play">▶</div>
-              </div>
-            </div>
-            <!-- 统计 -->
-            <div class="stats-row">
-              <div class="stat-box">
-                <div class="stat-num">1,234</div>
-                <div class="stat-label2">服务客户</div>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-box">
-                <div class="stat-num">567</div>
-                <div class="stat-label2">正在代养</div>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-box">
-                <div class="stat-num">89</div>
-                <div class="stat-label2">合作农户</div>
-              </div>
-            </div>
-            <!-- 农户故事 -->
-            <div class="sec-title">农户故事</div>
-            <div class="farmers-row">
-              <div class="farmer-card">
-                <div class="farmer-avatar">👨‍🌾</div>
-                <div class="farmer-name">张大爷</div>
-                <div class="farmer-stars">★★★★★ 4.9</div>
-                <div class="farmer-region">四川广元</div>
-              </div>
-              <div class="farmer-card">
-                <div class="farmer-avatar">👩‍🌾</div>
-                <div class="farmer-name">李大妈</div>
-                <div class="farmer-stars">★★★★★ 4.8</div>
-                <div class="farmer-region">四川绵阳</div>
-              </div>
-              <div class="farmer-card">
-                <div class="farmer-avatar">🧑‍🌾</div>
-                <div class="farmer-name">王叔</div>
-                <div class="farmer-stars">★★★★★ 4.9</div>
-                <div class="farmer-region">四川德阳</div>
-              </div>
-              <div class="farmer-card">
-                <div class="farmer-avatar">👨‍🌾</div>
-                <div class="farmer-name">陈阿姨</div>
-                <div class="farmer-stars">★★★★☆ 4.7</div>
-                <div class="farmer-region">四川南充</div>
-              </div>
-            </div>
-            <!-- 为什么选择我们 -->
-            <div class="sec-title">为什么选择我们</div>
-            <div class="why-grid">
-              <div class="why-item"><div class="why-icon">🌿</div><div class="why-label">纯天然<br>散养</div></div>
-              <div class="why-item"><div class="why-icon">📹</div><div class="why-label">全程<br>直播</div></div>
-              <div class="why-item"><div class="why-icon">🥩</div><div class="why-label">新鲜<br>配送</div></div>
-              <div class="why-item"><div class="why-icon">💚</div><div class="why-label">品质<br>保障</div></div>
-            </div>
-            <!-- 精选猪只 -->
-            <div class="sec-title">精选猪只</div>
-            <div class="pig-list">
-              <div class="pig-card2" onclick="showClientPage('c-order')">
-                <div class="pig-img">🐷</div>
-                <div class="pig-info2">
-                  <div class="pig-name2">广元黑猪 · 土猪散养</div>
-                  <div class="pig-meta2">张大爷 · 四川广元 · 已养 120 天</div>
-                  <div class="pig-price">¥3,680 <span>/ 份</span></div>
-                  <span class="pig-btn">立即认购</span>
-                </div>
-              </div>
-              <div class="pig-card2" onclick="showClientPage('c-order')">
-                <div class="pig-img">🐽</div>
-                <div class="pig-info2">
-                  <div class="pig-name2">绵阳白猪 · 有机饲料</div>
-                  <div class="pig-meta2">李大妈 · 四川绵阳 · 已养 95 天</div>
-                  <div class="pig-price">¥2,980 <span>/ 份</span></div>
-                  <span class="pig-btn">立即认购</span>
-                </div>
-              </div>
-            </div>
-          </div><!-- /scr-c-home -->
-
-          <!-- 订猪页 -->
-          <div class="screen" id="scr-c-order">
-            <div class="order-header">
-              <div class="order-title">选一头好猪 🐷</div>
-              <div class="filter-row">
-                <div class="filter-chip active">全部</div>
-                <div class="filter-chip">黑猪</div>
-                <div class="filter-chip">白猪</div>
-                <div class="filter-chip">土猪</div>
-                <div class="filter-chip">有机</div>
-              </div>
-            </div>
-            <div class="order-pig-list">
-              <div class="order-pig-card">
-                <div class="opc-banner">🐷<span class="opc-tag">热销</span></div>
-                <div class="opc-body">
-                  <div class="opc-name">广元黑猪 · 张大爷散养</div>
-                  <div class="opc-sub">四川广元 · 纯天然 · 已养 120 天 · 预计出栏 60 天</div>
-                  <div class="opc-row">
-                    <div class="opc-price">¥3,680 <small>/ 份</small></div>
-                    <div class="opc-shares">已售 7/10 份</div>
-                  </div>
-                  <div class="opc-progress"><div class="opc-progress-bar" style="width:70%"></div></div>
-                  <button class="opc-buy-btn">立即认购</button>
-                </div>
-              </div>
-              <div class="order-pig-card">
-                <div class="opc-banner">🐽<span class="opc-tag">新品</span></div>
-                <div class="opc-body">
-                  <div class="opc-name">绵阳白猪 · 李大妈有机</div>
-                  <div class="opc-sub">四川绵阳 · 有机饲料 · 已养 95 天 · 预计出栏 75 天</div>
-                  <div class="opc-row">
-                    <div class="opc-price">¥2,980 <small>/ 份</small></div>
-                    <div class="opc-shares">已售 3/8 份</div>
-                  </div>
-                  <div class="opc-progress"><div class="opc-progress-bar" style="width:37%"></div></div>
-                  <button class="opc-buy-btn">立即认购</button>
-                </div>
-              </div>
-              <div class="order-pig-card">
-                <div class="opc-banner" style="background:linear-gradient(135deg,#e8c9a0,#c8a068)">🐖</div>
-                <div class="opc-body">
-                  <div class="opc-name">德阳土猪 · 王叔散养</div>
-                  <div class="opc-sub">四川德阳 · 林下散养 · 已养 160 天 · 即将出栏</div>
-                  <div class="opc-row">
-                    <div class="opc-price">¥4,200 <small>/ 份</small></div>
-                    <div class="opc-shares">已售 9/10 份</div>
-                  </div>
-                  <div class="opc-progress"><div class="opc-progress-bar" style="width:90%"></div></div>
-                  <button class="opc-buy-btn" style="background:linear-gradient(90deg,#e74c3c,#c0392b)">🔥 仅剩最后 1 份</button>
-                </div>
-              </div>
-            </div>
-          </div><!-- /scr-c-order -->
-
-          <!-- 我的猪圈 -->
-          <div class="screen" id="scr-c-mine">
-            <div class="mine-header">
-              <div class="mine-title">我的猪圈 🐷</div>
-              <div class="mine-stats">
-                <div class="mine-stat"><div class="mine-num">2</div><div class="mine-lbl">认养中</div></div>
-                <div class="mine-stat"><div class="mine-num">1</div><div class="mine-lbl">已出栏</div></div>
-                <div class="mine-stat"><div class="mine-num">3</div><div class="mine-lbl">累计订单</div></div>
-              </div>
-            </div>
-            <div class="mine-pig-list">
-              <div class="mine-pig-card">
-                <div class="mpc-top">
-                  <div class="mpc-pig">🐷</div>
-                  <div class="mpc-info">
-                    <div class="mpc-name">广元黑猪 · 张大爷</div>
-                    <div class="mpc-sub">订单号：PIG2024031501</div>
-                  </div>
-                  <span class="mpc-status healthy">生长中</span>
-                </div>
-                <div class="mpc-row">
-                  <div class="mpc-metric"><div class="mpc-val">42.5</div><div class="mpc-key">当前体重(kg)</div></div>
-                  <div class="mpc-metric"><div class="mpc-val">120</div><div class="mpc-key">已饲养(天)</div></div>
-                  <div class="mpc-metric"><div class="mpc-val">60</div><div class="mpc-key">预计出栏(天)</div></div>
-                </div>
-                <div class="mpc-action">
-                  <button class="mpc-btn">📹 查看直播</button>
-                  <button class="mpc-btn primary">📊 成长记录</button>
-                </div>
-              </div>
-              <div class="mine-pig-card">
-                <div class="mpc-top">
-                  <div class="mpc-pig">🐽</div>
-                  <div class="mpc-info">
-                    <div class="mpc-name">绵阳白猪 · 李大妈</div>
-                    <div class="mpc-sub">订单号：PIG2024032801</div>
-                  </div>
-                  <span class="mpc-status growing">快速生长</span>
-                </div>
-                <div class="mpc-row">
-                  <div class="mpc-metric"><div class="mpc-val">38.2</div><div class="mpc-key">当前体重(kg)</div></div>
-                  <div class="mpc-metric"><div class="mpc-val">95</div><div class="mpc-key">已饲养(天)</div></div>
-                  <div class="mpc-metric"><div class="mpc-val">75</div><div class="mpc-key">预计出栏(天)</div></div>
-                </div>
-                <div class="mpc-action">
-                  <button class="mpc-btn">📹 查看直播</button>
-                  <button class="mpc-btn primary">📊 成长记录</button>
-                </div>
-              </div>
-            </div>
-          </div><!-- /scr-c-mine -->
-
-          <!-- 我的 -->
-          <div class="screen" id="scr-c-my">
-            <div class="my-header">
-              <div class="my-avatar">👤</div>
-              <div>
-                <div class="my-name">张小明</div>
-                <div class="my-id">UID: 10086288</div>
-                <div class="my-vip">⭐ VIP 会员</div>
-              </div>
-            </div>
-            <div class="my-cards">
-              <div class="my-card"><div class="my-card-num">3</div><div class="my-card-lbl">我的订单</div></div>
-              <div class="my-card"><div class="my-card-num">2</div><div class="my-card-lbl">认养中</div></div>
-              <div class="my-card"><div class="my-card-num">580</div><div class="my-card-lbl">积分</div></div>
-            </div>
-            <div class="my-menu">
-              <div class="my-menu-item"><span class="my-menu-icon">📦</span><span class="my-menu-name">我的订单</span><span class="my-menu-arrow">›</span></div>
-              <div class="my-menu-item"><span class="my-menu-icon">🐷</span><span class="my-menu-name">我的猪圈</span><span class="my-menu-arrow">›</span></div>
-              <div class="my-menu-item"><span class="my-menu-icon">📍</span><span class="my-menu-name">收货地址</span><span class="my-menu-arrow">›</span></div>
-              <div class="my-menu-item"><span class="my-menu-icon">💬</span><span class="my-menu-name">消息通知</span><span class="my-menu-arrow">›</span></div>
-              <div class="my-menu-item"><span class="my-menu-icon">⭐</span><span class="my-menu-name">VIP 特权</span><span class="my-menu-arrow">›</span></div>
-              <div class="my-menu-item"><span class="my-menu-icon">⚙️</span><span class="my-menu-name">设置</span><span class="my-menu-arrow">›</span></div>
-            </div>
-          </div><!-- /scr-c-my -->
-
-          <!-- 直播页 -->
-          <div class="screen" id="scr-c-live">
-            <div class="page-header-nav">
-              <span class="phn-back" onclick="showClientPage('c-home')">←</span>
-              <span class="phn-title">直播间</span>
-            </div>
-            <div style="background:#111;height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-              <div style="font-size:48px">📺</div>
-              <div style="color:#fff;font-size:14px;opacity:.7">直播画面</div>
-              <div style="background:#ff4d4f;color:#fff;font-size:12px;padding:3px 10px;border-radius:10px">● 直播中 · 128人观看</div>
-            </div>
-            <div style="background:#1a1a1a;padding:12px 16px;display:flex;align-items:center;gap:12px">
-              <div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:700">张大爷的广元黑猪 🐷</div><div style="color:#aaa;font-size:11px;margin-top:2px">四川广元 · 今日喂食 全有机饲料</div></div>
-              <div style="background:#2d8a4e;color:#fff;padding:6px 14px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer">关注</div>
-            </div>
-            <div style="padding:16px;background:#f5f5f5;">
-              <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:10px;">直播评论</div>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="background:#fff;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;">用户小王：这猪养得好！准备订一份 👍</div>
-                <div style="background:#fff;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;">农场主张大爷：欢迎大家，今天给猪喂玉米 🌽</div>
-                <div style="background:#fff;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;">用户小李：猪猪好可爱，上次买的很好吃</div>
-              </div>
-            </div>
-          </div><!-- /scr-c-live -->
-
-        </div><!-- /sa-client -->
-
-        <!-- 客户端 tabbar -->
-        <div class="tabbar">
-          <div class="tab-item active" id="tab-c-home" onclick="showClientPage('c-home')">
-            <span class="tab-icon">🏠</span><span class="tab-label">首页</span>
-          </div>
-          <div class="tab-item" id="tab-c-order" onclick="showClientPage('c-order')">
-            <span class="tab-icon">🐷</span><span class="tab-label">订猪</span>
-          </div>
-          <div class="tab-item" id="tab-c-mine" onclick="showClientPage('c-mine')">
-            <span class="tab-icon">🐽</span><span class="tab-label">我的猪圈</span>
-          </div>
-          <div class="tab-item" id="tab-c-my" onclick="showClientPage('c-my')">
-            <span class="tab-icon">👤</span><span class="tab-label">我的</span>
-          </div>
+      <!-- 离线遮罩 -->
+      <div class="offline-mask" id="offlineMask">
+        <div class="om-pig">🐷</div>
+        <div class="om-title">H5 服务器未启动</div>
+        <div class="om-sub">
+          请先双击运行启动脚本：<br>
+          <span class="om-code">demo/start.bat</span><br>
+          等待 5 秒后点击重新连接
         </div>
-      </div><!-- /sec-client -->
-
-
-      <!-- ══════════════════════════════
-           代养人端
-      ══════════════════════════════ -->
-      <div class="section" id="sec-foster">
-        <div class="scroll-area" id="sa-foster">
-
-          <!-- 登录 -->
-          <div class="screen show" id="scr-f-login">
-            <div class="foster-login-page scroll-area no-tab no-status">
-              <div class="fl-logo">🐷</div>
-              <div class="fl-title">私人订猪</div>
-              <div class="fl-sub">代养人工作台</div>
-              <div class="fl-card">
-                <div class="fl-card-title">选择您的农户身份</div>
-                <div class="fl-farmer-item selected" onclick="showFosterPage('f-workbench')">
-                  <div class="fl-av">张</div>
-                  <div class="fl-fi-info">
-                    <div class="fl-fi-name">张大爷</div>
-                    <div class="fl-fi-sub">四川广元 · 散养 12 年</div>
-                  </div>
-                  <span class="fl-fi-check">✓</span>
-                </div>
-                <div class="fl-farmer-item" onclick="showFosterPage('f-workbench')">
-                  <div class="fl-av" style="background:#c4889a">李</div>
-                  <div class="fl-fi-info">
-                    <div class="fl-fi-name">李大妈</div>
-                    <div class="fl-fi-sub">四川绵阳 · 散养 8 年</div>
-                  </div>
-                </div>
-                <div class="fl-farmer-item" onclick="showFosterPage('f-workbench')">
-                  <div class="fl-av" style="background:#8899c4">王</div>
-                  <div class="fl-fi-info">
-                    <div class="fl-fi-name">王叔</div>
-                    <div class="fl-fi-sub">四川德阳 · 散养 15 年</div>
-                  </div>
-                </div>
-                <button class="fl-btn" onclick="showFosterPage('f-workbench')">进入工作台 →</button>
-                <div class="fl-admin" onclick="switchSection('admin',null)">⚙️ 管理员入口</div>
-              </div>
-            </div>
-          </div><!-- /scr-f-login -->
-
-          <!-- 工作台 -->
-          <div class="screen" id="scr-f-workbench">
-            <div class="wb-nav">
-              <span class="wb-back" onclick="showFosterPage('f-login')">← 客户端</span>
-              <span class="wb-title">代养人工作台</span>
-              <span class="wb-bell">🔔</span>
-            </div>
-            <div class="wb-scroll" style="margin-top:88px">
-              <div class="wb-stats">
-                <div class="wb-stat">
-                  <span class="wb-num green">3</span>
-                  <span class="wb-lbl">托管猪只</span>
-                </div>
-                <div class="wb-divider"></div>
-                <div class="wb-stat">
-                  <span class="wb-num orange">2</span>
-                  <span class="wb-lbl">待完成任务</span>
-                </div>
-              </div>
-              <div class="sec-title2">今日任务</div>
-              <div class="task-card-inner">
-                <div class="task-row2" onclick="showFosterPage('f-tasks')">
-                  <span class="task-ic">🌅</span>
-                  <div class="task-inf">
-                    <span class="task-nm">早餐喂养 · A 区猪舍</span>
-                    <span class="task-tm">07:00 - 08:30</span>
-                  </div>
-                  <span class="st-badge done">✅ 已完成</span>
-                </div>
-                <div class="task-row2" onclick="showFosterPage('f-tasks')">
-                  <span class="task-ic">☀️</span>
-                  <div class="task-inf">
-                    <span class="task-nm">午餐喂养 · A 区猪舍</span>
-                    <span class="task-tm">12:00 - 13:30</span>
-                  </div>
-                  <span class="st-badge in_progress">⏳ 进行中</span>
-                </div>
-                <div class="task-row2" onclick="showFosterPage('f-tasks')">
-                  <span class="task-ic">🌙</span>
-                  <div class="task-inf">
-                    <span class="task-nm">晚餐喂养 · A 区猪舍</span>
-                    <span class="task-tm">18:00 - 19:30</span>
-                  </div>
-                  <span class="st-badge pending">🕐 未开始</span>
-                </div>
-              </div>
-              <div class="sec-title2">快捷入口</div>
-              <div class="quick-grid">
-                <div class="quick-card" onclick="showFosterPage('f-tasks')">
-                  <span class="quick-ic2">📋</span><span class="quick-lb2">喂养任务</span>
-                </div>
-                <div class="quick-card" onclick="showFosterPage('f-pigs')">
-                  <span class="quick-ic2">🐷</span><span class="quick-lb2">我的猪只</span>
-                </div>
-                <div class="quick-card" onclick="showFosterPage('f-earnings')">
-                  <span class="quick-ic2">💰</span><span class="quick-lb2">收益中心</span>
-                </div>
-              </div>
-              <div class="logout-row">
-                <span class="logout-text" onclick="showFosterPage('f-login')">切换农户</span>
-              </div>
-            </div>
-          </div><!-- /scr-f-workbench -->
-
-          <!-- 喂养任务 -->
-          <div class="screen" id="scr-f-tasks">
-            <div class="page-bg">
-              <div class="task-card3">
-                <div class="tc3-header">
-                  <div class="tc3-left"><span class="tc3-icon">🌅</span><span class="tc3-name">早餐喂养</span></div>
-                  <span class="st-badge done">已完成</span>
-                </div>
-                <div class="tc3-meta">
-                  <span class="tc3-tag">A 区猪舍</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag" style="color:#fa8c16">07:00 - 08:30</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag">玉米 + 糠麸 各 5kg</span>
-                </div>
-                <button class="tc3-btn done" disabled>✓ 已打卡</button>
-              </div>
-              <div class="task-card3">
-                <div class="tc3-header">
-                  <div class="tc3-left"><span class="tc3-icon">☀️</span><span class="tc3-name">午餐喂养</span></div>
-                  <span class="st-badge in_progress">进行中</span>
-                </div>
-                <div class="tc3-meta">
-                  <span class="tc3-tag">A 区猪舍</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag" style="color:#fa8c16">12:00 - 13:30</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag">豆粕 + 青料 各 4kg</span>
-                </div>
-                <button class="tc3-btn in_progress" onclick="this.textContent='✓ 已打卡';this.className='tc3-btn done';this.disabled=true;this.closest('.task-card3').querySelector('.st-badge').textContent='已完成';this.closest('.task-card3').querySelector('.st-badge').className='st-badge done'">立即打卡</button>
-              </div>
-              <div class="task-card3">
-                <div class="tc3-header">
-                  <div class="tc3-left"><span class="tc3-icon">🌙</span><span class="tc3-name">晚餐喂养</span></div>
-                  <span class="st-badge pending">待完成</span>
-                </div>
-                <div class="tc3-meta">
-                  <span class="tc3-tag">A 区猪舍</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag" style="color:#fa8c16">18:00 - 19:30</span>
-                  <span class="tc3-sep">|</span>
-                  <span class="tc3-tag">玉米 + 糠麸 各 5kg</span>
-                </div>
-                <button class="tc3-btn pending" disabled>待完成</button>
-              </div>
-              <div class="date-foot">📅 今日任务 · 共 3 条</div>
-            </div>
-          </div><!-- /scr-f-tasks -->
-
-          <!-- 我的猪只 -->
-          <div class="screen" id="scr-f-pigs">
-            <div class="page-bg">
-              <div class="fpig-card">
-                <div class="fpc-top">
-                  <div class="fpc-left">
-                    <span class="fpc-icon">🐷</span>
-                    <div>
-                      <div class="fpc-nm">黑猪 · 小黑</div>
-                      <div class="fpc-stall">#A001</div>
-                    </div>
-                  </div>
-                  <span class="fpc-ht healthy">健康</span>
-                </div>
-                <div class="fpc-divider"></div>
-                <div class="fpc-stats">
-                  <div class="fpc-stat"><span class="fpc-val">42.5</span><span class="fpc-unit">kg</span><span class="fpc-key">当前体重</span></div>
-                  <div class="fpc-sep"></div>
-                  <div class="fpc-stat"><span class="fpc-val">120</span><span class="fpc-unit">天</span><span class="fpc-key">已饲养</span></div>
-                  <div class="fpc-sep"></div>
-                  <div class="fpc-stat"><span class="fpc-owner">张小明</span><span class="fpc-key">主人</span></div>
-                </div>
-                <div class="fpc-edit-bar">
-                  <button class="fpc-edit-btn">✏️ 修改信息</button>
-                </div>
-              </div>
-              <div class="fpig-card">
-                <div class="fpc-top">
-                  <div class="fpc-left">
-                    <span class="fpc-icon">🐷</span>
-                    <div>
-                      <div class="fpc-nm">白猪 · 小白</div>
-                      <div class="fpc-stall">#A002</div>
-                    </div>
-                  </div>
-                  <span class="fpc-ht healthy">健康</span>
-                </div>
-                <div class="fpc-divider"></div>
-                <div class="fpc-stats">
-                  <div class="fpc-stat"><span class="fpc-val">38.2</span><span class="fpc-unit">kg</span><span class="fpc-key">当前体重</span></div>
-                  <div class="fpc-sep"></div>
-                  <div class="fpc-stat"><span class="fpc-val">95</span><span class="fpc-unit">天</span><span class="fpc-key">已饲养</span></div>
-                  <div class="fpc-sep"></div>
-                  <div class="fpc-stat"><span class="fpc-owner">待认领</span><span class="fpc-key">主人</span></div>
-                </div>
-                <div class="fpc-edit-bar">
-                  <button class="fpc-edit-btn">✏️ 修改信息</button>
-                </div>
-              </div>
-              <div style="text-align:center;padding:16px;font-size:12px;color:#bbb;">共托管 2 头猪只 · 饲养天数随实时时间自动累计</div>
-            </div>
-          </div><!-- /scr-f-pigs -->
-
-          <!-- 收益中心 -->
-          <div class="screen" id="scr-f-earnings">
-            <div class="earn-summary">
-              <div class="earn-item">
-                <span class="earn-lbl">本月收益</span>
-                <div class="earn-row"><span class="earn-cur">¥</span><span class="earn-amt">2,340</span></div>
-              </div>
-              <div class="earn-div"></div>
-              <div class="earn-item">
-                <span class="earn-lbl">累计收益</span>
-                <div class="earn-row"><span class="earn-cur">¥</span><span class="earn-amt">18,620</span></div>
-              </div>
-            </div>
-            <div class="earn-title">月度明细</div>
-            <div class="earn-list">
-              <div class="earn-row2">
-                <span class="earn-month">2025年5月</span>
-                <div class="earn-bar-wrap"><div class="earn-bar-fill" style="width:78%"></div></div>
-                <span class="earn-val">¥2,340</span>
-              </div>
-              <div class="earn-row2">
-                <span class="earn-month">2025年4月</span>
-                <div class="earn-bar-wrap"><div class="earn-bar-fill" style="width:100%"></div></div>
-                <span class="earn-val">¥3,000</span>
-              </div>
-              <div class="earn-row2">
-                <span class="earn-month">2025年3月</span>
-                <div class="earn-bar-wrap"><div class="earn-bar-fill" style="width:62%"></div></div>
-                <span class="earn-val">¥1,860</span>
-              </div>
-              <div class="earn-row2">
-                <span class="earn-month">2025年2月</span>
-                <div class="earn-bar-wrap"><div class="earn-bar-fill" style="width:45%"></div></div>
-                <span class="earn-val">¥1,350</span>
-              </div>
-              <div class="earn-row2">
-                <span class="earn-month">2025年1月</span>
-                <div class="earn-bar-wrap"><div class="earn-bar-fill" style="width:70%"></div></div>
-                <span class="earn-val">¥2,100</span>
-              </div>
-            </div>
-            <div class="earn-note">💡 收益每月结算一次，次月5日前到账</div>
-          </div><!-- /scr-f-earnings -->
-
-        </div><!-- /sa-foster -->
-
-        <!-- 代养人端 tabbar（登录页不显示） -->
-        <div class="tabbar" id="tabbar-foster" style="display:none">
-          <div class="tab-item active" id="tab-f-workbench" onclick="showFosterPage('f-workbench')">
-            <span class="tab-icon">🏠</span><span class="tab-label">工作台</span>
-          </div>
-          <div class="tab-item" id="tab-f-tasks" onclick="showFosterPage('f-tasks')">
-            <span class="tab-icon">📋</span><span class="tab-label">喂养任务</span>
-          </div>
-          <div class="tab-item" id="tab-f-pigs" onclick="showFosterPage('f-pigs')">
-            <span class="tab-icon">🐷</span><span class="tab-label">我的猪只</span>
-          </div>
-          <div class="tab-item" id="tab-f-earnings" onclick="showFosterPage('f-earnings')">
-            <span class="tab-icon">💰</span><span class="tab-label">收益中心</span>
-          </div>
-        </div>
-      </div><!-- /sec-foster -->
-
-
-      <!-- ══════════════════════════════
-           管理端
-      ══════════════════════════════ -->
-      <div class="section" id="sec-admin">
-        <div class="scroll-area no-tab" id="sa-admin">
-
-          <!-- 管理首页 -->
-          <div class="screen show" id="scr-a-index">
-            <div class="admin-header">
-              <div class="admin-title">⚙️ 数据管理中心</div>
-              <div class="admin-sub">录入和管理农户、猪只及任务数据</div>
-            </div>
-            <div class="admin-menu">
-              <div class="admin-item" onclick="showAdminPage('a-farmers')">
-                <div class="admin-item-icon green">👨‍🌾</div>
-                <div class="admin-item-info">
-                  <div class="admin-item-name">农户管理</div>
-                  <div class="admin-item-desc">添加 / 编辑 / 删除农户档案</div>
-                </div>
-                <span class="admin-arrow">›</span>
-              </div>
-              <div class="admin-item" onclick="showAdminPage('a-pigs')">
-                <div class="admin-item-icon orange">🐷</div>
-                <div class="admin-item-info">
-                  <div class="admin-item-name">猪只管理</div>
-                  <div class="admin-item-desc">录入猪只信息、上架下架管理</div>
-                </div>
-                <span class="admin-arrow">›</span>
-              </div>
-              <div class="admin-item" onclick="showAdminPage('a-tasks')">
-                <div class="admin-item-icon blue">📋</div>
-                <div class="admin-item-info">
-                  <div class="admin-item-name">任务管理</div>
-                  <div class="admin-item-desc">为农户生成今日喂养任务</div>
-                </div>
-                <span class="admin-arrow">›</span>
-              </div>
-            </div>
-            <div class="admin-back-btn" onclick="switchSection('foster',null)">← 返回代养人登录</div>
-          </div>
-
-          <!-- 农户管理 -->
-          <div class="screen" id="scr-a-farmers">
-            <div class="admin-sub-header">
-              <span class="admin-sub-back" onclick="showAdminPage('a-index')">←</span>
-              <span class="admin-sub-title">农户管理</span>
-              <span class="admin-add-btn">＋ 添加</span>
-            </div>
-            <div class="admin-list">
-              <div class="admin-card">
-                <div class="admin-card-av">张</div>
-                <div class="admin-card-info">
-                  <div class="admin-card-name">张大爷</div>
-                  <div class="admin-card-sub">四川广元 · 散养 12 年</div>
-                </div>
-                <div class="admin-card-actions">
-                  <span class="ac-btn">✏️ 编辑</span>
-                  <span class="ac-btn del">🗑️</span>
-                </div>
-              </div>
-              <div class="admin-card">
-                <div class="admin-card-av" style="background:linear-gradient(135deg,#c4889a,#a0506a)">李</div>
-                <div class="admin-card-info">
-                  <div class="admin-card-name">李大妈</div>
-                  <div class="admin-card-sub">四川绵阳 · 散养 8 年</div>
-                </div>
-                <div class="admin-card-actions">
-                  <span class="ac-btn">✏️ 编辑</span>
-                  <span class="ac-btn del">🗑️</span>
-                </div>
-              </div>
-              <div class="admin-card">
-                <div class="admin-card-av" style="background:linear-gradient(135deg,#8899c4,#4a6a9a)">王</div>
-                <div class="admin-card-info">
-                  <div class="admin-card-name">王叔</div>
-                  <div class="admin-card-sub">四川德阳 · 散养 15 年</div>
-                </div>
-                <div class="admin-card-actions">
-                  <span class="ac-btn">✏️ 编辑</span>
-                  <span class="ac-btn del">🗑️</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 猪只管理 -->
-          <div class="screen" id="scr-a-pigs">
-            <div class="admin-sub-header">
-              <span class="admin-sub-back" onclick="showAdminPage('a-index')">←</span>
-              <span class="admin-sub-title">猪只管理</span>
-              <span class="admin-add-btn">＋ 添加</span>
-            </div>
-            <div class="admin-list">
-              <div class="admin-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-                <div style="display:flex;align-items:center;gap:10px;width:100%">
-                  <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#f5e6d3,#c8a068);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐷</div>
-                  <div style="flex:1">
-                    <div class="admin-card-name">广元黑猪 · 土猪散养</div>
-                    <div class="admin-card-sub">张大爷 · 四川广元 · 42.5kg · ¥3,680/份</div>
-                  </div>
-                  <span style="background:#f6ffed;color:#52c41a;font-size:11px;padding:3px 8px;border-radius:8px;font-weight:700">上架</span>
-                </div>
-                <div style="display:flex;gap:8px;width:100%;padding-top:8px;border-top:1px solid #f5f5f5">
-                  <span class="ac-btn" style="flex:1;text-align:center">✏️ 编辑</span>
-                  <span class="ac-btn" style="flex:1;text-align:center">⬇️ 下架</span>
-                  <span class="ac-btn del" style="flex:1;text-align:center">🗑️ 删除</span>
-                </div>
-              </div>
-              <div class="admin-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-                <div style="display:flex;align-items:center;gap:10px;width:100%">
-                  <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#e8f0ff,#b0c8ff);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐽</div>
-                  <div style="flex:1">
-                    <div class="admin-card-name">绵阳白猪 · 有机饲料</div>
-                    <div class="admin-card-sub">李大妈 · 四川绵阳 · 38.2kg · ¥2,980/份</div>
-                  </div>
-                  <span style="background:#f6ffed;color:#52c41a;font-size:11px;padding:3px 8px;border-radius:8px;font-weight:700">上架</span>
-                </div>
-                <div style="display:flex;gap:8px;width:100%;padding-top:8px;border-top:1px solid #f5f5f5">
-                  <span class="ac-btn" style="flex:1;text-align:center">✏️ 编辑</span>
-                  <span class="ac-btn" style="flex:1;text-align:center">⬇️ 下架</span>
-                  <span class="ac-btn del" style="flex:1;text-align:center">🗑️ 删除</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 任务管理 -->
-          <div class="screen" id="scr-a-tasks">
-            <div class="admin-sub-header">
-              <span class="admin-sub-back" onclick="showAdminPage('a-index')">←</span>
-              <span class="admin-sub-title">任务管理</span>
-            </div>
-            <div class="task-form">
-              <div class="task-form-card">
-                <span class="tf-label">📋 选择农户</span>
-                <div class="farmer-chips">
-                  <div class="farmer-chip2 active">张大爷</div>
-                  <div class="farmer-chip2">李大妈</div>
-                  <div class="farmer-chip2">王叔</div>
-                </div>
-              </div>
-              <div class="task-form-card">
-                <span class="tf-label">⚙️ 任务配置</span>
-                <div class="task-row-form">
-                  <span class="tf-icon">🌅</span>
-                  <div class="tf-info"><div class="tf-name">早餐喂养</div><div class="tf-time">07:00 - 08:30</div></div>
-                  <span style="font-size:12px;color:#2d8a4e;font-weight:700">已配置</span>
-                </div>
-                <div class="task-row-form">
-                  <span class="tf-icon">☀️</span>
-                  <div class="tf-info"><div class="tf-name">午餐喂养</div><div class="tf-time">12:00 - 13:30</div></div>
-                  <span style="font-size:12px;color:#2d8a4e;font-weight:700">已配置</span>
-                </div>
-                <div class="task-row-form">
-                  <span class="tf-icon">🌙</span>
-                  <div class="tf-info"><div class="tf-name">晚餐喂养</div><div class="tf-time">18:00 - 19:30</div></div>
-                  <span style="font-size:12px;color:#2d8a4e;font-weight:700">已配置</span>
-                </div>
-              </div>
-              <button class="gen-btn" onclick="this.textContent='✓ 已生成 3 条任务';this.style.background='#888';this.disabled=true">一键生成今日任务</button>
-            </div>
-          </div>
-
-        </div><!-- /sa-admin -->
-      </div><!-- /sec-admin -->
-
-    </div><!-- /phone-screen -->
-  </div><!-- /phone-frame -->
-
-  <div style="margin-top:16px;text-align:center;">
-    <div style="font-size:14px;font-weight:700;color:#333" id="phoneLabel">客户端 · 首页</div>
-    <div style="font-size:12px;color:#aaa;margin-top:3px;font-family:monospace" id="phoneRoute">pages/index/index</div>
+        <button class="om-btn" onclick="retry()">重新连接</button>
+      </div>
+    </div>
   </div>
 
-</div><!-- /phone-wrap -->
-</div><!-- /main -->
+  <div class="phone-label">
+    <div class="pl-name" id="labelName">客户端 · 首页</div>
+    <div class="pl-path" id="labelPath">localhost:5173/#/pages/index/index</div>
+  </div>
+</div>
+</div>
 
 <script>
-// ── 时钟 ──
+const BASE = 'http://localhost:5173';
+const sections = {
+  client:  { name:'客户端 · 首页',    path:'pages/index/index',           label:'客户端' },
+  foster:  { name:'代养人端 · 登录',  path:'pages/foster/login/index',     label:'代养人端' },
+  admin:   { name:'管理端 · 数据中心', path:'pages/foster/admin/index',     label:'管理端' },
+};
+
+let currentSection = 'client';
+let serverOk = false;
+
+// 时钟
 function tick(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('clockEl').textContent=h+':'+m;
+  const n=new Date();
+  document.getElementById('clockEl').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 }
 tick(); setInterval(tick,10000);
 
-// ── 状态栏颜色 ──
-const statusColors={
-  client:'rgba(0,0,0,0)',
-  foster:'rgba(0,0,0,0)',
-  admin:'rgba(0,0,0,0)'
-};
-
-let currentSec='client';
-
-// ── 切换顶级区段 ──
-function switchSection(key, btn){
-  currentSec=key;
-  // 按钮状态
-  if(btn){
-    document.querySelectorAll('.top-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }else{
-    // 通过 key 找按钮
-    const btns=document.querySelectorAll('.top-btn');
-    const labels={'client':'客户端','foster':'代养人端','admin':'管理端'};
-    btns.forEach(b=>{if(b.textContent===labels[key])b.classList.add('active');else b.classList.remove('active');});
-  }
-  // 显示区段
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
-  document.getElementById('sec-'+key).classList.add('show');
+// 检测服务器
+async function checkServer(){
+  try{
+    await fetch(BASE+'/',{method:'HEAD',mode:'no-cors',signal:AbortSignal.timeout(3000)});
+    return true;
+  }catch{return false;}
 }
 
-// ── 客户端页面切换 ──
-const clientMeta={
-  'c-home':{label:'客户端 · 首页',route:'pages/index/index',tab:'tab-c-home'},
-  'c-order':{label:'客户端 · 订猪',route:'pages/pig/list',tab:'tab-c-order'},
-  'c-mine':{label:'客户端 · 我的猪圈',route:'pages/my/pigs',tab:'tab-c-mine'},
-  'c-my':{label:'客户端 · 我的',route:'pages/my/index',tab:'tab-c-my'},
-  'c-live':{label:'客户端 · 直播间',route:'pages/live/index',tab:null},
-};
-function showClientPage(key){
-  document.querySelectorAll('#sec-client .screen').forEach(s=>s.classList.remove('show'));
-  document.getElementById('scr-'+key).classList.add('show');
-  document.querySelectorAll('#sec-client .tab-item').forEach(t=>t.classList.remove('active'));
-  const m=clientMeta[key];
-  if(m){
-    if(m.tab) document.getElementById(m.tab)?.classList.add('active');
-    document.getElementById('phoneLabel').textContent=m.label;
-    document.getElementById('phoneRoute').textContent=m.route;
-  }
-  document.getElementById('sa-client').scrollTop=0;
-}
-
-// ── 代养人端页面切换 ──
-const fosterMeta={
-  'f-login':{label:'代养人端 · 登录',route:'pages/foster/login/index',tab:null,tabbar:false},
-  'f-workbench':{label:'代养人端 · 工作台',route:'pages/foster/workbench/index',tab:'tab-f-workbench',tabbar:true},
-  'f-tasks':{label:'代养人端 · 喂养任务',route:'pages/foster/tasks/index',tab:'tab-f-tasks',tabbar:true},
-  'f-pigs':{label:'代养人端 · 我的猪只',route:'pages/foster/pigs/index',tab:'tab-f-pigs',tabbar:true},
-  'f-earnings':{label:'代养人端 · 收益中心',route:'pages/foster/earnings/index',tab:'tab-f-earnings',tabbar:true},
-};
-function showFosterPage(key){
-  document.querySelectorAll('#sec-foster .screen').forEach(s=>s.classList.remove('show'));
-  const scrEl=document.getElementById('scr-'+key);
-  if(scrEl) scrEl.classList.add('show');
-  const m=fosterMeta[key];
-  const tabbar=document.getElementById('tabbar-foster');
-  if(m){
-    tabbar.style.display=m.tabbar?'flex':'none';
-    // scroll margin
-    const sa=document.getElementById('sa-foster');
-    sa.style.marginBottom=m.tabbar?'60px':'0px';
-    if(m.tabbar){
-      document.querySelectorAll('#sec-foster .tab-item').forEach(t=>t.classList.remove('active'));
-      if(m.tab) document.getElementById(m.tab)?.classList.add('active');
+async function updateStatus(){
+  const ok = await checkServer();
+  serverOk = ok;
+  const badge=document.getElementById('syncBadge');
+  const text=document.getElementById('syncText');
+  const mask=document.getElementById('offlineMask');
+  if(ok){
+    badge.className='sync-badge';
+    text.textContent='实时同步中';
+    mask.className='offline-mask hidden';
+    // 如果 iframe 还是 about:blank，加载对应页面
+    const frame=document.getElementById('appFrame');
+    if(frame.src==='about:blank'||frame.src===window.location.href){
+      loadSection(currentSection);
     }
-    document.getElementById('phoneLabel').textContent=m.label;
-    document.getElementById('phoneRoute').textContent=m.route;
+  }else{
+    badge.className='sync-badge offline';
+    text.textContent='未连接';
+    mask.className='offline-mask';
   }
-  document.getElementById('sa-foster').scrollTop=0;
 }
 
-// ── 管理端页面切换 ──
-const adminMeta={
-  'a-index':{label:'管理端 · 数据管理中心',route:'pages/foster/admin/index'},
-  'a-farmers':{label:'管理端 · 农户管理',route:'pages/foster/admin/farmers'},
-  'a-pigs':{label:'管理端 · 猪只管理',route:'pages/foster/admin/pigs'},
-  'a-tasks':{label:'管理端 · 任务管理',route:'pages/foster/admin/tasks'},
-};
-function showAdminPage(key){
-  document.querySelectorAll('#sec-admin .screen').forEach(s=>s.classList.remove('show'));
-  document.getElementById('scr-'+key).classList.add('show');
-  const m=adminMeta[key];
-  if(m){
-    document.getElementById('phoneLabel').textContent=m.label;
-    document.getElementById('phoneRoute').textContent=m.route;
-  }
-  document.getElementById('sa-admin').scrollTop=0;
+function loadSection(key){
+  const s=sections[key];
+  const url=BASE+'/#/'+s.path;
+  document.getElementById('appFrame').src=url;
+  document.getElementById('labelName').textContent=s.name;
+  document.getElementById('labelPath').textContent='localhost:5173/#/'+s.path;
 }
+
+function goSection(key,btn){
+  currentSection=key;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(serverOk) loadSection(key);
+}
+
+function retry(){
+  document.getElementById('offlineMask').innerHTML=`
+    <div style="font-size:56px;animation:bounce 1.2s infinite">🐷</div>
+    <div style="font-size:16px;font-weight:700;color:#333">正在连接…</div>
+  `;
+  setTimeout(updateStatus, 800);
+}
+
+// 初始化
+updateStatus();
+setInterval(updateStatus, 20000);
 </script>
 </body>
 </html>
