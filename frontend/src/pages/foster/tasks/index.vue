@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <view v-if="loading" class="center"><text class="gray">加载中…</text></view>
-    <scroll-view v-else scroll-y class="scroll">
+    <scroll-view v-else scroll-y class="scroll" style="padding-bottom:120rpx;box-sizing:border-box;">
       <view v-if="!tasks.length" class="center">
         <text class="empty-emoji">🎉</text>
         <text class="empty-text">今日任务已全部完成！</text>
@@ -42,6 +42,8 @@
         <text class="date-text">📅 {{ todayStr }}</text>
       </view>
     </scroll-view>
+
+    <FosterTabBar current="tasks" />
   </view>
 </template>
 
@@ -49,6 +51,7 @@
 import { ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { request, getFarmerId } from '../../../utils/fosterRequest';
+import FosterTabBar from '../../../components/FosterTabBar.vue';
 
 interface Task { id: string; label: string; icon: string; area: string; timeSlot: string; foodDesc: string; status: string; checkedAt: string | null; }
 

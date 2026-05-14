@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
-import { request } from '../../../utils/fosterRequest';
+import { request, getFarmerId } from '../../../utils/fosterRequest';
 
 interface Pig {
   id: string; title: string; breed: string; farmerId: string; farmerName: string;
@@ -122,7 +122,10 @@ const form = reactive({
 
 const farmerNames = computed(() => farmers.value.map(f => `${f.name}（${f.region}）`));
 
-onMounted(load);
+onMounted(() => {
+  if (!getFarmerId()) { uni.reLaunch({ url: '/pages/foster/login/index' }); return; }
+  load();
+});
 
 async function load() {
   loading.value = true;

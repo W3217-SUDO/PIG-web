@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { request } from '../../../utils/fosterRequest';
+import { request, getFarmerId } from '../../../utils/fosterRequest';
 
 interface Farmer {
   id: string; name: string; region: string; years: number;
@@ -86,7 +86,10 @@ const form = reactive({
   name: '', region: '', years: 0, avatarUrl: '', story: '', videoUrl: ''
 });
 
-onMounted(load);
+onMounted(() => {
+  if (!getFarmerId()) { uni.reLaunch({ url: '/pages/foster/login/index' }); return; }
+  load();
+});
 
 async function load() {
   loading.value = true;

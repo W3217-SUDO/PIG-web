@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <view v-if="loading" class="center"><text class="gray">加载中…</text></view>
-    <scroll-view v-else scroll-y class="scroll">
+    <scroll-view v-else scroll-y class="scroll" style="padding-bottom:120rpx;box-sizing:border-box;">
       <!-- 汇总卡片 -->
       <view class="summary-card">
         <view class="summary-item">
@@ -46,6 +46,8 @@
         <text class="note-text">💡 收益每月结算一次，次月5日前到账</text>
       </view>
     </scroll-view>
+
+    <FosterTabBar current="earnings" />
   </view>
 </template>
 
@@ -53,6 +55,7 @@
 import { ref, computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { request, getFarmerId } from '../../../utils/fosterRequest';
+import FosterTabBar from '../../../components/FosterTabBar.vue';
 
 interface Earning { year: number; month: number; amount: number; }
 interface EarningsResp { thisMonth: number; total: number; list: Earning[]; }

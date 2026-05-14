@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import * as crypto from 'crypto';
@@ -307,7 +307,7 @@ export class FosterService {
           stallNo,
           healthStatus,
           ownerName,
-          ownerNote: (pig as any).ownerNote || '',  // 农户手填的主人备注
+          ownerNote: pig.ownerNote || '',  // 农户手填的主人备注
           daysRaised: Math.max(0, daysRaised),
           weightKg: pig.weightKg ? Number(pig.weightKg) : null,
         };
@@ -324,7 +324,11 @@ export class FosterService {
       order: { year: 'DESC', month: 'DESC' },
     });
 
-    const thisMonth = earnings[0] ? Number(earnings[0].amount) : 0;
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    const curEntry = earnings.find(e => e.year === curYear && e.month === curMonth);
+    const thisMonth = curEntry ? Number(curEntry.amount) : 0;
     const total = earnings.reduce((sum, e) => sum + Number(e.amount), 0);
 
     return {
@@ -348,21 +352,21 @@ export class FosterService {
     if (!pig) throw new NotFoundException('猪只不存在或不属于该农户');
     if (dto.weightKg !== undefined) {
       if (!dto.weightImage || dto.weightImage.trim() === '') {
-        throw new Error('修改体重必须上传称重图片');
+        throw new BadRequestException('修改体重必须上传称重图片');
       }
-      (pig as any).weightKg = String(dto.weightKg);
+      pig.weightKg = String(dto.weightKg);
       // 将称重图片记录到 photos 字段（保留最近10张）
       const existing: string[] = (pig.photos as string[]) || [];
       pig.photos = [...existing, dto.weightImage].slice(-10);
     }
     if (dto.ownerNote !== undefined) {
-      (pig as any).ownerNote = dto.ownerNote;  // 使用专用 owner_note 列
+      pig.ownerNote = dto.ownerNote;
     }
     await this.pigRepo.save(pig);
     return {
       id: pig.id,
       weightKg: pig.weightKg ? Number(pig.weightKg) : null,
-      ownerNote: (pig as any).ownerNote || '',
+      ownerNote: pig.ownerNote || '',
     };
   }
 
@@ -452,9 +456,9 @@ export class FosterService {
   }>) {
     const pig = await this.pigRepo.findOne({ where: { id } });
     if (!pig) throw new NotFoundException('猪只不存在');
-    if (dto.weightKg !== undefined) (pig as any).weightKg = String(dto.weightKg);
-    if (dto.expectedWeightKg !== undefined) (pig as any).expectedWeightKg = String(dto.expectedWeightKg);
-    if (dto.pricePerShare !== undefined) (pig as any).pricePerShare = String(dto.pricePerShare);
+    if (dto.weightKg !== undefined) pig.weightKg = String(dto.weightKg);
+    if (dto.expectedWeightKg !== undefined) pig.expectedWeightKg = String(dto.expectedWeightKg);
+    if (dto.pricePerShare !== undefined) pig.pricePerShare = String(dto.pricePerShare);
     const { weightKg, expectedWeightKg, pricePerShare, ...rest } = dto;
     Object.assign(pig, rest);
     return this.pigRepo.save(pig);

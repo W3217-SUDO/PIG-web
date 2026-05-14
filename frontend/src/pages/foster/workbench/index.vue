@@ -4,9 +4,9 @@
     <view class="nav-bar" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view class="nav-content">
         <view class="nav-left">
-          <text class="nav-icon">👨‍🌾</text>
-          <text class="nav-title">代养人工作台</text>
+          <text class="back-btn" @tap="exitFoster">← 客户端</text>
         </view>
+        <text class="nav-title">代养人工作台</text>
         <text class="bell-icon" @tap="goMessages">🔔</text>
       </view>
     </view>
@@ -71,6 +71,9 @@
         <text class="logout-btn" @tap="logout">切换农户</text>
       </view>
     </scroll-view>
+
+    <!-- 底部导航栏 -->
+    <FosterTabBar current="workbench" />
   </view>
 </template>
 
@@ -78,6 +81,7 @@
 import { ref, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { request, getFarmerId, clearAuth } from '../../../utils/fosterRequest';
+import FosterTabBar from '../../../components/FosterTabBar.vue';
 
 interface Task { id: string; label: string; icon: string; area: string; timeSlot: string; status: string; }
 interface Dashboard { pigCount: number; pendingTaskCount: number; todayTasks: Task[]; }
@@ -110,10 +114,11 @@ function statusLabel(s: string) {
   return s === 'done' ? '✅ 已完成' : s === 'in_progress' ? '⏳ 进行中' : '🕐 未开始';
 }
 
-function goTasks() { uni.navigateTo({ url: '/pages/foster/tasks/index' }); }
-function goPigs() { uni.navigateTo({ url: '/pages/foster/pigs/index' }); }
-function goEarnings() { uni.navigateTo({ url: '/pages/foster/earnings/index' }); }
+function goTasks() { uni.redirectTo({ url: '/pages/foster/tasks/index' }); }
+function goPigs() { uni.redirectTo({ url: '/pages/foster/pigs/index' }); }
+function goEarnings() { uni.redirectTo({ url: '/pages/foster/earnings/index' }); }
 function goMessages() { uni.showToast({ title: '暂无新消息', icon: 'none' }); }
+function exitFoster() { uni.reLaunch({ url: '/pages/index/index' }); }
 function logout() {
   uni.showModal({
     title: '切换农户',
@@ -131,12 +136,11 @@ function logout() {
 <style scoped>
 .page { min-height: 100vh; background: #f5f5f5; }
 .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: linear-gradient(135deg, #1a6b35, #2d8a4e); }
-.nav-content { height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 32rpx; }
-.nav-left { display: flex; align-items: center; gap: 12rpx; }
-.nav-icon { font-size: 40rpx; }
-.nav-title { font-size: 36rpx; font-weight: 700; color: #fff; }
+.nav-content { height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; }
+.back-btn { font-size: 26rpx; color: rgba(255,255,255,0.9); font-weight: 500; padding: 8rpx 0; }
+.nav-title { font-size: 34rpx; font-weight: 700; color: #fff; }
 .bell-icon { font-size: 44rpx; }
-.body { height: 100vh; }
+.body { height: 100vh; padding-bottom: 120rpx; box-sizing: border-box; }
 .stats-card { margin: 24rpx; background: #fff; border-radius: 20rpx; display: flex; align-items: center; padding: 40rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); }
 .stat-item { flex: 1; text-align: center; }
 .stat-num { font-size: 72rpx; font-weight: 800; display: block; }
