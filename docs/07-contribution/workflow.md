@@ -4,32 +4,101 @@
 
 ---
 
-## 一、分支模型
+## 一、分支模型(2026-05-14 起)
 
 ```
-main                       永远可部署的稳定分支
- ├─ feat/xxx               功能开发
+main                       稳定发布分支,只接受来自 dev 的合并 + 打 tag
+ │
+dev                        日常开发集成分支,所有 feature 完工后合并到这里
+ │
+ ├─ feature/xxx            新功能开发
  ├─ fix/xxx                bug 修复
- ├─ hotfix/xxx             紧急修复(线上)
+ ├─ hotfix/xxx             紧急修复(线上,可直接合 main + 回灌 dev)
  ├─ chore/xxx              杂项(依赖升级、配置)
  ├─ docs/xxx               纯文档
  └─ refactor/xxx           重构(行为不变)
 ```
 
-**只有 `main` 是长期分支**,其他都是短期(feature branch)。
+**长期分支**:`main`、`dev` 两条,其他都是短期(完工就删)。
+
+### 流程图
+
+```
+feature/xxx ──(完工合并)──> dev ──(发布合并 + tag)──> main
+                              ↑                          │
+                              └────(hotfix 回灌)──────────┘
+```
+
+- **不要**直接 push 到 `main`(发布以外的所有改动必须经过 dev)
+- **不要**直接 push 到 `dev`(短改动也要走 feature 分支,虽然 trivial 改可口头放宽)
+- `main` 上每次合并 dev 之后,**必须**打一个 `vX.Y.Z` tag
 
 ### 命名约定
 
 ```
-<type>/<topic>
+<type>/<topic-kebab>
 ```
 
 例:
-- `feat/share-claim` — 拼猪功能
+- `feature/share-claim` — 拼猪功能
 - `fix/wallet-balance-race` — 钱包余额竞态
 - `hotfix/pay-callback-sign` — 支付回调签名应急修
 - `chore/upgrade-nestjs-10.4`
 - `docs/add-postman-collection`
+
+> **Claude Code 的 `claude/<worktree-name>` 分支**:当作 feature 分支使用,合并目标为 **dev**,合完即删。
+
+---
+
+## 一·五、发布流程(tag 版本号管理)
+
+**起点**:`v1.0.0`(MVP 5/31 上线那一刻)。
+
+**版本号语义**(SemVer):`vMAJOR.MINOR.PATCH`
+
+| 改动类型 | 版本变更 | 例 |
+|---|---|---|
+| 兼容性破坏 / 大版本迭代 | MAJOR +1 | v1.x.x → v2.0.0 |
+| 新功能(向下兼容) | MINOR +1 | v1.0.x → v1.1.0 |
+| bug 修复 / 小调整 | PATCH +1 | v1.0.0 → v1.0.1 |
+
+**操作步骤**(发布人执行):
+
+```bash
+# 1. 确保 dev 已经稳定,所有 feature 已合并
+git checkout dev && git pull origin dev
+
+# 2. 合并到 main
+git checkout main && git pull origin main
+git merge --ff-only dev          # 必须 fast-forward,有冲突先回 dev 解决
+
+# 3. 打 tag
+git tag -a v1.0.0 -m "v1.0.0 · MVP 上线"
+
+# 4. 推 main + tag
+git push origin main --follow-tags
+
+# 5. 把 main 的 tag 回灌 dev(可选,避免分歧)
+git checkout dev && git merge --ff-only main
+git push origin dev
+```
+
+**hotfix(线上 bug 应急)流程**:
+
+```bash
+# 1. 从 main 切 hotfix
+git checkout main && git pull
+git checkout -b hotfix/pay-callback-sign
+
+# 2. 改完提交、合并 main + 打 tag(PATCH +1)
+git checkout main && git merge --no-ff hotfix/pay-callback-sign
+git tag -a v1.0.1 -m "v1.0.1 · hotfix: pay-callback 签名"
+git push origin main --follow-tags
+
+# 3. 回灌 dev,删 hotfix 分支
+git checkout dev && git merge main && git push origin dev
+git branch -d hotfix/pay-callback-sign
+```
 
 ---
 
