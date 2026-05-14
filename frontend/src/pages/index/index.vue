@@ -9,9 +9,14 @@
 
       <view class="hero-top">
         <text class="hero-brand" @tap="todo('关于我们')">私 人 订 猪</text>
-        <view class="hero-bell" @tap="goMessages">
-          <text class="hero-bell-icon">🔔</text>
-          <view class="hero-bell-dot"></view>
+        <view class="hero-top-right">
+          <view class="btn-foster" @tap="goFoster">
+            <text class="btn-foster-text">代养人端</text>
+          </view>
+          <view class="hero-bell" @tap="goMessages">
+            <text class="hero-bell-icon">🔔</text>
+            <view class="hero-bell-dot"></view>
+          </view>
         </view>
       </view>
 
@@ -375,6 +380,10 @@ function goMessages() {
   uni.navigateTo({ url: '/pages/messages/index' });
 }
 
+function goFoster() {
+  uni.navigateTo({ url: '/pages/foster/login/index' });
+}
+
 function goMyPigs() {
   uni.navigateTo({ url: '/pages/my/pigs' });
 }
@@ -480,6 +489,23 @@ onMounted(loadList);
   font-weight: 800;
   color: #ffd89c;
   letter-spacing: 6rpx;
+}
+.hero-top-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.btn-foster {
+  background: rgba(45, 138, 78, 0.85);
+  border-radius: 30rpx;
+  padding: 10rpx 24rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+}
+.btn-foster-text {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 2rpx;
 }
 .hero-bell {
   width: 72rpx; height: 72rpx;

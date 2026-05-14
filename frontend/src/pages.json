@@ -170,6 +170,76 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#0f1115"
       }
+    },
+    {
+      "path": "pages/foster/login/index",
+      "style": {
+        "navigationBarTitleText": "代养人登录",
+        "navigationBarBackgroundColor": "#2d8a4e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/workbench/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/foster/tasks/index",
+      "style": {
+        "navigationBarTitleText": "喂养任务",
+        "navigationBarBackgroundColor": "#2d8a4e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/pigs/index",
+      "style": {
+        "navigationBarTitleText": "我的猪只",
+        "navigationBarBackgroundColor": "#2d8a4e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/earnings/index",
+      "style": {
+        "navigationBarTitleText": "收益中心",
+        "navigationBarBackgroundColor": "#2d8a4e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/admin/index",
+      "style": {
+        "navigationBarTitleText": "数据管理中心",
+        "navigationBarBackgroundColor": "#1a6b35",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/admin/farmers",
+      "style": {
+        "navigationBarTitleText": "农户管理",
+        "navigationBarBackgroundColor": "#1a6b35",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/admin/pigs",
+      "style": {
+        "navigationBarTitleText": "猪只管理",
+        "navigationBarBackgroundColor": "#1a6b35",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/foster/admin/tasks",
+      "style": {
+        "navigationBarTitleText": "任务管理",
+        "navigationBarBackgroundColor": "#1a6b35",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {
