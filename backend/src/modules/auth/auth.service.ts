@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
+import { BadGatewayException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
@@ -98,6 +98,24 @@ export class AuthService {
       openid,
       nickname: `dev-${openid}`,
     });
+    return { user, tokens: this.signTokens(user) };
+  }
+
+  /**
+   * 管理员登录:手机号 + 密码,凭据从 config(env)读。
+   * 凭据正确 → findOrCreateAdmin 保证 role=ADMIN 的 user 存在 → 签 JWT。
+   * 凭据不对统一抛 401(避免暴露"手机号是否存在")。
+   */
+  async adminLogin(phone: string, password: string): Promise<{ user: User; tokens: TokenPair }> {
+    const expectedPhone = this.config.get<string>('admin.phone');
+    const expectedPassword = this.config.get<string>('admin.password');
+    if (!expectedPhone || !expectedPassword) {
+      throw new UnauthorizedException('admin login not configured');
+    }
+    if (phone !== expectedPhone || password !== expectedPassword) {
+      throw new UnauthorizedException('手机号或密码错误');
+    }
+    const user = await this.userService.findOrCreateAdmin(phone);
     return { user, tokens: this.signTokens(user) };
   }
 }

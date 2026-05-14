@@ -11,6 +11,7 @@ import type { Request } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
+import { AdminLoginDto } from './dto/admin-login.dto';
 import { DevLoginDto } from './dto/dev-login.dto';
 import { WxLoginDto } from './dto/wx-login.dto';
 
@@ -39,6 +40,14 @@ export class AuthController {
       throw new ForbiddenException('dev-login disabled in production');
     }
     const { user, tokens } = await this.auth.devLogin(dto.openid);
+    return { user: pickUser(user), ...tokens };
+  }
+
+  @Public()
+  @Post('admin-login')
+  @ApiOperation({ summary: '管理员登录(手机号 + 密码,凭据从 env 读)' })
+  async adminLogin(@Body() dto: AdminLoginDto) {
+    const { user, tokens } = await this.auth.adminLogin(dto.phone, dto.password);
     return { user: pickUser(user), ...tokens };
   }
 

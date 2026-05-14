@@ -23,6 +23,10 @@ export const configuration = () => ({
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '2h',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
+  admin: {
+    phone: process.env.ADMIN_PHONE || '13800000000',
+    password: process.env.ADMIN_PASSWORD || 'admin123',
+  },
   wx: {
     mp: {
       appid: process.env.WX_MP_APPID || '',

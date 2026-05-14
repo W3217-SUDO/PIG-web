@@ -56,6 +56,36 @@ export class UserService {
   }
 
   /**
+   * 管理员账号 findOrCreate:固定 openid='admin_seed_001',强制 role=ADMIN。
+   * adminLogin 用,凭据校验已在上游完成。
+   */
+  async findOrCreateAdmin(phone: string): Promise<User> {
+    const SEED_OPENID = 'admin_seed_001';
+    let user = await this.findByOpenid(SEED_OPENID);
+    if (!user) {
+      user = this.repo.create({
+        openid: SEED_OPENID,
+        unionid: null,
+        phone,
+        nickname: '管理员',
+        avatarUrl: '',
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
+      });
+      user = await this.repo.save(user);
+      this.logger.log(`new admin user: id=${user.id} phone=${phone}`);
+    } else if (user.role !== UserRole.ADMIN || user.phone !== phone) {
+      // 已存在但 role/phone 不对(可能被改过) → 强制矫正
+      await this.repo.update(user.id, { role: UserRole.ADMIN, phone });
+      user.role = UserRole.ADMIN;
+      user.phone = phone;
+    }
+    await this.repo.update(user.id, { lastLoginAt: new Date() });
+    user.lastLoginAt = new Date();
+    return user;
+  }
+
+  /**
    * 更新用户资料(部分字段)
    */
   async updateProfile(id: string, input: UpdateProfileInput): Promise<User> {

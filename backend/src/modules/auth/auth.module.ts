@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -28,6 +29,8 @@ import { JwtStrategy } from './jwt.strategy';
     JwtStrategy,
     // 全局守卫: 所有路由默认要 JWT, @Public() 跳过
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // 角色守卫: 在 @Roles(...) 标注的接口上生效;未标注的接口直接放行(零影响)
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
   exports: [AuthService],
 })
