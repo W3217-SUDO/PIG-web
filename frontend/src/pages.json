@@ -28,6 +28,15 @@
       }
     },
     {
+      "path": "pages/admin/login",
+      "style": {
+        "navigationBarTitleText": "管理员登录",
+        "navigationBarBackgroundColor": "#1a2332",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#1a2332"
+      }
+    },
+    {
       "path": "pages/my/index",
       "style": {
         "navigationBarTitleText": "我的",

@@ -31,6 +31,20 @@
       </view>
     </view>
 
+    <!-- 其他身份入口 -->
+    <view class="role-entries">
+      <view class="role-entry" @tap="goFoster">
+        <text class="role-icon">🧑‍🌾</text>
+        <text class="role-text">我是代养人</text>
+        <text class="role-arrow">→</text>
+      </view>
+      <view class="role-entry" @tap="goAdmin">
+        <text class="role-icon">🛡</text>
+        <text class="role-text">管理员入口</text>
+        <text class="role-arrow">→</text>
+      </view>
+    </view>
+
     <view class="footer">
       <text class="footer-tip">登录即表示同意</text>
       <text class="footer-link" @tap="goStatic('terms')">《用户协议》</text>
@@ -134,6 +148,14 @@ async function onDevLogin() {
 function goStatic(name: 'terms' | 'privacy') {
   uni.navigateTo({ url: `/pages/static/${name}` });
 }
+
+function goFoster() {
+  uni.navigateTo({ url: '/pages/foster/login/index' });
+}
+
+function goAdmin() {
+  uni.navigateTo({ url: '/pages/admin/login' });
+}
 </script>
 
 <style>
@@ -226,6 +248,33 @@ function goStatic(name: 'terms' | 'privacy') {
   text-align: center;
   word-break: break-all;
 }
+.role-entries {
+  margin-top: 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.role-entry {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2rpx solid rgba(255, 216, 156, 0.3);
+  border-radius: 36rpx;
+  padding: 20rpx 32rpx;
+  display: flex;
+  align-items: center;
+}
+.role-icon { font-size: 32rpx; margin-right: 16rpx; }
+.role-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+.role-arrow {
+  font-size: 28rpx;
+  color: #ffd89c;
+}
+
 .footer {
   margin-top: auto;
   padding-top: 60rpx;
