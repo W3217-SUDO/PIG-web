@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { request } from '../../utils/request';
+import { request, getFarmerId } from '../../utils/request';
 
 interface Farmer { id: string; name: string; region: string; }
 
@@ -78,6 +78,7 @@ const tasks = reactive([
 ]);
 
 onMounted(async () => {
+  if (!getFarmerId()) { uni.reLaunch({ url: '/pages/login/index' }); return; }
   try {
     farmers.value = await request<Farmer[]>('/foster/admin/farmers');
   } catch { uni.showToast({ title: '加载农户失败', icon: 'none' }); }

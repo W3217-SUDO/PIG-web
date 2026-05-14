@@ -241,7 +241,7 @@ async function doSave() {
 
 <style scoped>
 .page { min-height: 100vh; background: #f5f5f5; }
-.scroll { height: 100vh; padding: 24rpx; box-sizing: border-box; }
+.scroll { height: 100vh; padding: 24rpx 24rpx 140rpx; box-sizing: border-box; }
 .center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120rpx 40rpx; }
 .gray { color: #aaa; font-size: 30rpx; }
 .empty-emoji { font-size: 100rpx; }

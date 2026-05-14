@@ -49,6 +49,23 @@
         </view>
       </view>
 
+      <!-- 快捷入口 -->
+      <view class="section-title">快捷入口</view>
+      <view class="quick-nav">
+        <view class="quick-item" @tap="goTasks">
+          <text class="quick-icon">📋</text>
+          <text class="quick-label">喂养任务</text>
+        </view>
+        <view class="quick-item" @tap="goPigs">
+          <text class="quick-icon">🐷</text>
+          <text class="quick-label">我的猪只</text>
+        </view>
+        <view class="quick-item" @tap="goEarnings">
+          <text class="quick-icon">💰</text>
+          <text class="quick-label">收益中心</text>
+        </view>
+      </view>
+
       <!-- 退出登录 -->
       <view class="logout-wrap">
         <text class="logout-btn" @tap="logout">切换农户</text>
@@ -94,6 +111,8 @@ function statusLabel(s: string) {
 }
 
 function goTasks() { uni.switchTab({ url: '/pages/tasks/index' }); }
+function goPigs() { uni.switchTab({ url: '/pages/pigs/index' }); }
+function goEarnings() { uni.switchTab({ url: '/pages/earnings/index' }); }
 function goMessages() { uni.showToast({ title: '暂无新消息', icon: 'none' }); }
 function logout() {
   uni.showModal({
@@ -117,7 +136,7 @@ function logout() {
 .nav-icon { font-size: 40rpx; }
 .nav-title { font-size: 36rpx; font-weight: 700; color: #fff; }
 .bell-icon { font-size: 44rpx; }
-.body { height: 100vh; }
+.body { height: 100vh; padding-bottom: 120rpx; box-sizing: border-box; }
 .stats-card { margin: 24rpx; background: #fff; border-radius: 20rpx; display: flex; align-items: center; padding: 40rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); }
 .stat-item { flex: 1; text-align: center; }
 .stat-num { font-size: 72rpx; font-weight: 800; display: block; }
@@ -139,6 +158,12 @@ function logout() {
 .status-badge.done { background: #f6ffed; color: #52c41a; }
 .status-badge.in_progress { background: #fff7e6; color: #fa8c16; }
 .status-badge.pending { background: #f5f5f5; color: #999; }
+/* 快捷入口 */
+.quick-nav { display: flex; margin: 0 24rpx 24rpx; gap: 16rpx; }
+.quick-item { flex: 1; background: #fff; border-radius: 20rpx; padding: 32rpx 0; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); }
+.quick-icon { font-size: 52rpx; }
+.quick-label { font-size: 24rpx; color: #555; margin-top: 12rpx; font-weight: 500; }
+/* 退出 */
 .logout-wrap { text-align: center; padding: 40rpx; }
 .logout-btn { font-size: 28rpx; color: #999; border-bottom: 1rpx solid #ddd; padding-bottom: 4rpx; }
 </style>
