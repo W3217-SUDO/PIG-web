@@ -12,6 +12,44 @@
 
 > **更新规则**:复制 `### 大盘 - YYYY-MM-DD` 块在最下方追加,旧的保留作历史。
 
+### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
+
+| 模块 | 任务数 | 已完成 | 进度 | 责任 | 风险 |
+|---|---|---|---|---|---|
+| 基础设施 | 6 | 6 | 🟢 100% | 后端 | — |
+| 文档体系 | 8 | 8 | 🟢 100% | 共同 | — |
+| auth（主端） | 7 | 2 | 🟡 29% | 后端 | 真实wx-login待AppSecret(C3) |
+| user + address | 9 | 9 | 🟢 100% | 后端 | — |
+| pig | 6 | 6 | 🟢 100% | 后端 | — |
+| order | 7 | 7 | 🟢 100% | 后端 | — |
+| **pay** | **5** | **0** | **🔴 0%** | **后端** | **⚠️ 上线阻塞，等商户号C4-C5** |
+| wallet | 4 | 4 | 🟢 100% | 后端 | — |
+| share | 3 | 3 | 🟢 100% | 后端 | — |
+| farmer + feeding + health + live | 8 | 8 | 🟢 100% | 后端 | — |
+| message | 3 | 3 | 🟢 100% | 后端 | — |
+| **upload** | **2** | **0** | **🟡 0%** | **后端** | 非阻塞 |
+| Seed数据 | 4 | 4 | 🟢 100% | 后端 | — |
+| **代养人端后端** | **6** | **6** | **🟢 100%** | **后端** | — |
+| **代养人端认证系统** | **6** | **6** | **🟢 100%** | **后端** | — |
+| **代养人端前端(foster-care-page)** | **10** | **10** | **🟢 100%** | **前端** | 快捷导航+鉴权+留白已同步 |
+| **代养人端管理后台** | **4** | **4** | **🟢 100%** | **前端+后端** | — |
+| 主端前端(19页+工具) | 23 | 19 | 🟢 83% | 前端 | — |
+| **Web 原型预览系统** | **5** | **3** | **🟡 60%** | **前端** | H5 dev server 连接问题；改用直连后端API方案 |
+| 部署运维 | 8 | 5 | 🟡 62% | 后端 | — |
+| **合规依赖** | 10 | 2 | 🔴 20% | **Owner** | AppSecret/商户号/ICP/资质 ⏳ |
+| 监控告警 | 5 | 0 | ⚪ 0% | 后端 | — |
+| APP 打包 | 4 | 0 | ⚪ 0% | 前端 | iOS账号C9 |
+| 测试 | 6 | 1 | 🟡 16% | 共同 | — |
+| **合计** | **168** | **126** | **🟢 75%** | | |
+
+> ✅ **foster-care-page 全面改进**：工作台快捷入口（3张卡片跳转）+ admin 三页登录鉴权 + 四页底部留白修复
+> ✅ **frontend H5 适配**：代养人登录页增加 `// #ifndef MP-WEIXIN` 条件编译，H5 模式自动进入 dev_mode
+> ✅ **vite.config.ts**：CORS + `X-Frame-Options: ALLOWALL` 支持 iframe 嵌入
+> ✅ **Web 原型框架完成**：手机外壳 + 三端切换导航 + 离线遮罩
+> ⚠️ **已知错误①**：`start.bat` 原命令 `node ..\node_modules\.bin\uni` 无效（.bin\uni 是 Shell 脚本，不能被 Node 直接执行）→ 已修复为 `node ..\node_modules\@dcloudio\vite-plugin-uni\bin\uni.js`
+> ⚠️ **已知错误②**：`file://` 打开 prototype.html，浏览器阻断 localhost iframe 加载 → 已修复：新增 `demo/serve.js` 提供 HTTP 服务，改为 `http://localhost:8080` 访问
+> 🔴 **原型页连接仍失败**：H5 dev server 难以稳定启动 → 当前进行中：改为直接 fetch `localhost:3000/api` 方案，完全绕开 H5 dev server
+
 ### 大盘 - 2026-05-14(全面校准 · 实际进度与代码对齐)
 
 > 本次大盘经逐文件审查校准，修正了此前§2详细清单与实际代码的严重不一致。
@@ -221,6 +259,41 @@
 - [x] 登录页新增管理员入口按钮 + 图片 404 文字头像回退(05-13 · Claude) ✓
 - [x] 主端 wx-login 502 自动回退 devLogin(05-13 · Claude) ✓
 - [x] 主端 todo() 占位替换为真实导航逻辑(05-13 · Claude) ✓
+
+### 1.9 foster-care-page 改进同步 🟢 4/4 · (2026-05-14 · Claude)
+
+> 将 `frontend/src/pages/foster/` 的改进同步回独立项目 `foster-care-page/`，并补充 H5 模式适配。
+
+- [x] `pages/workbench/index.vue`：新增快捷入口区（喂养任务 / 我的猪只 / 收益中心 三张卡片），底部 padding-bottom 120rpx ✓ 05-14
+- [x] `pages/tasks/index.vue` / `pigs/index.vue` / `earnings/index.vue`：scroll 区域 padding 加 140rpx 底部留白，防止内容被 tabBar 遮挡 ✓ 05-14
+- [x] `pages/admin/farmers.vue` / `admin/pigs.vue` / `admin/tasks.vue`：onMounted 加 `getFarmerId()` 鉴权检查，未登录自动 reLaunch 到登录页 ✓ 05-14
+- [x] `frontend/src/pages/foster/login/index.vue`：`startWxLogin` 和 `onMounted` 中增加 `// #ifndef MP-WEIXIN` 条件编译块，H5 模式自动进 dev_mode 流程 ✓ 05-14
+
+### 1.10 Web 原型预览系统 🟡 3/5 · (2026-05-14 · Claude)
+
+> 独立 `demo/` 目录，目标：在桌面浏览器中预览完整项目原型（只读，不影响小程序代码）。
+
+- [x] `demo/prototype.html`：手机外壳（390×820px iPhone 样式）+ 三端导航（客户端/代养人端/管理端）+ 离线遮罩 + iframe 嵌入 H5 app ✓ 05-14
+- [x] `demo/start.bat`：一键启动后端(3000) + H5 dev server(5173) + 原型页 HTTP 服务(8080) ✓ 05-14
+- [x] `demo/serve.js`：Node.js 原生 HTTP 服务，将 demo/ 挂载到 localhost:8080，解决 file:// 跨域限制 ✓ 05-14
+- [ ] **[已知错误·已修复]** `start.bat` 原命令 `node ..\node_modules\.bin\uni` 无效 → 修复为 `node ..\node_modules\@dcloudio\vite-plugin-uni\bin\uni.js`（直接调用 JS 入口文件）
+- [ ] **[进行中]** H5 dev server 仍连接失败 → 改为直连后端 API 方案：prototype.html 直接 fetch `http://localhost:3000/api`，完全绕开 Vite 构建流程
+
+**错误记录：**
+```
+错误1: start.bat 中 node ..\node_modules\.bin\uni
+  原因: Windows 的 .bin\uni 是 shell wrapper 脚本（无扩展名），不能被 node.exe 直接执行
+  修复: 改为 node ..\node_modules\@dcloudio\vite-plugin-uni\bin\uni.js
+
+错误2: 直接双击打开 prototype.html（file:// 协议）
+  原因: 浏览器安全策略阻断 file:// 页面中 iframe 加载 http://localhost，以及 fetch() 跨域
+  修复: 新增 demo/serve.js，用 Node HTTP 在 localhost:8080 提供服务
+
+错误3: 用户报告"连不上"（H5 dev server 未能正常启动）
+  原因: frontend/node_modules/.bin/ 目录下没有 uni，npm run dev:h5 也因此失败
+        root-level node_modules 有 uni.cmd，但 frontend 目录下 npm run 不自动加入 root .bin
+  修复进行中: 改为不依赖 H5 dev server 的独立 API 直连方案
+```
 
 ### 1.8 代养人端认证系统(Farmer Auth) 🟢 6/6 · (2026-05-13 · Claude)
 
