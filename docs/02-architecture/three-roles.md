@@ -13,7 +13,7 @@
 ```
 frontend/                         foster-care-page/
 ├── 19 个用户端页面                ├── 9 个页面(农户 5 + Admin 4)
-├── AppID: wx4409bb388ab1a03e      ├── AppID: wx4409bb388ab1a03e  ← 同
+├── AppID: wx7aaf3180b690e871      ├── AppID: wx7aaf3180b690e871  ← 同
 ├── 鉴权: Authorization Bearer JWT ├── 鉴权: X-Foster-Token  ← 不同!
 ├── token key: pig:access_token    ├── token key: pig:foster_token
 ├── API base: VITE_API_BASE 环境量 ├── API base: 硬编码 127.0.0.1:3000
@@ -151,7 +151,7 @@ frontend/
 │   │   └── auth.ts                    ← role/token storage 封装(新增)
 │   └── ...
 ├── package.json
-└── manifest.json                       AppID wx4409bb388ab1a03e(不变)
+└── manifest.json                       AppID wx7aaf3180b690e871(不变)
 ```
 
 **foster-care-page/ 目录在合并完成后整体删除**,git history 仍保留。

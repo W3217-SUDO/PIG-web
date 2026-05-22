@@ -238,7 +238,7 @@
 ### 1.6 代养人端前端(foster-care-page) 🟢 6/6 · (2026-05-12–13 · Claude)
 
 > 独立 uni-app 项目，路径 `foster-care-page/`，编译产物 `dist/build/mp-weixin/`。
-> AppID：`wx4409bb388ab1a03e`，tabBar 4 项（工作台/喂养任务/我的猪只/收益中心）。
+> AppID：`wx7aaf3180b690e871`，tabBar 4 项（工作台/喂养任务/我的猪只/收益中心）。
 
 - [x] 项目初始化：package.json / vite.config.ts / manifest.json / pages.json(05-12 · Claude) ✓
 - [x] `pages/login/index.vue`：微信一键登录（四路分流）+ 已登录快捷入口 + 切换账号(05-13 · Claude) ✓
@@ -545,7 +545,7 @@ wx.login() → code → POST /foster/auth/login
 | C8 | 隐私政策 + 用户协议文案 | 5/22 | Owner | ⬜ | 已有占位页，需 Owner 补充真实文案 |
 | C9 | Apple Developer Program(¥688) | 5/15 | Owner | ⬜ | iOS 砍 / TestFlight 无 |
 | C10 | 软件著作权(部分安卓商店) | — | Owner | ⬜ | 商店上架卡 |
-| **C11** | **代养人端独立 AppID**（当前与主端共用 wx4409bb388ab1a03e） | **立刻** | **Owner** | ⬜ | **两端只能上线其中一个，必须分开** |
+| **C11** | **代养人端独立 AppID**（当前与主端共用 wx7aaf3180b690e871） | **立刻** | **Owner** | ⬜ | **两端只能上线其中一个，必须分开** |
 
 ---
 

@@ -78,8 +78,8 @@ function onDiagnose() {
       `运行时 AppID: ${mp.appId || '(无)'}\n` +
       `环境: ${mp.envVersion || '?'}\n` +
       `版本: ${mp.version || '-'}\n` +
-      `期望 AppID: wx4409bb388ab1a03e\n` +
-      `是否一致: ${mp.appId === 'wx4409bb388ab1a03e' ? '✅ 一致' : '❌ 不一致, 这是登录失败的原因!'}`;
+      `期望 AppID: wx7aaf3180b690e871\n` +
+      `是否一致: ${mp.appId === 'wx7aaf3180b690e871' ? '✅ 一致' : '❌ 不一致, 这是登录失败的原因!'}`;
   } catch (e) {
     diagInfo.value = `getAccountInfoSync 失败: ${String(e)}`;
   }
