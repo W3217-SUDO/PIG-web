@@ -5,8 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ShareInvite } from './share-invite.entity';
+import { ShareMember, ShareMemberRole } from './share-member.entity';
 import { Order } from '../order/order.entity';
 import { Pig } from '../pig/pig.entity';
 import { User } from '../user/user.entity';
@@ -27,6 +28,8 @@ export class ShareService {
   constructor(
     @InjectRepository(ShareInvite)
     private readonly inviteRepo: Repository<ShareInvite>,
+    @InjectRepository(ShareMember)
+    private readonly memberRepo: Repository<ShareMember>,
     @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
     @InjectRepository(Pig) private readonly pigRepo: Repository<Pig>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
@@ -69,7 +72,9 @@ export class ShareService {
       userId,
       expiresAt,
     });
-    return this.inviteRepo.save(invite);
+    const saved = await this.inviteRepo.save(invite);
+    await this.ensureMember(saved.id, userId, ShareMemberRole.HOST);
+    return saved;
   }
 
   /**
@@ -111,5 +116,77 @@ export class ShareService {
           }
         : null,
     };
+  }
+
+  async join(code: string, userId: string) {
+    const invite = await this.getValidInvite(code);
+    const member = await this.ensureMember(invite.id, userId, ShareMemberRole.MEMBER);
+    return {
+      code,
+      joined: true,
+      member: {
+        id: member.id,
+        role: member.role,
+        joinedAt: member.joinedAt,
+      },
+    };
+  }
+
+  async members(code: string, userId: string) {
+    const invite = await this.getValidInvite(code);
+    const canView =
+      invite.userId === userId ||
+      !!(await this.memberRepo.findOne({ where: { inviteId: invite.id, userId } }));
+    if (!canView) throw new ForbiddenException('无权查看拼猪成员');
+
+    await this.ensureMember(invite.id, invite.userId, ShareMemberRole.HOST);
+    const members = await this.memberRepo.find({
+      where: { inviteId: invite.id },
+      order: { createdAt: 'ASC' },
+    });
+    const users = members.length
+      ? await this.userRepo.find({ where: { id: In(members.map((m) => m.userId)) } })
+      : [];
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    return {
+      code,
+      total: members.length,
+      members: members.map((m) => {
+        const u = userMap.get(m.userId);
+        return {
+          id: m.id,
+          userId: m.userId,
+          role: m.role,
+          joinedAt: m.joinedAt,
+          nickname: u?.nickname || (m.role === ShareMemberRole.HOST ? '主认领人' : '拼猪成员'),
+          avatarUrl: u?.avatarUrl || '',
+        };
+      }),
+    };
+  }
+
+  private async getValidInvite(code: string) {
+    const invite = await this.inviteRepo.findOne({ where: { code } });
+    if (!invite) throw new NotFoundException('邀请不存在或已过期');
+    if (invite.expiresAt < new Date()) throw new ForbiddenException('邀请已过期');
+    return invite;
+  }
+
+  private async ensureMember(inviteId: string, userId: string, role: ShareMemberRole) {
+    const existing = await this.memberRepo.findOne({ where: { inviteId, userId } });
+    if (existing) {
+      if (role === ShareMemberRole.HOST && existing.role !== ShareMemberRole.HOST) {
+        existing.role = ShareMemberRole.HOST;
+        return this.memberRepo.save(existing);
+      }
+      return existing;
+    }
+    const member = this.memberRepo.create({
+      inviteId,
+      userId,
+      role,
+      joinedAt: new Date(),
+    });
+    return this.memberRepo.save(member);
   }
 }

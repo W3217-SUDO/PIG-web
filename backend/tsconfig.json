@@ -24,7 +24,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node"]
+    "types": ["node", "multer"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

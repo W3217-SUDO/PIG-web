@@ -20,6 +20,8 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { ShareModule } from './modules/share/share.module';
 import { MessageModule } from './modules/message/message.module';
 import { FosterModule } from './modules/foster/foster.module';
+import { UploadModule } from './modules/upload/upload.module';
+import { PayModule } from './modules/pay/pay.module';
 
 @Module({
   imports: [
@@ -124,6 +126,8 @@ import { FosterModule } from './modules/foster/foster.module';
     WalletModule,
     ShareModule,
     FosterModule,
+    UploadModule,
+    PayModule,
   ],
 })
 export class AppModule {}

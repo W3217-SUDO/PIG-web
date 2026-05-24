@@ -24,4 +24,20 @@ export class ShareController {
   async lookup(@Param('code') code: string) {
     return this.share.lookup(code);
   }
+
+  @ApiBearerAuth()
+  @Post('share/:code/join')
+  @ApiOperation({ summary: '受邀人加入拼猪围观组(幂等)' })
+  async join(@Req() req: Request, @Param('code') code: string) {
+    const u = req.user as User;
+    return this.share.join(code, u.id);
+  }
+
+  @ApiBearerAuth()
+  @Get('share/:code/members')
+  @ApiOperation({ summary: '查看拼猪成员列表(主认领人/成员可看)' })
+  async members(@Req() req: Request, @Param('code') code: string) {
+    const u = req.user as User;
+    return this.share.members(code, u.id);
+  }
 }
