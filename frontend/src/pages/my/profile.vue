@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { request, ApiError } from '../../utils/request';
+import { request, ApiError, uploadImage } from '../../utils/request';
 
 interface UserInfo {
   id: string;
@@ -68,7 +68,26 @@ async function load() {
 }
 
 function onPickAvatar() {
-  uni.showToast({ title: '头像上传(S6 实现)', icon: 'none' });
+  uni.chooseImage({
+    count: 1,
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
+    success: async (res) => {
+      const filePath = res.tempFilePaths?.[0];
+      if (!filePath) return;
+      saving.value = true;
+      errMsg.value = '';
+      try {
+        const asset = await uploadImage(filePath);
+        form.avatarUrl = asset.url;
+        uni.showToast({ title: '头像已上传', icon: 'success' });
+      } catch (e) {
+        errMsg.value = e instanceof ApiError ? `[${e.bizCode}] ${e.message}` : String(e);
+      } finally {
+        saving.value = false;
+      }
+    },
+  });
 }
 
 async function onSave() {

@@ -13,7 +13,8 @@ function readBaseUrl(): string {
   return fromEnv || 'http://127.0.0.1:3000/api';
 }
 
-const BASE_URL = readBaseUrl();
+export const API_BASE_URL = readBaseUrl();
+const BASE_URL = API_BASE_URL;
 const TOKEN_KEY = 'pig:access_token';
 
 // 401 并发跳登录去重:多个请求同时 401 时,只跳一次
@@ -123,6 +124,50 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
       fail: (err) => {
         reject(new ApiError(99999, err.errMsg || '网络错误', 0));
       },
+    });
+  });
+}
+
+export function uploadImage(filePath: string): Promise<{
+  id: string;
+  url: string;
+  path: string;
+  filename: string;
+  size: number;
+  mimeType: string;
+}> {
+  const tok = getToken();
+  return new Promise((resolve, reject) => {
+    uni.uploadFile({
+      url: `${API_BASE_URL}/upload/image`,
+      filePath,
+      name: 'file',
+      header: tok ? { Authorization: `Bearer ${tok}` } : {},
+      success: (res) => {
+        const status = res.statusCode || 0;
+        let body: ApiResponse<{
+          id: string;
+          url: string;
+          path: string;
+          filename: string;
+          size: number;
+          mimeType: string;
+        }> | null = null;
+        try {
+          body = JSON.parse(res.data || '{}');
+        } catch {
+          reject(new ApiError(90099, `非 JSON 响应 (HTTP ${status})`, status));
+          return;
+        }
+        if (status === 401) {
+          clearToken();
+          reject(new ApiError(10001, '未登录或登录已过期', 401));
+          return;
+        }
+        if (body.code === 0) resolve(body.data);
+        else reject(new ApiError(body.code, body.message || '上传失败', status));
+      },
+      fail: (err) => reject(new ApiError(99999, err.errMsg || '上传失败', 0)),
     });
   });
 }

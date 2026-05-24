@@ -71,6 +71,9 @@
 
       <!-- CTA -->
       <view class="cta-bar">
+        <view class="join-btn" :class="joining && 'join-btn-disabled'" @tap="onJoin">
+          <text>{{ joined ? '已加入 · 去看这头猪' : joining ? '加入中...' : '加入拼猪一起看' }}</text>
+        </view>
         <view class="cta-btn" @tap="goPig">
           <text>🐷  我 也 想 认 一 头</text>
         </view>
@@ -110,6 +113,9 @@ interface ShareView {
 const data = ref<ShareView | null>(null);
 const loading = ref(true);
 const errMsg = ref('');
+const inviteCode = ref('');
+const joining = ref(false);
+const joined = ref(false);
 
 const priceInt = computed(() =>
   data.value?.pig ? Math.round(parseFloat(data.value.pig.pricePerShare)) : 0,
@@ -126,6 +132,28 @@ function goPig() {
     uni.reLaunch({ url: `/pages/pig/detail?id=${data.value.pig.id}` });
   } else {
     uni.reLaunch({ url: '/pages/index/index' });
+  }
+}
+
+async function onJoin() {
+  if (!inviteCode.value) return;
+  if (joined.value) {
+    goPig();
+    return;
+  }
+  joining.value = true;
+  try {
+    await request(`/share/${inviteCode.value}/join`, { method: 'POST' });
+    joined.value = true;
+    uni.showToast({ title: '已加入拼猪', icon: 'success' });
+  } catch (e) {
+    if (e instanceof ApiError && e.bizCode === 10001) {
+      uni.navigateTo({ url: '/pages/login/index' });
+      return;
+    }
+    uni.showToast({ title: e instanceof ApiError ? e.message : '加入失败', icon: 'none' });
+  } finally {
+    joining.value = false;
   }
 }
 
@@ -147,6 +175,7 @@ onLoad((opts: Record<string, string | undefined>) => {
     loading.value = false;
     return;
   }
+  inviteCode.value = opts.code;
   load(opts.code);
 });
 </script>
@@ -315,6 +344,18 @@ onLoad((opts: Record<string, string | undefined>) => {
   padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   z-index: 100;
 }
+.join-btn {
+  background: #fff7e8;
+  border: 2rpx solid #ffd89c;
+  border-radius: 52rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+.join-btn text { color: #7a1f1f; font-size: 28rpx; font-weight: 800; }
+.join-btn-disabled { opacity: 0.65; }
 .cta-btn {
   background: linear-gradient(135deg, #c0392b, #e74c3c);
   border-radius: 52rpx;

@@ -66,6 +66,15 @@
           <text class="share-link">{{ shareModal.link }}</text>
           <view class="copy-btn"><text>复制</text></view>
         </view>
+        <view class="members-btn" @tap="onLoadMembers(shareModal.code)">
+          <text>查看已加入成员</text>
+        </view>
+        <view v-if="members.length" class="members-list">
+          <view v-for="m in members" :key="m.id" class="member-row">
+            <text class="member-role">{{ m.role === 'host' ? '主认领人' : '成员' }}</text>
+            <text class="member-name">{{ m.nickname }}</text>
+          </view>
+        </view>
         <text class="share-modal-ttl">{{ shareModal.ttl }} 过期</text>
         <view class="share-modal-close" @tap="shareModal = null">
           <text>关闭</text>
@@ -254,6 +263,7 @@ async function onConfirmReceived(o: Order) {
 
 // ===== 拼猪 =====
 const shareModal = ref<{ code: string; link: string; ttl: string } | null>(null);
+const members = ref<Array<{ id: string; role: string; nickname: string }>>([]);
 
 async function onShare(o: Order) {
   try {
@@ -270,8 +280,20 @@ async function onShare(o: Order) {
     // #endif
     const link = `${base}/pages/share/landing?code=${invite.code}`;
     shareModal.value = { code: invite.code, link, ttl: `${days} 天后` };
+    members.value = [];
   } catch (e) {
     uni.showToast({ title: e instanceof ApiError ? e.message : '生成失败', icon: 'none' });
+  }
+}
+
+async function onLoadMembers(code: string) {
+  try {
+    const data = await request<{ members: Array<{ id: string; role: string; nickname: string }> }>(
+      `/share/${code}/members`,
+    );
+    members.value = data.members;
+  } catch (e) {
+    uni.showToast({ title: e instanceof ApiError ? e.message : '成员加载失败', icon: 'none' });
   }
 }
 
@@ -516,6 +538,27 @@ onShow(load);
   color: #aaa;
   margin-bottom: 24rpx;
 }
+.members-btn {
+  background: #fff7e8;
+  border: 2rpx solid #ffd89c;
+  border-radius: 24rpx;
+  padding: 18rpx 0;
+  margin-bottom: 20rpx;
+}
+.members-btn text { color: #7a1f1f; font-size: 24rpx; font-weight: 800; }
+.members-list {
+  background: #f9f6ee;
+  border-radius: 20rpx;
+  padding: 12rpx 18rpx;
+  margin-bottom: 20rpx;
+}
+.member-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+}
+.member-role { color: #c0392b; font-size: 22rpx; font-weight: 700; }
+.member-name { color: #333; font-size: 22rpx; }
 .share-modal-close {
   border-top: 2rpx solid #f0e8d4;
   padding-top: 24rpx;
