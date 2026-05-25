@@ -1,5 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { DataSource } from 'typeorm';
+import { Farmer } from '../src/modules/farmer/farmer.entity';
+import { Pig, PigStatus } from '../src/modules/pig/pig.entity';
 import { auth, createTestApp, devLogin, expectOk } from './helpers/app';
 
 describe('Upload + Share member + Pay boundary (e2e)', () => {
@@ -13,9 +16,39 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
     host = await devLogin(app, 'e2e_v1_host');
     guest = await devLogin(app, 'e2e_v1_guest');
 
-    const list = await request(app.getHttpServer()).get('/api/pigs?pageSize=1');
-    listedPigId = list.body?.data?.items?.[0]?.id;
-    expect(listedPigId).toBeTruthy();
+    const dataSource = app.get(DataSource);
+    const farmer = await dataSource.getRepository(Farmer).save(
+      dataSource.getRepository(Farmer).create({
+        name: 'e2e 测试农户',
+        region: 'e2e 测试村',
+        years: 8,
+        avatarUrl: '',
+        story: 'e2e only',
+        videoUrl: '',
+      }),
+    );
+    const pig = await dataSource.getRepository(Pig).save(
+      dataSource.getRepository(Pig).create({
+        merchantId: host.userId,
+        title: `e2e 拼猪测试猪 ${Date.now()}`,
+        description: 'e2e only',
+        breed: 'e2e 土猪',
+        farmerId: farmer.id,
+        region: farmer.region,
+        weightKg: '80.00',
+        expectedWeightKg: '140.00',
+        mockVideoUrl: '',
+        pricePerShare: '88.00',
+        totalShares: 1000,
+        soldShares: 0,
+        coverImage: 'https://example.com/pig.jpg',
+        photos: [],
+        ownerNote: '',
+        status: PigStatus.LISTED,
+        listedAt: new Date(),
+      }),
+    );
+    listedPigId = pig.id;
   });
 
   afterAll(async () => {
