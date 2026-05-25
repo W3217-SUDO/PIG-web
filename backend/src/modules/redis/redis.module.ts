@@ -1,11 +1,7 @@
-import { Global, Logger, Module, OnModuleDestroy } from '@nestjs/common';
+import { Global, Inject, Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis, { type Redis as RedisClient } from 'ioredis';
 
-/**
- * Redis 客户端 DI token。
- * 注入方式: @Inject(REDIS_CLIENT) private readonly redis: Redis
- */
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
 
 @Global()
@@ -26,7 +22,6 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
           port,
           password,
           db,
-          // 启动期不阻塞: 连不上不抛, 由 health check 暴露
           lazyConnect: false,
           enableOfflineQueue: true,
           maxRetriesPerRequest: 3,
@@ -44,10 +39,9 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
   exports: [REDIS_CLIENT],
 })
 export class RedisModule implements OnModuleDestroy {
-  // Nest 关闭时优雅断开连接 (provider 没有 onModuleDestroy 钩子, 由模块本身处理)
+  constructor(@Inject(REDIS_CLIENT) private readonly redis: RedisClient) {}
+
   async onModuleDestroy() {
-    // 实际客户端在 provider 里, 这里不直接访问;
-    // Nest 应用关闭时 provider 不会自动 quit, 由进程退出统一回收.
-    // 如需精细控制, 在 main.ts 里调用 app.close() 前手动 quit.
+    this.redis.disconnect();
   }
 }

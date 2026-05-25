@@ -7,7 +7,9 @@ import * as dotenv from 'dotenv';
 
 export default async function () {
   // e2e 用本地 docker 的 MySQL/Redis (跟 dev 同库)
-  process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+  if (process.env.NODE_ENV === 'test' || !process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'development';
+  }
   dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
   dotenv.config({ path: '.env' });
 

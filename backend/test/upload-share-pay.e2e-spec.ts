@@ -15,6 +15,7 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
 
     const list = await request(app.getHttpServer()).get('/api/pigs?pageSize=1');
     listedPigId = list.body?.data?.items?.[0]?.id;
+    expect(listedPigId).toBeTruthy();
   });
 
   afterAll(async () => {
@@ -22,6 +23,7 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   });
 
   async function createPaidOrder(token = host.token) {
+    expect(listedPigId).toBeTruthy();
     const orderRes = await request(app.getHttpServer())
       .post('/api/orders')
       .set(auth(token))
@@ -69,7 +71,6 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   });
 
   it('lets invitees join a pig share group and lets members view the group', async () => {
-    if (!listedPigId) return;
     const orderId = await createPaidOrder();
 
     const inviteRes = await request(app.getHttpServer())
@@ -102,7 +103,6 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   });
 
   it('keeps share member join idempotent for the same invitee', async () => {
-    if (!listedPigId) return;
     const orderId = await createPaidOrder();
     const inviteRes = await request(app.getHttpServer())
       .post(`/api/orders/${orderId}/share`)
@@ -122,7 +122,6 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   });
 
   it('exposes mock-prepay and payment status through the pay module', async () => {
-    if (!listedPigId) return;
     const orderRes = await request(app.getHttpServer())
       .post('/api/orders')
       .set(auth(host.token))
