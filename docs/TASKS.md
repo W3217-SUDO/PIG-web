@@ -369,15 +369,16 @@ wx.login() → code → POST /foster/auth/login
 - [x] `POST /api/orders/:id/mock-paid`(dev 环境，事务包裹) ✓
 - [x] 状态机(`pending_payment / paid / cancelled / refunded / completed`) ✓
 
-### 2.5 🔴 pay · 微信支付(0/5)· W2 · 后端 · ⚠️ 依赖 C4-C5
+### 2.5 🟡 pay · 微信支付(1/6)· W2 · 后端 · ⚠️ 依赖 C4-C5
 
-完成度 0% — **上线阻塞项**，需等商户号到位后实现
+完成度 17% — 支付模块边界已建立；真实微信支付仍需等商户号到位后实现
 
-- [ ] 安装 `wechatpay-node-v3` + 创建 `PayModule`
+- [x] 创建 `PayModule` + `GET /api/pay/orders/:orderId/status` + `POST /api/pay/orders/:orderId/mock-prepay` ✓ 2026-05-25 · Codex
 - [ ] `POST /api/pay/wx-prepay`(JSAPI 下单，返回 5 参数给前端)
 - [ ] `POST /api/pay/wx-notify`(v3 签名校验 + APIv3Key 解密 + 幂等处理)
 - [ ] nginx `/api/pay/wx-notify` 限速(仅微信 IP 段)
 - [ ] 真实 ¥0.01 全链路通过(沙箱 + 真机双验)
+- [ ] 真实微信支付接入后补支付 e2e 沙箱用例
 
 ### 2.6 🟢 wallet · 钱包 🟢 4/4 · 已完成
 
@@ -390,13 +391,15 @@ wx.login() → code → POST /foster/auth/login
 
 > ⚠️ `POST /api/wallet/topup`(真实微信支付充值)依赖 §2.5 pay 模块，待后续实现
 
-### 2.7 🟢 share · 拼猪 v1 🟢 3/3 · 已完成
+### 2.7 🟢 share · 拼猪 v1 🟢 5/5 · 已完成
 
 完成度 100% ✓ 2026-05-12 · Claude
 
 - [x] `share_invite.entity`：8 位短码(去 IO01 易混)+ 30 天 TTL + `1778562602367-S5Share` migration ✓
 - [x] `POST /api/orders/:id/share`(主认领人生成短码，同订单复用未过期 code) ✓
 - [x] `GET /api/share/:code`(`@Public()`，返回简版 pig + 主认领人昵称) ✓
+- [x] `POST /api/share/:code/join`(受邀人登录后加入同一头猪的拼猪成员组) ✓ 2026-05-25 · Codex
+- [x] `GET /api/share/:code/members`(主认领人/成员查看同组成员) ✓ 2026-05-25 · Codex
 
 ### 2.8 🟢 farmer · 农户 🟢 2/2 · 已完成
 
@@ -422,11 +425,11 @@ wx.login() → code → POST /foster/auth/login
 - [x] `messageService.notify(userId, type, payload)` 工具方法，异步触发不阻塞主流程 ✓
 - [x] `GET /api/messages` + `PATCH /api/messages/:id/read` + `POST /api/messages/read-all` ✓
 
-### 2.11 🟡 upload · 文件上传(0/2)· P1 · 后端
+### 2.11 🟡 upload · 文件上传(1/2)· P1 · 后端
 
-完成度 0% — 非上线阻塞，但头像/称重图片上传需要此功能
+完成度 50% — 后端上传接口已完成；生产 nginx `/uploads/` 静态托管待部署配置落地
 
-- [ ] `POST /api/upload/image`(multer，写本地 `/opt/pig/shared/uploads/`)
+- [x] `POST /api/upload/image`(multer，写本地 `STORAGE_LOCAL_DIR`，前端头像上传已接入) ✓ 2026-05-25 · Codex
 - [ ] nginx `/uploads/` 静态文件托管
 
 ### 2.12 🟢 Seed 测试数据 🟢 4/4 · 已完成
@@ -508,12 +511,13 @@ wx.login() → code → POST /foster/auth/login
 - [ ] iOS .ipa 出包(若 C9 到位)
 - [ ] TestFlight 内部测试 + 3 名测试员安装
 
-### 2.17 🟡 测试(0/6)· W1-W3 · 共同
+### 2.17 🟡 测试(1/7)· W1-W3 · 共同
 
-完成度 0%
+完成度 14%
 
 - [ ] 后端单测覆盖率 ≥ 40%
 - [ ] e2e 测试套件(supertest):auth / order / wallet 主链路
+- [x] e2e 测试套件补充 upload / share member / pay boundary 用例 ✓ 2026-05-25 · Codex
 - [ ] `scripts/smoke-w1.sh` curl 一条龙
 - [ ] 前端 H5 端到端真机走查
 - [ ] 微信开发者工具真机调试
