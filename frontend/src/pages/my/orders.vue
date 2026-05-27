@@ -272,11 +272,9 @@ async function onShare(o: Order) {
       { method: 'POST' },
     );
     const days = Math.ceil((new Date(invite.expiresAt).getTime() - Date.now()) / 86400000);
+    let base = 'https://www.rockingwei.online/#';
     // #ifdef H5
-    const base = window.location.origin + '/#';
-    // #endif
-    // #ifndef H5
-    const base = 'https://www.rockingwei.online/#';
+    base = window.location.origin + '/#';
     // #endif
     const link = `${base}/pages/share/landing?code=${invite.code}`;
     shareModal.value = { code: invite.code, link, ttl: `${days} 天后` };

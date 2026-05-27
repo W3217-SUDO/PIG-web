@@ -64,7 +64,7 @@ export function request<T = unknown>(
   return new Promise((resolve, reject) => {
     uni.request({
       url: fullUrl,
-      method: opts.method || 'GET',
+      method: (opts.method || 'GET') as any,
       data: opts.data as never,
       header: headers,
       timeout: 15000,

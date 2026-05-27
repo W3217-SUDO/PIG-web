@@ -86,7 +86,7 @@ function goMyOrders() {
   uni.reLaunch({ url: '/pages/my/orders' });
 }
 
-onLoad(async (opts: Record<string, string | undefined>) => {
+onLoad(async (opts?: Record<string, any>) => {
   ok.value = opts?.ok === '1';
   if (opts?.id) {
     try {

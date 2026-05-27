@@ -321,9 +321,9 @@ wx.login() → code → POST /foster/auth/login
 
 > 优先级:🔴P0 上线必须 / 🟡P1 上线最好有 / 🟢P2 推迟也可
 
-### 2.1 🔴 auth · 认证(2/7)· W2 · 后端
+### 2.1 🔴 auth · 认证(5/7)· W2 · 后端
 
-完成度 71%(主流程已通,差真实小程序登录)
+完成度 71%(主流程已通,差真实小程序登录与覆盖率门槛)
 
 - [x] dev-login + JWT 签发 ✓ 2026-05-12
 - [x] JwtAuthGuard + @Public() ✓ 2026-05-12
@@ -331,9 +331,9 @@ wx.login() → code → POST /foster/auth/login
   - [ ] `wx.login` code → 调微信 `code2Session` → 拿 openid + session_key
   - [ ] 落 user 表(openid 唯一索引)
   - [ ] 签发 access + refresh token
-- [ ] `POST /api/auth/refresh`
-- [ ] `POST /api/auth/logout`(清 Redis 中的 refresh token)
-- [ ] `@Roles('customer' | 'farmer' | 'admin')` 守卫装饰器
+- [x] `POST /api/auth/refresh` ✓ 2026-05-27 · Codex
+- [x] `POST /api/auth/logout`(清 Redis 中的 refresh token) ✓ 2026-05-27 · Codex
+- [x] `@Roles('customer' | 'farmer' | 'admin')` 守卫装饰器 ✓ 2026-05-27 · Codex
 - [ ] 单测 e2e(覆盖率 ≥ 60%)
 
 ### 2.2 🟢 user · 用户 🟢 5/5 · 已完成

@@ -80,7 +80,7 @@ DB_NAME=pig
 
 # Redis
 REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
+REDIS_PORT=6380
 
 # JWT(本地随便填,生产环境必须严格保密)
 JWT_SECRET=local_dev_jwt_secret_change_in_prod

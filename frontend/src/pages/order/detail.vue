@@ -429,7 +429,7 @@ async function onShare() {
   }
 }
 
-onLoad((opts: Record<string, string | undefined>) => {
+onLoad((opts?: Record<string, any>) => {
   orderId = opts?.id || '';
   if (!orderId) {
     errMsg.value = '缺少订单 ID';

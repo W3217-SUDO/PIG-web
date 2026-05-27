@@ -51,6 +51,23 @@ export class AuthController {
     return { user: pickUser(user), ...tokens };
   }
 
+  @Public()
+  @Post('refresh')
+  @ApiOperation({ summary: 'Use refresh_token to issue a new token pair' })
+  async refresh(@Body() dto: { refresh_token?: string }) {
+    if (!dto.refresh_token) {
+      throw new ForbiddenException('refresh_token required');
+    }
+    return this.auth.refresh(dto.refresh_token);
+  }
+
+  @Post('logout')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke the current access token and optional refresh token' })
+  async logout(@Req() req: Request, @Body() dto: { refresh_token?: string }) {
+    return this.auth.logout(bearerToken(req), dto.refresh_token);
+  }
+
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: '当前用户(用于验证 token 有效)' })
@@ -69,4 +86,13 @@ function pickUser(u: User) {
     role: u.role,
     status: u.status,
   };
+}
+
+function bearerToken(req: Request): string {
+  const header = req.headers.authorization || '';
+  const [type, token] = header.split(' ');
+  if (type !== 'Bearer' || !token) {
+    throw new ForbiddenException('bearer token required');
+  }
+  return token;
 }

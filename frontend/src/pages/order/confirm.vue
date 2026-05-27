@@ -310,7 +310,7 @@ async function onSubmit() {
   }
 }
 
-onLoad((opts: Record<string, string | undefined>) => {
+onLoad((opts?: Record<string, any>) => {
   pigIdParam = opts?.pigId || '';
   if (!pigIdParam) {
     errMsg.value = '缺少 pigId';

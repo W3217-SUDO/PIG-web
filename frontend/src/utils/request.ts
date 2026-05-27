@@ -77,7 +77,7 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
   return new Promise<T>((resolve, reject) => {
     uni.request({
       url: fullUrl,
-      method,
+      method: method as any,
       data: data as never,
       header: headers,
       timeout: 10000,
@@ -162,6 +162,10 @@ export function uploadImage(filePath: string): Promise<{
         if (status === 401) {
           clearToken();
           reject(new ApiError(10001, '未登录或登录已过期', 401));
+          return;
+        }
+        if (!body || typeof body !== 'object') {
+          reject(new ApiError(90099, `Invalid JSON response (HTTP ${status})`, status));
           return;
         }
         if (body.code === 0) resolve(body.data);

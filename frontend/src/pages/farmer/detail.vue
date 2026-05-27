@@ -130,7 +130,7 @@ async function load(id: string) {
   }
 }
 
-onLoad((opts: Record<string, string | undefined>) => {
+onLoad((opts?: Record<string, any>) => {
   if (!opts?.id) {
     errMsg.value = '缺少 id 参数';
     loading.value = false;

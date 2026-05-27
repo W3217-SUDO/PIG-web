@@ -1,7 +1,9 @@
-import { BadGatewayException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadGatewayException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
+import type { Redis } from 'ioredis';
+import { REDIS_CLIENT } from '../redis/redis.module';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import type { JwtPayload } from './jwt.strategy';
@@ -29,6 +31,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   /**
@@ -117,5 +120,56 @@ export class AuthService {
     }
     const user = await this.userService.findOrCreateAdmin(phone);
     return { user, tokens: this.signTokens(user) };
+  }
+
+  async refresh(refreshToken: string): Promise<TokenPair> {
+    await this.assertTokenNotRevoked(refreshToken);
+
+    let payload: JwtPayload & { type?: string };
+    try {
+      payload = this.jwtService.verify(refreshToken);
+    } catch {
+      throw new UnauthorizedException('refresh token invalid');
+    }
+
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('refresh token required');
+    }
+
+    const user = await this.userService.findById(payload.sub);
+    if (!user) throw new UnauthorizedException('user not found');
+    return this.signTokens(user);
+  }
+
+  async logout(accessToken: string, refreshToken?: string): Promise<{ revoked: true }> {
+    await this.revokeToken(accessToken);
+    if (refreshToken) {
+      await this.revokeToken(refreshToken);
+    }
+    return { revoked: true };
+  }
+
+  async assertTokenNotRevoked(token: string): Promise<void> {
+    const revoked = await this.redis.get(this.revokedKey(token));
+    if (revoked) {
+      throw new UnauthorizedException('token revoked');
+    }
+  }
+
+  private async revokeToken(token: string): Promise<void> {
+    const ttl = this.tokenTtlSeconds(token);
+    await this.redis.set(this.revokedKey(token), '1', 'EX', ttl);
+  }
+
+  private tokenTtlSeconds(token: string): number {
+    const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+    if (!decoded?.exp) return 60 * 60 * 24 * 7;
+
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+    return Math.max(ttl, 1);
+  }
+
+  private revokedKey(token: string): string {
+    return `jwt:revoked:${token}`;
   }
 }

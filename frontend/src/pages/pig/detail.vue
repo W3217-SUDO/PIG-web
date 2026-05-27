@@ -254,7 +254,7 @@ function onShareHint() {
   uni.showToast({ title: '拼猪邀请(S5 实现)', icon: 'none' });
 }
 
-onLoad((opts: Record<string, string | undefined>) => {
+onLoad((opts?: Record<string, any>) => {
   const id = opts?.id;
   if (!id) {
     errMsg.value = '缺少 id 参数';

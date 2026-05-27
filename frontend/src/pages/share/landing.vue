@@ -169,7 +169,7 @@ async function load(code: string) {
   }
 }
 
-onLoad((opts: Record<string, string | undefined>) => {
+onLoad((opts?: Record<string, any>) => {
   if (!opts?.code) {
     errMsg.value = '缺少邀请码';
     loading.value = false;
