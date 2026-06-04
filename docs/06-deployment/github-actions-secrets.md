@@ -41,11 +41,11 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 - `CI` passes on `main`.
 - `SSH_HOST` and `SSH_KEY` have been configured as repository secrets.
 - `Deploy Backend` attempt 2 succeeded on 2026-06-05.
-- Deployed release: `/opt/pig/releases/20260605_061117`.
+- Deployed release: `/opt/pig/releases/20260605_063027`.
 - PM2 status: `pig-backend` online.
 - Server-side `smoke-prod`: 25/25.
-- Health release identity: `/api/health.data.commit = bf0a1cb45064d29f83f98748e7f275311981f9f7` was validated during deploy.
-- H5 manual deploy verified on 2026-06-05: `/var/www/html/pig/release.txt = 817a55aa8196c08771f2e972bf748467260692e8`, server-side `smoke-prod` 25/25.
+- Health release identity: `/api/health.data.commit = 9ef5112d064531ca7fbba0564b4a9e4fec841574` was validated during deploy.
+- H5 deploy verified on 2026-06-05: `/var/www/html/pig/release.txt = 9ef5112d064531ca7fbba0564b4a9e4fec841574`, server-side `smoke-prod` 25/25.
 
 ## How To Verify After Adding Secrets
 

@@ -509,8 +509,8 @@ wx.login() → code → POST /foster/auth/login
 - [x] GitHub Actions `deploy-h5.yml` workflow(配置就绪) ✅ 2026-06-05 · Codex
 - [x] 部署 SSH key 生成 + CODEOWNERS
 - [x] docker-compose(本地 dev)
-- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_061117`，PM2 online，`/api/health.data.commit=bf0a1cb45064d29f83f98748e7f275311981f9f7`，服务器侧 `smoke-prod` 25/25）
-- [x] **H5 手工发布脚本实跑** ✅ 2026-06-05 · Codex（`infra/deploy/h5.sh` 成功；`/var/www/html/pig/release.txt=817a55aa8196c08771f2e972bf748467260692e8`，服务器侧 `smoke-prod` 25/25）
+- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_063027`，PM2 online，`/api/health.data.commit=9ef5112d064531ca7fbba0564b4a9e4fec841574`，服务器侧 `smoke-prod` 25/25）
+- [x] **H5 自动发布实跑** ✅ 2026-06-05 · Codex（`Deploy H5` 成功；`/var/www/html/pig/release.txt=9ef5112d064531ca7fbba0564b4a9e4fec841574`，服务器侧 `smoke-prod` 25/25）
 - [x] **小程序构建包自动审计** ✅ 2026-06-05 · Codex（`npm run audit:miniapp` 13 PASS / 0 FAIL；CI 已接入 mp-weixin 构建包审计）
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
