@@ -531,14 +531,14 @@ wx.login() → code → POST /foster/auth/login
 - [ ] iOS .ipa 出包(若 C9 到位)
 - [ ] TestFlight 内部测试 + 3 名测试员安装
 
-### 2.17 🟡 测试(1/7)· W1-W3 · 共同
+### 2.17 🟡 测试(2/7)· W1-W3 · 共同
 
-完成度 14%
+完成度 29%
 
 - [ ] 后端单测覆盖率 ≥ 40%
 - [ ] e2e 测试套件(supertest):auth / order / wallet 主链路
 - [x] e2e 测试套件补充 upload / share member / pay boundary 用例 ✓ 2026-05-25 · Codex
-- [ ] `scripts/smoke-w1.sh` curl 一条龙
+- [x] `scripts/smoke-w1.sh` curl 一条龙 ✅ 2026-06-05 · Codex
 - [ ] 前端 H5 端到端真机走查
 - [ ] 微信开发者工具真机调试
 - [ ] 上线前压测(loadtest 50 RPS / 5 分钟)
