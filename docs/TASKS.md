@@ -25,10 +25,11 @@
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5` |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
+| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2 元信息，Sentry/告警仍待接入 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
-> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，服务器侧 smoke 23/23 全绿。
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 23/23 全绿。
 > ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
 
 ### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
@@ -511,14 +512,14 @@ wx.login() → code → POST /foster/auth/login
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
 
-### 2.15 🔴 监控可观测性(0/5)· W3 · 后端
+### 2.15 🔴 监控可观测性(1/5)· W3 · 后端
 
-完成度 0%
+完成度 20%
 
 - [ ] Sentry 后端接入(@sentry/nestjs)
 - [ ] Sentry 前端接入(@sentry/vue + sourcemap 上传)
 - [ ] pino 日志 JSON 行式 + 按日切割(30 天保留)
-- [ ] `/api/health` 加 disk / mem / pm2 状态
+- [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex
 - [ ] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / Sentry 阈值)
 
 ### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9

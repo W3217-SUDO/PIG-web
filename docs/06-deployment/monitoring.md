@@ -10,7 +10,7 @@
 |---|---|---|
 | 进程存活 | PM2 自带 | ✅ |
 | 应用日志 | 文件 + grep | ✅ |
-| 健康端点 | `/api/health` | ✅(待实现) |
+| 健康端点 | `/api/health` | ✅ db/redis/mem/disk/pm2 已接入 |
 | HTTP 访问日志 | nginx access.log | ✅ |
 | 异常上报 | **Sentry** | ❌ 待接入 |
 | 主机监控(CPU/MEM/DISK) | 腾讯云控制台 | ✅ 但被动 |
@@ -22,6 +22,37 @@
 ## 二、健康检查端点
 
 ### `/api/health` 实现
+
+#### 当前实现 · 2026-06-05
+
+`/api/health` 已返回 `db`、`redis`、主机内存、磁盘容量/使用率和 PM2 运行元信息。磁盘检查失败时接口返回 `status=degraded`,不会直接 500。
+
+关键字段示例:
+
+```json
+{
+  "status": "ok",
+  "db": "ok",
+  "redis": "ok",
+  "system": {
+    "process_rss_mb": 112,
+    "mem_used_pct": 21.5,
+    "disk": {
+      "status": "ok",
+      "path": "/opt/pig/shared/uploads",
+      "total_mb": 40951,
+      "free_mb": 28000,
+      "used_pct": 31.6
+    },
+    "pm2": {
+      "managed": true,
+      "pm_id": "0",
+      "name": "pig-backend",
+      "node_app_instance": "0"
+    }
+  }
+}
+```
 
 ```ts
 @Public()
