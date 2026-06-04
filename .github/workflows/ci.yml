@@ -35,6 +35,11 @@ jobs:
         run: npm -w frontend run type-check || echo "skip-if-not-configured"
         continue-on-error: true
 
+      - name: miniapp build audit
+        run: |
+          npm -w frontend run build:mp-weixin
+          npm run audit:miniapp
+
       - name: audit
         run: npm audit --audit-level=high --workspaces=false || true
 

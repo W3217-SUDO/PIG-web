@@ -31,6 +31,7 @@
     "smoke:w1": "node scripts/run-bash.cjs scripts/smoke-w1.sh",
     "smoke:prod": "node scripts/run-bash.cjs scripts/smoke-prod.sh",
     "test:smoke-diagnostics": "node scripts/run-bash.cjs scripts/test-smoke-prod-diagnostics.sh",
+    "audit:miniapp": "node scripts/audit-miniapp-build.cjs",
     "loadtest:readonly": "node scripts/loadtest-readonly.cjs",
     "clean": "rimraf '**/node_modules' '**/dist' '**/unpackage' '**/.cache'"
   },

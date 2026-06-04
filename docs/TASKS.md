@@ -21,7 +21,7 @@
 | 生产 smoke | 🟡 服务器侧 25/25 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿；本机公网 HTTP 命中 DNSPod webblock，HTTPS 仍握手失败，需备案/接入/安全组/本地网络复核 |
 | 上传静态托管 | ✅ 已上线 | nginx `/uploads/` 指向 `/opt/pig/shared/uploads/`，公网 URL 验证 200 |
 | 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
-| 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
+| 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` + `npm run audit:miniapp`，13 PASS / 0 FAIL |
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5`；`infra/deploy/h5.sh` 手工发布已验证 |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
@@ -511,6 +511,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] docker-compose(本地 dev)
 - [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_061117`，PM2 online，`/api/health.data.commit=bf0a1cb45064d29f83f98748e7f275311981f9f7`，服务器侧 `smoke-prod` 25/25）
 - [x] **H5 手工发布脚本实跑** ✅ 2026-06-05 · Codex（`infra/deploy/h5.sh` 成功；`/var/www/html/pig/release.txt=817a55aa8196c08771f2e972bf748467260692e8`，服务器侧 `smoke-prod` 25/25）
+- [x] **小程序构建包自动审计** ✅ 2026-06-05 · Codex（`npm run audit:miniapp` 13 PASS / 0 FAIL；CI 已接入 mp-weixin 构建包审计）
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)

@@ -18,6 +18,7 @@
 ```bash
 npm -w frontend run type-check
 npm -w frontend run build:mp-weixin
+npm run audit:miniapp
 ```
 
 构建成功后检查：
