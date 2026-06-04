@@ -29,7 +29,7 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 - `CI` passes on `main`.
 - `SSH_HOST` and `SSH_KEY` have been configured as repository secrets.
 - `Deploy Backend` attempt 2 succeeded on 2026-06-05.
-- Deployed release: `/opt/pig/releases/20260605_054346`.
+- Deployed release: `/opt/pig/releases/20260605_055928`.
 - PM2 status: `pig-backend` online.
 - Server-side `smoke-prod`: 25/25.
 
