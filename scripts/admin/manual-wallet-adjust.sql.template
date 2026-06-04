@@ -1,0 +1,94 @@
+-- Manual wallet balance adjustment.
+-- Use only for owner-approved compensation or correction.
+-- Replace all TODO_* placeholders before running.
+
+SET @user_id = 'TODO_USER_ULID';
+SET @wallet_id_if_missing = 'TODO_WALLET_ULID_IF_USER_HAS_NO_WALLET';
+SET @tx_id = 'TODO_WALLET_TRANSACTION_ULID';
+SET @message_id = 'TODO_MESSAGE_ULID';
+
+-- Positive amount credits the user. Negative amount debits the user.
+SET @amount = 100.00;
+SET @reason = 'TODO_REASON';
+SET @operator = 'TODO_OPERATOR_NAME';
+
+-- Preview target user and current wallet.
+SELECT id, nickname, phone, role, status, created_at
+FROM user
+WHERE id = @user_id;
+
+SELECT id, user_id, balance, frozen, created_at, updated_at
+FROM wallet
+WHERE user_id = @user_id;
+
+START TRANSACTION;
+
+-- Create wallet only when the user does not have one yet.
+INSERT IGNORE INTO wallet (id, user_id, balance, frozen, created_at, updated_at)
+VALUES (@wallet_id_if_missing, @user_id, 0.00, 0.00, NOW(6), NOW(6));
+
+-- Lock wallet row and preview before updating.
+SELECT id, user_id, balance, frozen
+FROM wallet
+WHERE user_id = @user_id
+FOR UPDATE;
+
+UPDATE wallet
+SET balance = balance + @amount,
+    updated_at = NOW(6)
+WHERE user_id = @user_id
+  AND balance + @amount >= 0;
+
+-- Must be 1. If 0, ROLLBACK: user missing, wallet missing, or debit exceeds balance.
+SELECT ROW_COUNT() AS wallet_rows_updated;
+
+INSERT INTO wallet_transaction (
+  id, wallet_id, user_id, direction, type, amount,
+  related_id, balance_after, note, created_at, updated_at
+)
+SELECT
+  @tx_id,
+  w.id,
+  w.user_id,
+  IF(@amount >= 0, 'in', 'out'),
+  'adjust',
+  ABS(@amount),
+  '',
+  w.balance,
+  CONCAT('[manual] ', @reason, ' | operator=', @operator),
+  NOW(6),
+  NOW(6)
+FROM wallet w
+WHERE w.user_id = @user_id;
+
+INSERT INTO message (
+  id, user_id, type, title, content, related_id, is_read, read_at, created_at, updated_at
+)
+VALUES (
+  @message_id,
+  @user_id,
+  'system',
+  '账户余额调整',
+  CONCAT('您的账户余额已调整：', IF(@amount >= 0, '+', ''), @amount, ' 元。原因：', @reason),
+  '',
+  0,
+  NULL,
+  NOW(6),
+  NOW(6)
+);
+
+-- Verify before COMMIT.
+SELECT id, user_id, balance, frozen, updated_at
+FROM wallet
+WHERE user_id = @user_id;
+
+SELECT id, user_id, direction, type, amount, balance_after, note, created_at
+FROM wallet_transaction
+WHERE id = @tx_id;
+
+SELECT id, user_id, type, title, content, created_at
+FROM message
+WHERE id = @message_id;
+
+-- COMMIT;
+-- ROLLBACK;

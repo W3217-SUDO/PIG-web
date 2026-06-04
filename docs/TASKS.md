@@ -543,12 +543,12 @@ wx.login() → code → POST /foster/auth/login
 - [ ] 微信开发者工具真机调试
 - [ ] 上线前压测(loadtest 50 RPS / 5 分钟)
 
-### 2.18 🔴 运营支撑(0/3)· W3 · 共同
+### 2.18 🔴 运营支撑(1/3)· W3 · 共同
 
-完成度 0%
+完成度 33%
 
 - [ ] `docs/06-deployment/admin-sop.md`(运营 SOP 完整版)
-- [ ] `scripts/admin/*.sql.template`(发猪 / 改单 / 充值模板)
+- [x] `scripts/admin/*.sql.template`(发猪 / 改单 / 充值模板) ✅ 2026-06-05 · Codex
 - [ ] 与运营做一次"跟随我操作"演练并修订 SOP
 
 ---

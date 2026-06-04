@@ -1,0 +1,105 @@
+-- Manual order status adjustment.
+-- Use only for exceptional cases after owner/backend confirmation.
+-- Replace all TODO_* placeholders before running.
+
+SET @order_id = 'TODO_ORDER_ULID';
+SET @target_status = 'refund_pending'; -- pending | paid | shipped | delivered | cancelled | refund_pending | refunded
+SET @reason = 'TODO_REASON';
+SET @operator = 'TODO_OPERATOR_NAME';
+
+-- Optional fields used by specific statuses.
+SET @tracking_no = 'TODO_TRACKING_NO_OR_EMPTY';
+SET @wx_pay_transaction_id = 'TODO_WX_TRANSACTION_ID_OR_EMPTY';
+
+-- Preview full order context.
+SELECT
+  o.id, o.status, o.pay_method, o.user_id, o.pig_id, o.shares_count,
+  o.unit_price, o.total_price, o.wx_pay_transaction_id,
+  o.paid_at, o.slaughter_date, o.shipped_at, o.delivered_at, o.refunded_at,
+  o.refund_reason, o.tracking_no, o.remark, o.created_at, o.updated_at,
+  p.title AS pig_title, p.sold_shares, p.total_shares, p.status AS pig_status
+FROM `order` o
+LEFT JOIN pig p ON p.id = o.pig_id
+WHERE o.id = @order_id;
+
+SELECT id, order_id, channel, amount, status, transaction_id, succeeded_at, created_at
+FROM order_payment
+WHERE order_id = @order_id
+ORDER BY created_at DESC;
+
+START TRANSACTION;
+
+SELECT id, status, pig_id, shares_count, remark
+FROM `order`
+WHERE id = @order_id
+FOR UPDATE;
+
+UPDATE `order`
+SET
+  status = @target_status,
+  pay_method = CASE
+    WHEN @target_status = 'paid' AND pay_method IS NULL THEN 'wxpay'
+    ELSE pay_method
+  END,
+  wx_pay_transaction_id = CASE
+    WHEN @target_status = 'paid' AND @wx_pay_transaction_id <> '' THEN @wx_pay_transaction_id
+    ELSE wx_pay_transaction_id
+  END,
+  paid_at = CASE
+    WHEN @target_status = 'paid' AND paid_at IS NULL THEN NOW(3)
+    ELSE paid_at
+  END,
+  shipped_at = CASE
+    WHEN @target_status = 'shipped' AND shipped_at IS NULL THEN NOW(3)
+    ELSE shipped_at
+  END,
+  delivered_at = CASE
+    WHEN @target_status = 'delivered' AND delivered_at IS NULL THEN NOW(3)
+    ELSE delivered_at
+  END,
+  refunded_at = CASE
+    WHEN @target_status = 'refunded' AND refunded_at IS NULL THEN NOW(3)
+    ELSE refunded_at
+  END,
+  refund_reason = CASE
+    WHEN @target_status IN ('refund_pending', 'refunded') THEN @reason
+    ELSE refund_reason
+  END,
+  tracking_no = CASE
+    WHEN @target_status = 'shipped' AND @tracking_no <> '' THEN @tracking_no
+    ELSE tracking_no
+  END,
+  remark = CONCAT(
+    IFNULL(NULLIF(remark, ''), ''),
+    IF(remark IS NULL OR remark = '', '', '\n'),
+    '[manual-status] ', @target_status, ' | ', @reason, ' | operator=', @operator
+  ),
+  updated_at = NOW(6)
+WHERE id = @order_id
+  AND @target_status IN ('pending', 'paid', 'shipped', 'delivered', 'cancelled', 'refund_pending', 'refunded');
+
+-- Must be 1. If 0, ROLLBACK.
+SELECT ROW_COUNT() AS order_rows_updated;
+
+-- If this is a refund/cancel after shares were reserved, release inventory once.
+-- Only run this block after confirming the previous status was paid/shipped/delivered and shares need release.
+-- UPDATE pig p
+-- INNER JOIN `order` o ON o.pig_id = p.id
+-- SET p.sold_shares = GREATEST(p.sold_shares - o.shares_count, 0),
+--     p.status = IF(p.status = 'sold_out' AND p.sold_shares - o.shares_count < p.total_shares, 'listed', p.status),
+--     p.updated_at = NOW(6)
+-- WHERE o.id = @order_id
+--   AND @target_status IN ('cancelled', 'refunded');
+
+-- Verify before COMMIT.
+SELECT
+  o.id, o.status, o.pay_method, o.wx_pay_transaction_id,
+  o.paid_at, o.shipped_at, o.delivered_at, o.refunded_at,
+  o.refund_reason, o.tracking_no, o.remark, o.updated_at,
+  p.id AS pig_id, p.sold_shares, p.total_shares, p.status AS pig_status
+FROM `order` o
+LEFT JOIN pig p ON p.id = o.pig_id
+WHERE o.id = @order_id;
+
+-- COMMIT;
+-- ROLLBACK;

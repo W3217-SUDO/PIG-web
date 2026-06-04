@@ -1,0 +1,77 @@
+-- Publish a new pig listing.
+-- Replace all TODO_* placeholders before running.
+
+SET @pig_id = 'TODO_PIG_ULID';
+SET @merchant_id = 'TODO_MERCHANT_USER_ULID';
+SET @farmer_id = 'TODO_FARMER_ULID_OR_NULL';
+
+SET @title = 'TODO_TITLE';
+SET @description = 'TODO_DESCRIPTION';
+SET @breed = 'TODO_BREED';
+SET @region = 'TODO_REGION';
+SET @weight_kg = 35.50;
+SET @expected_weight_kg = 170.00;
+SET @price_per_share = 830.00;
+SET @total_shares = 10;
+SET @cover_image = 'TODO_COVER_IMAGE_URL';
+SET @mock_video_url = 'TODO_VIDEO_URL_OR_EMPTY';
+SET @photos_json = JSON_ARRAY('TODO_PHOTO_URL_1', 'TODO_PHOTO_URL_2');
+SET @owner_note = 'TODO_OWNER_NOTE';
+
+-- Preview existing farmers and merchant account.
+SELECT id, name, region, years, phone, created_at
+FROM farmer
+ORDER BY created_at DESC
+LIMIT 20;
+
+SELECT id, nickname, phone, role, status
+FROM user
+WHERE id = @merchant_id;
+
+START TRANSACTION;
+
+-- If @farmer_id is not NULL, this must return exactly one row.
+SELECT id, name, region, years
+FROM farmer
+WHERE id = @farmer_id
+FOR SHARE;
+
+INSERT INTO pig (
+  id, merchant_id, title, description, breed,
+  farmer_id, region,
+  weight_kg, expected_weight_kg, mock_video_url,
+  price_per_share, total_shares, sold_shares,
+  cover_image, photos, owner_note,
+  status, listed_at, created_at, updated_at
+) VALUES (
+  @pig_id,
+  @merchant_id,
+  @title,
+  @description,
+  @breed,
+  NULLIF(@farmer_id, 'NULL'),
+  @region,
+  @weight_kg,
+  @expected_weight_kg,
+  @mock_video_url,
+  @price_per_share,
+  @total_shares,
+  0,
+  @cover_image,
+  @photos_json,
+  @owner_note,
+  'listed',
+  NOW(3),
+  NOW(6),
+  NOW(6)
+);
+
+-- Verify before COMMIT.
+SELECT
+  id, title, farmer_id, region, price_per_share,
+  total_shares, sold_shares, status, listed_at
+FROM pig
+WHERE id = @pig_id;
+
+-- COMMIT;
+-- ROLLBACK;
