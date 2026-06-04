@@ -74,6 +74,9 @@ ssh pig 'curl -s http://127.0.0.1:3000/api/health'
 # 公网
 curl -s https://www.rockingwei.online/api/health
 
+# 完整 production smoke
+npm run smoke:prod
+
 # 上传静态托管
 ssh pig 'mkdir -p /opt/pig/shared/uploads/healthcheck && printf ok > /opt/pig/shared/uploads/healthcheck/nginx.txt'
 curl -i https://www.rockingwei.online/uploads/healthcheck/nginx.txt
@@ -93,7 +96,27 @@ location /uploads/ {
 }
 ```
 
-### 2.4 回滚到上一个 release
+### 2.4 域名拦截诊断
+
+如果外部机器运行 `npm run smoke:prod` 出现大量 `HTTP 000`，但服务器内执行 `curl https://www.rockingwei.online/api/health` 正常，先检查明文入口是否被 DNSPod 拦截：
+
+```bash
+curl -sS -D - -o /dev/null http://www.rockingwei.online/
+```
+
+若响应头里出现：
+
+```text
+Location: https://dnspod.qcloud.com/static/webblock.html?d=www.rockingwei.online
+```
+
+说明请求没有到达 nginx，问题在域名/备案/腾讯云接入层，不要先改 NestJS 或 PM2。处理顺序：
+
+1. 腾讯云备案控制台确认 `rockingwei.online` 与 `www.rockingwei.online` 已备案且接入当前腾讯云服务器。
+2. DNSPod 确认 A 记录仍指向 `175.24.175.123`，且没有开启错误的拦截/停放策略。
+3. 等待备案接入生效后，从非服务器网络重新跑 `npm run smoke:prod`。
+
+### 2.5 回滚到上一个 release
 
 ```bash
 ssh pig 'bash -s' << 'EOF'

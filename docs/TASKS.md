@@ -18,7 +18,7 @@
 |---|---|---|
 | 生产 H5 | ✅ 已部署 | `https://www.rockingwei.online/` 返回 200，Vite bundle 正常 |
 | 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok` |
-| 生产 smoke | ✅ 23/23 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿 |
+| 生产 smoke | 🟡 服务器侧 24/24 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿；外部网络访问当前命中 DNSPod webblock，需备案/接入复核 |
 | 上传静态托管 | ✅ 已上线 | nginx `/uploads/` 指向 `/opt/pig/shared/uploads/`，公网 URL 验证 200 |
 | 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
 | 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
@@ -29,7 +29,8 @@
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
-> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 23/23 全绿。
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 24/24 全绿。
+> 🔴 **当前公网风险**：外部网络 `GET http://www.rockingwei.online/` 被返回到 `dnspod.qcloud.com/static/webblock.html`，HTTPS 握手失败；请求未到 nginx，需复核腾讯云备案接入 / DNSPod 状态。
 > ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
 
 ### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
@@ -564,7 +565,7 @@ wx.login() → code → POST /foster/auth/login
 | C3 | AppID / AppSecret 写入服务器 `~/.pig-secrets` | 5/14 | Owner | ✅ | 2026-06-04 已写入本地/生产 env，wx-login 已调用微信接口 |
 | C4 | 微信支付商户号开通 | 5/20 | Owner | ⬜ | 不能收款 |
 | C5 | 商户号 API v3 密钥 / 证书 | 5/20 | Owner | ⬜ | 同上 |
-| **C6** | **rockingwei.online ICP 备案确认** | **立刻** | **Owner** | ❓ | **整体停摆** |
+| **C6** | **rockingwei.online ICP 备案确认** | **立刻** | **Owner** | 🔴 外部访问命中 DNSPod webblock(2026-06-05) | **整体停摆** |
 | C7 | 食品/农副产品资质(若类目需要) | 5/25 | Owner | ⬜ | 卡审 |
 | C8 | 隐私政策 + 用户协议文案 | 5/22 | Owner | ⬜ | 已有占位页，需 Owner 补充真实文案 |
 | C9 | Apple Developer Program(¥688) | 5/15 | Owner | ⬜ | iOS 砍 / TestFlight 无 |

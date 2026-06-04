@@ -14,6 +14,7 @@ set -u
 
 BASE="${BASE:-https://www.rockingwei.online/api}"
 ROOT="${ROOT:-https://www.rockingwei.online}"
+HTTP_ROOT="${HTTP_ROOT:-${ROOT/https:/http:}}"
 
 PASS=0
 FAIL=0
@@ -53,9 +54,17 @@ echo "时间: $(date -Iseconds 2>/dev/null || date)"
 echo "Base: $BASE"
 echo
 
+hdr "0. 公网入口诊断"
+HTTP_HEADERS=$(curl -sS -D - -o /dev/null -m 10 "$HTTP_ROOT/" 2>&1 || true)
+if echo "$HTTP_HEADERS" | grep -q "dnspod.qcloud.com/static/webblock.html"; then
+  red "HTTP 入口被 DNSPod webblock 拦截：请检查 ICP 备案、腾讯云备案接入和域名解析状态"
+else
+  green "HTTP 入口未命中 DNSPod webblock"
+fi
+
 hdr "1. H5 SPA 入口"
 expect_status "$ROOT/" "200" "GET / (H5 index.html)"
-expect_body_contains "$ROOT/" "私人订猪" "GET / 含 title '私人订猪'"
+expect_body_contains "$ROOT/" "<div id=\"app\"" "GET / 含 uni-app 挂载点"
 expect_body_contains "$ROOT/" "assets/index-" "GET / 引用 vite bundle"
 
 hdr "2. 公开 API"

@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 加固 `scripts/smoke-prod.sh`：H5 检查改用稳定的 uni-app 挂载点，并新增 DNSPod webblock 入口诊断，便于区分业务故障和域名/备案拦截。
+- 复核生产访问链路：服务器侧 `smoke-prod` 24/24 全绿；当前外部网络访问域名命中 DNSPod webblock，已在任务清单标记 C6 备案/接入风险。
 - 新增 W1 本地 smoke 一条龙 `scripts/smoke-w1.sh` 与 `npm run smoke:w1`，覆盖 health、dev-login、用户态接口、下单/取消和无 token 401 边界；`SMOKE_MUTATE=1` 可额外验证 mock 支付与拼猪分享。
 - 新增运营 SQL 模板目录 `scripts/admin/`，覆盖发猪、改订单状态、手动钱包补偿三类上线前高频后台操作，并默认采用事务、预览查询和提交前复核。
 - 修复生产订单页支付入口边界：订单列表/订单详情不再在生产环境调用 `/mock-paid`，改为认养登记说明；开发环境仍保留 mock 联调。
