@@ -536,7 +536,7 @@ wx.login() → code → POST /foster/auth/login
 
 完成度 57%
 
-- [ ] 后端单测覆盖率 ≥ 40%
+- [ ] 后端单测覆盖率 ≥ 40%（2026-06-05 实测 statements 5.78%，提升计划见 `docs/05-debugging/backend-coverage-plan.md`）
 - [x] e2e 测试套件(supertest):auth / order / wallet 主链路 ✅ 2026-06-05 · Codex (`npm -w backend run test:e2e -- --runInBand`: 5 suites / 46 tests)
 - [x] e2e 测试套件补充 upload / share member / pay boundary 用例 ✓ 2026-05-25 · Codex
 - [x] `scripts/smoke-w1.sh` curl 一条龙 ✅ 2026-06-05 · Codex
