@@ -10,39 +10,43 @@ npm -w backend run test:cov -- --runInBand
 
 Current result:
 
-- Test suites: 2 passed
-- Tests: 5 passed
-- Statement coverage: 5.78%
-- Line coverage: 6.03%
+- Test suites: 7 passed
+- Tests: 29 passed
+- Statement coverage: 22.11%
+- Line coverage: 22.50%
 - Target before marking TASKS 2.17 complete: >= 40%
 
 Important note:
 
 `test:e2e` covers the auth/order/wallet runtime paths well, but Jest e2e coverage is not currently reliable for `backend/src` coverage accounting because the e2e config is rooted at `backend/test`. Do not mark backend coverage complete based on e2e pass counts alone.
 
-## Priority Order
+## Completed In This Pass
 
-1. `wallet.service.ts`
-   - `ensureWallet` creates once and reuses existing wallet.
-   - `credit` writes balance and `wallet_transaction`.
-   - `debit` rejects insufficient balance and writes out transaction when successful.
+- `wallet.service.ts`: wallet creation/reuse, overview, pagination, credit/debit and insufficient balance.
+- `message.service.ts`: notify success/failure, list, mark one read, mark all read.
+- `pig.service.ts`: list, detail, missing detail, feeding/health timeline merge.
+- `user.service.ts`: find/create user, admin repair, profile update, missing user.
+- `address.service.ts`: list, create default, default switching, update missing, remove/promote next default.
 
-2. `message.service.ts`
-   - `notify` creates user message.
-   - `list` paginates user messages.
-   - `markReadAll` only updates the current user.
+## Remaining Priority Order
 
-3. `pig.service.ts`
-   - List filtering by region/status.
-   - Detail with/without farmer.
-   - Timeline merge/sort for feeding and health records.
-
-4. `order.service.ts`
+1. `order.service.ts`
    - Create order inventory boundaries.
    - Wallet pay transaction boundary.
    - Refund/cancel state machine.
 
-5. Common layer
+2. `share.service.ts`
+   - Invite creation/reuse.
+   - Public lookup.
+   - Join idempotency.
+   - Member visibility guard.
+
+3. `upload.service.ts`
+   - Local path/url generation.
+   - Asset persistence metadata.
+   - Reject unsupported/unsafe input where applicable.
+
+4. Common layer
    - `response-wrap.interceptor.ts`
    - `all-exceptions.filter.ts`
    - `roles.guard.ts`
