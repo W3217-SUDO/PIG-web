@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### Launch hardening · 2026-06-05
+- 生产 H5 已重新部署到 `https://www.rockingwei.online/`，服务器侧 smoke-prod 23/23 全绿。
+- 首页所有 `todo()` 占位入口已替换为真实导航:关于我们、直播、认养、拼猪、订猪 Tab。
+- 订单确认页增加生产支付边界:生产构建不展示 `开发 mock`，`wxpay` 不再降级调用 `/mock-paid`。
+- 个人中心「帮助与反馈」改为真实客服弹窗，不再显示后续占位提示。
+- 新增上线执行计划 `docs/superpowers/plans/2026-06-05-launch-to-production-plan.md`。
+- 微信小程序构建通过:`npm -w frontend run build:mp-weixin`，产物在 `frontend/dist/build/mp-weixin`。
+
 ### Planning
 - 制定 5/31 上线总路线图 `docs/ROADMAP.md`
 - MVP v1.0.0 范围矩阵 `docs/00-overview/mvp-scope.md`

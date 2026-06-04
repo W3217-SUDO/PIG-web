@@ -12,6 +12,24 @@
 
 > **更新规则**:复制 `### 大盘 - YYYY-MM-DD` 块在最下方追加,旧的保留作历史。
 
+### 大盘 - 2026-06-05(上线硬化 · H5 已部署 · 小程序包可导入)
+
+| 模块 | 状态 | 说明 |
+|---|---|---|
+| 生产 H5 | ✅ 已部署 | `https://www.rockingwei.online/` 返回 200，Vite bundle 正常 |
+| 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok` |
+| 生产 smoke | ✅ 23/23 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿 |
+| 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
+| 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
+| H5 构建 | ✅ 通过 | `npm -w frontend run build:h5` |
+| 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
+| 支付 | 🟡 登记模式 | 生产不展示 mock；真实微信支付/商户号仍为正式收款上线前置 |
+| 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
+| APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
+
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付边界加固，H5 生产部署完成，服务器侧 smoke 23/23 全绿。
+> ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
+
 ### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
 
 | 模块 | 任务数 | 已完成 | 进度 | 责任 | 风险 |
