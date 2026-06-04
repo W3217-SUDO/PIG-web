@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 后端单测覆盖率达标：新增 order/share/upload/farmer service specs，`npm -w backend run test:cov -- --runInBand` 达到 11 suites / 55 tests，All files statements 40.90%、lines 41.98%。
 - 补充后端服务单测：address/message/pig/user/wallet 共 5 个 service spec，后端 `test:cov` 从 statements 5.78% 提升到 22.11%，但仍未达 40% 门槛。
 - 首次复核后端单测覆盖率基线：`npm -w backend run test:cov -- --runInBand` statements 5.78%，未达 40%；新增 `docs/05-debugging/backend-coverage-plan.md` 记录提升顺序和达标命令。
 - 新增只读压测脚本 `scripts/loadtest-readonly.cjs` 与 `npm run loadtest:readonly`，支持上线前 50 RPS / 5 分钟验证，默认只访问 health/pigs/detail/timeline，不污染业务数据。

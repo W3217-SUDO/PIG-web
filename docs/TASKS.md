@@ -532,11 +532,11 @@ wx.login() → code → POST /foster/auth/login
 - [ ] iOS .ipa 出包(若 C9 到位)
 - [ ] TestFlight 内部测试 + 3 名测试员安装
 
-### 2.17 🟡 测试(4/7)· W1-W3 · 共同
+### 2.17 🟡 测试(5/7)· W1-W3 · 共同
 
-完成度 57%
+完成度 71%
 
-- [ ] 后端单测覆盖率 ≥ 40%（2026-06-05 已提升至 statements 22.11%，提升计划见 `docs/05-debugging/backend-coverage-plan.md`）
+- [x] 后端单测覆盖率 ≥ 40% ✅ 2026-06-05 · Codex（`npm -w backend run test:cov -- --runInBand`: 11 suites / 55 tests, statements 40.90%, lines 41.98%）
 - [x] e2e 测试套件(supertest):auth / order / wallet 主链路 ✅ 2026-06-05 · Codex (`npm -w backend run test:e2e -- --runInBand`: 5 suites / 46 tests)
 - [x] e2e 测试套件补充 upload / share member / pay boundary 用例 ✓ 2026-05-25 · Codex
 - [x] `scripts/smoke-w1.sh` curl 一条龙 ✅ 2026-06-05 · Codex
