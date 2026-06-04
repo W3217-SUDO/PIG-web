@@ -10,6 +10,7 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   let host: { token: string; userId: string };
   let guest: { token: string; userId: string };
   let listedPigId: string;
+  let testFarmerId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -27,6 +28,7 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
         videoUrl: '',
       }),
     );
+    testFarmerId = farmer.id;
     const pig = await dataSource.getRepository(Pig).save(
       dataSource.getRepository(Pig).create({
         merchantId: host.userId,
@@ -52,6 +54,9 @@ describe('Upload + Share member + Pay boundary (e2e)', () => {
   });
 
   afterAll(async () => {
+    const dataSource = app.get(DataSource);
+    await dataSource.query('DELETE FROM `pig` WHERE `id` = ?', [listedPigId]);
+    await dataSource.query('DELETE FROM `farmer` WHERE `id` = ?', [testFarmerId]);
     await app.close();
   });
 
