@@ -25,7 +25,7 @@
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5`；`infra/deploy/h5.sh` 手工发布已验证 |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
-| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit 元信息，Sentry/告警仍待接入 |
+| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit/backup 元信息，Sentry/告警仍待接入 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
@@ -525,6 +525,7 @@ wx.login() → code → POST /foster/auth/login
 - [ ] pino 日志 JSON 行式 + 按日切割(30 天保留)
 - [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex
 - [x] Actions 部署注入并校验 `/api/health.data.commit` ✓ 2026-06-05 · Codex
+- [x] `/api/health` 加 MySQL backup 新鲜度/数量/最新文件状态 ✓ 2026-06-05 · Codex
 - [ ] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / Sentry 阈值)
 
 ### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9
