@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 新增 `docs/06-deployment/github-actions-secrets.md`，记录后端自动部署需要的 `SSH_HOST` / `SSH_KEY` 仓库 secrets 以及部署失败后的复核步骤。
 - 将 GitHub Actions 后端部署上传步骤从 `appleboy/scp-action` 改为原生 `ssh/scp`，增加 `SSH_HOST` / `SSH_KEY` 缺失和私钥格式校验，便于定位部署 secret 或网络问题。
 - 修复 GitHub Actions 后端部署 workflow 的 monorepo 打包方式：部署包改为携带根 `package.json` / `package-lock.json`，服务器端使用 `npm ci --omit=dev --workspace backend` 安装生产依赖。
 - 新增域名公网访问诊断 `docs/06-deployment/domain-access-diagnosis-2026-06-05.md`：记录 DNS/服务器/nginx/证书均正常，但本地公网 HTTPS 握手失败，需 Owner 在腾讯云/备案/DNSPod/安全组侧复核。
