@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 新增只读压测脚本 `scripts/loadtest-readonly.cjs` 与 `npm run loadtest:readonly`，支持上线前 50 RPS / 5 分钟验证，默认只访问 health/pigs/detail/timeline，不污染业务数据。
+- 完成服务器侧上线前只读压测：50 RPS / 300 秒，共 15000 请求、0 失败、p95 6.7ms；压测后 `smoke-prod` 24/24 全绿。
+- 新增 `.gitattributes` 固定 `*.sh` 为 LF，避免 Windows CRLF 导致服务器 bash 执行失败。
 - 复核后端 e2e 套件：`auth` / `order` / `wallet` 主链路及 upload/share/pay boundary 共 5 suites、46 tests 全通过，并同步任务清单测试进度。
 - 加固 `scripts/smoke-prod.sh`：H5 检查改用稳定的 uni-app 挂载点，并新增 DNSPod webblock 入口诊断，便于区分业务故障和域名/备案拦截。
 - 复核生产访问链路：服务器侧 `smoke-prod` 24/24 全绿；当前外部网络访问域名命中 DNSPod webblock，已在任务清单标记 C6 备案/接入风险。

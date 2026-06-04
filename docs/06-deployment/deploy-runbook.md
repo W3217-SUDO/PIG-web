@@ -116,7 +116,28 @@ Location: https://dnspod.qcloud.com/static/webblock.html?d=www.rockingwei.online
 2. DNSPod 确认 A 记录仍指向 `175.24.175.123`，且没有开启错误的拦截/停放策略。
 3. 等待备案接入生效后，从非服务器网络重新跑 `npm run smoke:prod`。
 
-### 2.5 回滚到上一个 release
+### 2.5 上线前只读压测
+
+压测只打只读接口，不会创建订单或污染钱包数据：
+
+```bash
+# 本地短跑，验证压测工具自身可用
+npm run loadtest:readonly
+
+# 正式门槛：50 RPS / 5 分钟
+RPS=50 DURATION_SECONDS=300 P95_LIMIT_MS=1000 npm run loadtest:readonly
+
+# 如果公网域名被 DNSPod webblock 拦截，可先在服务器侧验证服务承载能力
+ssh pig 'cd /opt/pig/current && BASE=https://www.rockingwei.online/api RPS=50 DURATION_SECONDS=300 P95_LIMIT_MS=1000 node scripts/loadtest-readonly.cjs'
+```
+
+通过标准：
+
+- `error_rate <= 1%`
+- `p95_ms <= P95_LIMIT_MS`
+- 压测后 `npm run smoke:prod` 仍通过
+
+### 2.6 回滚到上一个 release
 
 ```bash
 ssh pig 'bash -s' << 'EOF'
