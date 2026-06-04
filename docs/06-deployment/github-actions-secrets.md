@@ -14,6 +14,17 @@ The backend deploy workflow uses the monorepo layout:
 - upload/reload: native `ssh/scp`, then extract, switch `/opt/pig/current`, run migration, reload PM2
 - release identity: `NODE_ENV=production` and `GIT_COMMIT=${{ github.sha }}` are injected into PM2; deploy fails if `/api/health.data.commit` does not match the deployed Git SHA.
 
+## H5 Deploy Workflow
+
+Workflow: `.github/workflows/deploy-h5.yml`
+
+The H5 deploy workflow uses the same repository SSH secrets:
+
+- runner: `npm ci` + `npm -w frontend run build:h5`
+- archive: `frontend/dist/build/h5`
+- server: upload `h5.tar.gz`, unpack to staging, back up `/var/www/html/pig`, replace the static site, write `/var/www/html/pig/release.txt`
+- verification: server-local HTTPS with `--resolve www.rockingwei.online:443:127.0.0.1`, plus `release.txt == ${{ github.sha }}`
+
 ## Required Repository Secrets
 
 Configure these in:
@@ -34,6 +45,7 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 - PM2 status: `pig-backend` online.
 - Server-side `smoke-prod`: 25/25.
 - Health release identity: `/api/health.data.commit = bf0a1cb45064d29f83f98748e7f275311981f9f7` was validated during deploy.
+- H5 manual deploy verified on 2026-06-05: `/var/www/html/pig/release.txt = 817a55aa8196c08771f2e972bf748467260692e8`, server-side `smoke-prod` 25/25.
 
 ## How To Verify After Adding Secrets
 
@@ -46,4 +58,5 @@ Server-side post-deploy check:
 
 ```bash
 ssh pig 'pm2 list && curl -s http://127.0.0.1:3000/api/health'
+ssh pig 'cat /var/www/html/pig/release.txt'
 ```

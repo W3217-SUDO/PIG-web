@@ -1,0 +1,88 @@
+name: Deploy H5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-h5.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-h5
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: install
+        run: npm ci
+
+      - name: build h5
+        env:
+          VITE_API_BASE: https://www.rockingwei.online/api
+        run: npm -w frontend run build:h5
+
+      - name: validate artifact
+        run: |
+          set -euo pipefail
+          test -f frontend/dist/build/h5/index.html
+          test -d frontend/dist/build/h5/assets
+          grep -q '<div id="app"' frontend/dist/build/h5/index.html
+          tar czf h5.tar.gz -C frontend/dist/build/h5 .
+
+      - name: upload + publish
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          GIT_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_HOST" || { echo "::error::Missing GitHub secret SSH_HOST"; exit 1; }
+          test -n "$SSH_KEY" || { echo "::error::Missing GitHub secret SSH_KEY"; exit 1; }
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/pig_deploy_key
+          chmod 600 ~/.ssh/pig_deploy_key
+          ssh-keygen -y -f ~/.ssh/pig_deploy_key > /dev/null
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+          scp -i ~/.ssh/pig_deploy_key h5.tar.gz "ubuntu@$SSH_HOST:/tmp/pig-h5.tar.gz"
+          ssh -i ~/.ssh/pig_deploy_key "ubuntu@$SSH_HOST" "sudo -n GIT_COMMIT=$GIT_COMMIT bash -s" <<'REMOTE'
+            set -euo pipefail
+            SITE_DIR=/var/www/html/pig
+            TS=$(date +%Y%m%d_%H%M%S)
+            BACKUP=/var/www/html/pig-h5-bak-$TS
+            STAGING=/tmp/pig-h5-$TS
+
+            mkdir -p "$STAGING"
+            tar xzf /tmp/pig-h5.tar.gz -C "$STAGING"
+            test -f "$STAGING/index.html"
+            test -d "$STAGING/assets"
+
+            if [ -d "$SITE_DIR" ]; then
+              cp -a "$SITE_DIR" "$BACKUP"
+            fi
+
+            mkdir -p "$SITE_DIR"
+            find "$SITE_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+            cp -a "$STAGING"/. "$SITE_DIR"/
+            printf '%s\n' "$GIT_COMMIT" > "$SITE_DIR/release.txt"
+            chown -R www-data:www-data "$SITE_DIR"
+            rm -rf "$STAGING" /tmp/pig-h5.tar.gz
+
+            curl -fsS --resolve www.rockingwei.online:443:127.0.0.1 https://www.rockingwei.online/ | grep -q '<div id="app"'
+            test "$(cat "$SITE_DIR/release.txt")" = "$GIT_COMMIT"
+            ls -dt /var/www/html/pig-h5-bak-*/ 2>/dev/null | tail -n +8 | xargs -r rm -rf
+          REMOTE

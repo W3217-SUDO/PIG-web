@@ -1,53 +1,61 @@
 #!/usr/bin/env bash
-# PIG H5 部署脚本(在本地 Windows / Mac / Linux 跑, 把 build 产物推到服务器)
+# PIG H5 deployment script for local/manual deployment.
 #
-# 使用:
+# Usage:
 #   bash infra/deploy/h5.sh
-#
-# 步骤:
-# 1. 本地 build (frontend/.env.production 已配 https://www.rockingwei.online/api)
-# 2. scp 到服务器 /tmp/pig-h5-new/
-# 3. 服务器侧:备份当前 + 替换 /var/www/html/pig/
 
 set -euo pipefail
-trap 'echo "❌ FAILED at line $LINENO"; exit 1' ERR
+trap 'echo "FAILED at line $LINENO"; exit 1' ERR
 
-cd "$(dirname "$0")/../.."   # 回到仓库根
-echo "═══ 1/3 本地 H5 build ═══"
-[ -f frontend/.env.production ] || { echo "❌ frontend/.env.production 不存在,先建并填 VITE_API_BASE"; exit 1; }
-npm run build:client:h5
-[ -d frontend/dist/build/h5 ] || { echo "❌ build 产物缺失"; exit 2; }
-ls frontend/dist/build/h5/ | head -5
-du -sh frontend/dist/build/h5/
+cd "$(dirname "$0")/../.."
+
+GIT_COMMIT="$(git rev-parse HEAD 2>/dev/null || echo manual)"
+
+echo "== 1/4 Build H5 =="
+VITE_API_BASE="${VITE_API_BASE:-https://www.rockingwei.online/api}" npm run build:client:h5
+test -f frontend/dist/build/h5/index.html
+test -d frontend/dist/build/h5/assets
+grep -q '<div id="app"' frontend/dist/build/h5/index.html
+tar czf /tmp/pig-h5.tar.gz -C frontend/dist/build/h5 .
+du -sh /tmp/pig-h5.tar.gz
 
 echo
-echo "═══ 2/3 scp 到服务器 /tmp/pig-h5-new/ ═══"
-ssh pig 'rm -rf /tmp/pig-h5-new && mkdir /tmp/pig-h5-new'
-scp -r -q frontend/dist/build/h5/* pig:/tmp/pig-h5-new/
+echo "== 2/4 Upload artifact =="
+scp -q /tmp/pig-h5.tar.gz pig:/tmp/pig-h5.tar.gz
 
 echo
-echo "═══ 3/3 服务器侧:备份当前 → 替换 /var/www/html/pig/ ═══"
-ssh pig 'sudo bash -s' << 'BASH'
-set -e
-TS=$(date +%Y%m%d-%H%M%S)
+echo "== 3/4 Publish on server =="
+ssh pig "sudo -n GIT_COMMIT=$GIT_COMMIT bash -s" <<'REMOTE'
+set -euo pipefail
+SITE_DIR=/var/www/html/pig
+TS=$(date +%Y%m%d_%H%M%S)
 BACKUP=/var/www/html/pig-h5-bak-$TS
+STAGING=/tmp/pig-h5-$TS
 
-if [ -d /var/www/html/pig ]; then
-  cp -r /var/www/html/pig "$BACKUP"
-  echo "  ✓ 已备份至 $BACKUP"
+mkdir -p "$STAGING"
+tar xzf /tmp/pig-h5.tar.gz -C "$STAGING"
+test -f "$STAGING/index.html"
+test -d "$STAGING/assets"
+
+if [ -d "$SITE_DIR" ]; then
+  cp -a "$SITE_DIR" "$BACKUP"
+  echo "  backup: $BACKUP"
 fi
 
-rm -rf /var/www/html/pig/*
-cp -r /tmp/pig-h5-new/* /var/www/html/pig/
-chown -R www-data:www-data /var/www/html/pig
-echo "  ✓ 新 H5 已就位"
-ls /var/www/html/pig/ | head -5
+mkdir -p "$SITE_DIR"
+find "$SITE_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+cp -a "$STAGING"/. "$SITE_DIR"/
+printf '%s\n' "$GIT_COMMIT" > "$SITE_DIR/release.txt"
+chown -R www-data:www-data "$SITE_DIR"
+rm -rf "$STAGING" /tmp/pig-h5.tar.gz
 
-# 自动清理 30 天前备份(保留 7 份)
-ls -dt /var/www/html/pig-h5-bak-*/ 2>/dev/null | tail -n +8 | xargs -r rm -rf 2>/dev/null || true
-BASH
+curl -fsS --resolve www.rockingwei.online:443:127.0.0.1 https://www.rockingwei.online/ | grep -q '<div id="app"'
+test "$(cat "$SITE_DIR/release.txt")" = "$GIT_COMMIT"
+ls -dt /var/www/html/pig-h5-bak-*/ 2>/dev/null | tail -n +8 | xargs -r rm -rf
+REMOTE
 
 echo
-echo "═══ 验证 ═══"
-ssh pig 'curl -s -o /dev/null -w "  https://www.rockingwei.online/ → HTTP %{http_code}\n" https://www.rockingwei.online/'
-echo "✅ H5 部署完成"
+echo "== 4/4 Verify =="
+ssh pig "cat /var/www/html/pig/release.txt && curl -fsS --resolve www.rockingwei.online:443:127.0.0.1 https://www.rockingwei.online/ | head -c 120"
+echo
+echo "H5 deployment complete: $GIT_COMMIT"
