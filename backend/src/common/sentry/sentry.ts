@@ -7,6 +7,8 @@ let inited = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SentryLib: any = null;
 
+const REDACTED_REQUEST_HEADERS = new Set(['authorization', 'cookie']);
+
 function getSentry() {
   if (SentryLib) return SentryLib;
   try {
@@ -32,15 +34,18 @@ export function initSentry(): boolean {
     tracesSampleRate: 0.05,
     beforeSend(event: Record<string, any>) {
       if (event.request?.headers) {
-        delete event.request.headers['authorization'];
-        delete event.request.headers['cookie'];
+        for (const key of Object.keys(event.request.headers)) {
+          if (REDACTED_REQUEST_HEADERS.has(key.toLowerCase())) {
+            delete event.request.headers[key];
+          }
+        }
       }
       return event;
     },
   });
   inited = true;
   // eslint-disable-next-line no-console
-  console.log(`🐷 Sentry initialized: env=${process.env.NODE_ENV} dsn=${dsn.slice(0, 30)}...`);
+  console.log(`Sentry initialized: env=${process.env.NODE_ENV || 'development'}`);
   return true;
 }
 

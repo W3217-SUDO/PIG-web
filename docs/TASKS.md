@@ -25,7 +25,7 @@
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5`；`infra/deploy/h5.sh` 手工发布已验证 |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
-| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit/backup 元信息，Sentry/告警仍待接入 |
+| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit/backup；后端 Sentry 已接入，待生产 `SENTRY_DSN` 配置后生效 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
@@ -516,11 +516,11 @@ wx.login() → code → POST /foster/auth/login
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [x] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓) ✓ 2026-06-05 · Codex
 
-### 2.15 🔴 监控可观测性(1/5)· W3 · 后端
+### 2.15 🔴 监控可观测性(2/5)· W3 · 后端
 
-完成度 20%
+完成度 40%
 
-- [ ] Sentry 后端接入(@sentry/nestjs)
+- [x] Sentry 后端接入(@sentry/node，可选 DSN，5xx/未知异常上报，敏感 header 清洗) ✓ 2026-06-05 · Codex
 - [ ] Sentry 前端接入(@sentry/vue + sourcemap 上传)
 - [ ] pino 日志 JSON 行式 + 按日切割(30 天保留)
 - [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex

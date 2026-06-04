@@ -12,7 +12,7 @@
 | 应用日志 | 文件 + grep | ✅ |
 | 健康端点 | `/api/health` | ✅ db/redis/mem/disk/pm2 已接入 |
 | HTTP 访问日志 | nginx access.log | ✅ |
-| 异常上报 | **Sentry** | ❌ 待接入 |
+| 异常上报 | **Sentry** | 🟡 后端已接入，待生产 `SENTRY_DSN` 配置 |
 | 主机监控(CPU/MEM/DISK) | 腾讯云控制台 | ✅ 但被动 |
 | 数据库慢查询 | MySQL slow log | ❌ 待开启 |
 | 告警通知 | **企业微信机器人** | ❌ 待配置 |
@@ -293,24 +293,26 @@ export class AlertService {
 
 ---
 
-## 九、Sentry 接入(后续)
+## 九、Sentry 接入
 
 Sentry 提供前后端异常聚合 + 用户上下文。
 
 ### 后端
 
-```bash
-npm i @sentry/node
-```
+当前后端已接入 `@sentry/node`。启动时读取 `SENTRY_DSN`；为空时 no-op，不影响本地开发和生产启动。
 
-```ts
-import * as Sentry from '@sentry/node';
+生效范围:
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-  tracesSampleRate: 0.1,
-});
+- `NODE_ENV` 写入 Sentry environment。
+- `APP_VERSION` / `GIT_COMMIT` 写入 release。
+- 全局异常过滤器只上报 5xx / 未知异常，业务 400/401/403/404 不制造噪音。
+- 上报前清洗 `authorization` / `cookie` 请求头，且大小写不敏感。
+- 启动日志不打印 DSN。
+
+生产配置:
+
+```env
+SENTRY_DSN=https://xxx.ingest.sentry.io/xxx
 ```
 
 ### 前端
@@ -354,7 +356,7 @@ Sentry.init({
 2. ✅ 企业微信机器人告警(`AlertService`)
 3. ✅ PM2 max_memory_restart + 日志
 4. ✅ 数据库每日备份 + cron
-5. ⬜ Sentry(P1)
+5. 🟡 Sentry(P1): 后端已接入，生产 DSN 待配置；前端待接入
 6. ⬜ MySQL 慢日志(P2)
 7. ⬜ Loki / Grafana(P3,日志量大了)
 
