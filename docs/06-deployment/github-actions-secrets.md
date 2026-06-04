@@ -27,8 +27,11 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 ## Current Status
 
 - `CI` passes on `main`.
-- `Deploy Backend` now passes install/build/archive.
-- `Deploy Backend` currently fails at `upload + reload` immediately. First verify `SSH_HOST` and `SSH_KEY`.
+- `SSH_HOST` and `SSH_KEY` have been configured as repository secrets.
+- `Deploy Backend` attempt 2 succeeded on 2026-06-05.
+- Deployed release: `/opt/pig/releases/20260605_054346`.
+- PM2 status: `pig-backend` online.
+- Server-side `smoke-prod`: 24/24.
 
 ## How To Verify After Adding Secrets
 

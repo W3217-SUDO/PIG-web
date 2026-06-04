@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 跑通 GitHub Actions `Deploy Backend`：配置 `SSH_HOST` / `SSH_KEY` 后，attempt 2 成功部署到 `/opt/pig/releases/20260605_054346`，PM2 online，服务器侧 `smoke-prod` 24/24。
 - 新增 `docs/06-deployment/github-actions-secrets.md`，记录后端自动部署需要的 `SSH_HOST` / `SSH_KEY` 仓库 secrets 以及部署失败后的复核步骤。
 - 将 GitHub Actions 后端部署上传步骤从 `appleboy/scp-action` 改为原生 `ssh/scp`，增加 `SSH_HOST` / `SSH_KEY` 缺失和私钥格式校验，便于定位部署 secret 或网络问题。
 - 修复 GitHub Actions 后端部署 workflow 的 monorepo 打包方式：部署包改为携带根 `package.json` / `package-lock.json`，服务器端使用 `npm ci --omit=dev --workspace backend` 安装生产依赖。

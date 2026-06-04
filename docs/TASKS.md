@@ -500,15 +500,15 @@ wx.login() → code → POST /foster/auth/login
 - [x] `components/Empty.vue` / `components/Loading.vue` / `components/ErrorBoundary.vue` — P2 ✓ 2026-06-04 · Codex
 - [ ] 真机走查截图存到 `docs/04-frontend/screens/` — P2
 
-### 2.14 🔴 部署 / CI · 后端(4/8)· W2-W3 · 后端
+### 2.14 🔴 部署 / CI · 后端(5/8)· W2-W3 · 后端
 
-完成度 50%(基础就位,生产部署待跑通)
+完成度 62%(GitHub Actions 部署已实跑成功，公网 HTTPS 仍需外部接入复核)
 
 - [x] GitHub Actions `ci.yml` workflow
 - [x] GitHub Actions `deploy-backend.yml` workflow(配置就绪)
 - [x] 部署 SSH key 生成 + CODEOWNERS
 - [x] docker-compose(本地 dev)
-- [ ] **GitHub Actions 实跑一次部署**(2026-06-05 CI 已绿，Deploy Backend 已修复打包问题；当前卡在 `upload + reload`，需配置/复核 GitHub Actions secrets `SSH_HOST` / `SSH_KEY`，见 `docs/06-deployment/github-actions-secrets.md`)
+- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` attempt 2 成功；release `/opt/pig/releases/20260605_054346`，PM2 online，服务器侧 `smoke-prod` 24/24）
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
