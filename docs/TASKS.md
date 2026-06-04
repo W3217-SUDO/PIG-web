@@ -508,7 +508,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] GitHub Actions `deploy-backend.yml` workflow(配置就绪)
 - [x] 部署 SSH key 生成 + CODEOWNERS
 - [x] docker-compose(本地 dev)
-- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_055928`，PM2 online，服务器侧 `smoke-prod` 25/25）
+- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_061117`，PM2 online，`/api/health.data.commit=bf0a1cb45064d29f83f98748e7f275311981f9f7`，服务器侧 `smoke-prod` 25/25）
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)

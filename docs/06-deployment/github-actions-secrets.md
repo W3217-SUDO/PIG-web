@@ -30,10 +30,10 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 - `CI` passes on `main`.
 - `SSH_HOST` and `SSH_KEY` have been configured as repository secrets.
 - `Deploy Backend` attempt 2 succeeded on 2026-06-05.
-- Deployed release: `/opt/pig/releases/20260605_055928`.
+- Deployed release: `/opt/pig/releases/20260605_061117`.
 - PM2 status: `pig-backend` online.
 - Server-side `smoke-prod`: 25/25.
-- Health release identity: `/api/health.data.commit` is validated during deploy.
+- Health release identity: `/api/health.data.commit = bf0a1cb45064d29f83f98748e7f275311981f9f7` was validated during deploy.
 
 ## How To Verify After Adding Secrets
 
