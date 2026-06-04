@@ -14,7 +14,9 @@
         </view>
         <view class="balance-row">
           <text class="balance-frozen">冻结:¥{{ wallet?.frozen || '0.00' }}</text>
-          <view class="topup-btn" @tap="onTopup"><text>💰 充值</text></view>
+          <view class="topup-btn" :class="{ disabled: isProd }" @tap="onTopup">
+            <text>{{ isProd ? '充值暂未开放' : '💰 充值' }}</text>
+          </view>
         </view>
       </view>
 
@@ -70,6 +72,7 @@ interface Tx {
 const wallet = ref<Wallet | null>(null);
 const list = ref<Tx[]>([]);
 const loading = ref(true);
+const isProd = (import.meta as any).env?.MODE === 'production';
 
 const balanceInt = computed(() => {
   if (!wallet.value) return '0';
@@ -108,6 +111,25 @@ async function load() {
 }
 
 function onTopup() {
+  if (isProd) {
+    uni.showModal({
+      title: '充值暂未开放',
+      content: '当前版本暂未开通微信支付充值。认养登记成功后,客服会联系你确认补款方式。',
+      showCancel: false,
+    });
+    return;
+  }
+
+  // #ifdef MP-WEIXIN
+  uni.showModal({
+    title: '充值暂未开放',
+    content: '小程序端暂未开通在线充值。认养登记成功后,客服会联系你确认补款方式。',
+    showCancel: false,
+  });
+  return;
+  // #endif
+
+  // #ifndef MP-WEIXIN
   uni.showModal({
     title: '充值',
     content: '充值多少元?(开发环境直接到账,不走真实支付)',
@@ -129,6 +151,7 @@ function onTopup() {
       }
     },
   });
+  // #endif
 }
 
 onShow(load);
@@ -200,6 +223,9 @@ onShow(load);
   background: linear-gradient(135deg, #ffd89c, #ff9e3d);
   padding: 16rpx 32rpx;
   border-radius: 32rpx;
+}
+.topup-btn.disabled {
+  background: rgba(255, 216, 156, 0.32);
 }
 .topup-btn text {
   color: #2c1810;

@@ -9,7 +9,7 @@
 - 构建产物：`frontend/dist/build/mp-weixin`
 - 生产包已启用合法域名校验：`project.config.json -> setting.urlCheck = true`
 - 生产包已移除开发登录入口：构建产物中不应出现 `/auth/dev-login`、`/foster/auth/dev-login`、`localhost`
-- 当前收款边界：正式环境为“认养登记/待确认”模式，真实微信支付需商户号和 API v3 配置到位后再开
+- 当前收款边界：正式环境为“认养登记/待确认”模式，钱包自助充值禁用，真实微信支付需商户号和 API v3 配置到位后再开
 
 ## 1. 构建前检查
 
@@ -23,7 +23,7 @@ npm -w frontend run build:mp-weixin
 构建成功后检查：
 
 ```bash
-rg -n "127\\.0\\.0\\.1:3000/api|localhost|/auth/dev-login|/foster/auth/dev-login|不校验合法域名" frontend/dist/build/mp-weixin -S
+rg -n "127\\.0\\.0\\.1:3000/api|localhost|/auth/dev-login|/foster/auth/dev-login|/wallet/topup|开发环境直接到账|不校验合法域名" frontend/dist/build/mp-weixin -S
 ```
 
 期望：没有命中。

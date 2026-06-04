@@ -1,5 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { DataSource } from 'typeorm';
+import { Farmer } from '../src/modules/farmer/farmer.entity';
+import { Pig, PigStatus } from '../src/modules/pig/pig.entity';
 import { createTestApp, devLogin, auth, expectOk } from './helpers/app';
 
 describe('Order (e2e, 端到端下单全流程)', () => {
@@ -7,6 +10,7 @@ describe('Order (e2e, 端到端下单全流程)', () => {
   let token: string;
   let userId: string;
   let listedPigId: string;
+  let testFarmerId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -14,12 +18,51 @@ describe('Order (e2e, 端到端下单全流程)', () => {
     token = u.token;
     userId = u.userId;
 
-    // 拿一个 listed 猪做下单(依赖 seed)
-    const list = await request(app.getHttpServer()).get('/api/pigs?pageSize=1');
-    listedPigId = list.body?.data?.items?.[0]?.id;
+    // Create an isolated listed pig so repeated e2e runs do not exhaust seed inventory.
+    const dataSource = app.get(DataSource);
+    const farmerRepo = dataSource.getRepository(Farmer);
+    const pigRepo = dataSource.getRepository(Pig);
+
+    const farmer = await farmerRepo.save(
+      farmerRepo.create({
+        name: 'e2e 订单测试农户',
+        region: 'e2e 订单测试村',
+        years: 8,
+        avatarUrl: '',
+        story: 'e2e only',
+        videoUrl: '',
+      }),
+    );
+    testFarmerId = farmer.id;
+
+    const pig = await pigRepo.save(
+      pigRepo.create({
+        merchantId: userId,
+        title: `e2e 订单测试猪 ${Date.now()}`,
+        description: 'e2e only',
+        breed: 'e2e 土猪',
+        farmerId: farmer.id,
+        region: farmer.region,
+        weightKg: '80.00',
+        expectedWeightKg: '140.00',
+        mockVideoUrl: '',
+        pricePerShare: '88.00',
+        totalShares: 10000,
+        soldShares: 0,
+        coverImage: 'https://example.com/pig.jpg',
+        photos: [],
+        ownerNote: '',
+        status: PigStatus.LISTED,
+        listedAt: new Date(),
+      }),
+    );
+    listedPigId = pig.id;
   });
 
   afterAll(async () => {
+    const dataSource = app.get(DataSource);
+    await dataSource.query('DELETE FROM `pig` WHERE `id` = ?', [listedPigId]);
+    await dataSource.query('DELETE FROM `farmer` WHERE `id` = ?', [testFarmerId]);
     await app.close();
   });
 

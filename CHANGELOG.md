@@ -8,6 +8,7 @@
 
 ### Launch hardening · 2026-06-05
 - 修复生产订单页支付入口边界：订单列表/订单详情不再在生产环境调用 `/mock-paid`，改为认养登记说明；开发环境仍保留 mock 联调。
+- 加固钱包充值边界：`POST /api/wallet/topup` 在生产环境返回 403，正式小程序/H5 钱包页显示“充值暂未开放”，避免用户自助给余额入账。
 - 生产 nginx 增加 `/uploads/` 静态托管到 `/opt/pig/shared/uploads/`，上传文件公网 URL 可访问。
 - 小程序提审包加固：启用 `urlCheck=true`，生产 API 默认指向 `https://www.rockingwei.online/api`，微信产物移除开发登录入口和 localhost 兜底。
 - 新增提审清单 `docs/06-deployment/miniapp-submit-checklist.md`，覆盖微信后台域名、开发者工具导入、真机验收、上传审核备注。

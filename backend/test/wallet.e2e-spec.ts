@@ -85,6 +85,30 @@ describe('Wallet (e2e)', () => {
     expect(res.status).toBe(400);
   });
 
+  it('POST /api/wallet/topup is disabled in production and does not change balance', async () => {
+    const before = await request(app.getHttpServer())
+      .get('/api/wallet/me')
+      .set(auth(token));
+    const balBefore = before.body.data.wallet.balance;
+    const oldEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    try {
+      const res = await request(app.getHttpServer())
+        .post('/api/wallet/topup')
+        .set(auth(token))
+        .send({ amount: 100 });
+      expect(res.status).toBe(403);
+    } finally {
+      process.env.NODE_ENV = oldEnv;
+    }
+
+    const after = await request(app.getHttpServer())
+      .get('/api/wallet/me')
+      .set(auth(token));
+    expect(after.body.data.wallet.balance).toBe(balBefore);
+  });
+
   it('无 token → 401', async () => {
     const res = await request(app.getHttpServer()).get('/api/wallet/me');
     expect(res.status).toBe(401);

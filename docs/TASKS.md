@@ -24,11 +24,11 @@
 | 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5` |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
-| 支付 | 🟡 登记模式 | 生产不展示 mock；真实微信支付/商户号仍为正式收款上线前置 |
+| 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
-> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，服务器侧 smoke 23/23 全绿。
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，服务器侧 smoke 23/23 全绿。
 > ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
 
 ### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
@@ -408,7 +408,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] `GET /api/wallet/transactions?page=&direction=` ✓
 - [x] 钱包余额充值 / 扣款事务(`credit / debit`)，mock 支付已通 ✓
 
-> ⚠️ `POST /api/wallet/topup`(真实微信支付充值)依赖 §2.5 pay 模块，待后续实现
+> ⚠️ `POST /api/wallet/topup` 仅限开发联调；生产环境返回 403。真实微信支付充值依赖 §2.5 pay 模块，待商户号/API v3 配置到位后再实现。
 
 ### 2.7 🟢 share · 拼猪 v1 🟢 5/5 · 已完成
 

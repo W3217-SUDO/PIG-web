@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Post,
   Query,
@@ -55,6 +56,10 @@ export class WalletController {
   @Post('topup')
   @ApiOperation({ summary: '充值(v1 mock,直接到账;v1.5 接微信支付)' })
   async topup(@Req() req: Request, @Body() dto: TopupDto) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('wallet topup disabled in production');
+    }
+
     const u = req.user as User;
     const tx = await this.wallet.credit(
       u.id,
