@@ -29,3 +29,5 @@ npm run audit:miniapp
 ```
 
 This blocks accidental submission packages that contain localhost, dev-login, mock payment endpoints, wallet top-up endpoints, or disabled legal-domain checks.
+
+The audit also writes `artifacts/miniapp-audit.json` and `artifacts/miniapp-audit.md`. CI uploads both as the `miniapp-audit` artifact, so each build keeps a reviewable submission-gate record with commit, AppID, API base, package size, and all pass/fail checks.

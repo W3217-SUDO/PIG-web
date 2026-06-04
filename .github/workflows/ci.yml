@@ -40,6 +40,16 @@ jobs:
           npm -w frontend run build:mp-weixin
           npm run audit:miniapp
 
+      - name: upload miniapp audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: miniapp-audit
+          path: |
+            artifacts/miniapp-audit.json
+            artifacts/miniapp-audit.md
+          if-no-files-found: ignore
+
       - name: audit
         run: npm audit --audit-level=high --workspaces=false || true
 
