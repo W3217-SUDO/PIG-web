@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 小程序提审包加固：启用 `urlCheck=true`，生产 API 默认指向 `https://www.rockingwei.online/api`，微信产物移除开发登录入口和 localhost 兜底。
+- 新增提审清单 `docs/06-deployment/miniapp-submit-checklist.md`，覆盖微信后台域名、开发者工具导入、真机验收、上传审核备注。
 - 生产 H5 已重新部署到 `https://www.rockingwei.online/`，服务器侧 smoke-prod 23/23 全绿。
 - 首页所有 `todo()` 占位入口已替换为真实导航:关于我们、直播、认养、拼猪、订猪 Tab。
 - 订单确认页增加生产支付边界:生产构建不展示 `开发 mock`，`wxpay` 不再降级调用 `/mock-paid`。

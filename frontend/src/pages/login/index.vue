@@ -15,7 +15,8 @@
       </view>
 
       <!-- 开发环境旁路 -->
-      <view class="dev-section">
+      <!-- #ifndef MP-WEIXIN -->
+      <view v-if="showDevTools" class="dev-section">
         <text class="dev-label">— 开发测试通道 —</text>
         <view class="btn-dev" @tap="onDevLogin">
           <text>{{ devLoading ? '登录中…' : 'dev 一键登录(自动建测试号)' }}</text>
@@ -24,6 +25,7 @@
           <text style="color:#888">🔍 诊断小程序 AppID</text>
         </view>
       </view>
+      <!-- #endif -->
 
       <view v-if="errMsg" class="err">{{ errMsg }}</view>
       <view v-if="diagInfo" class="err" style="color:#444;background:#fff5e6;padding:16rpx;border-radius:12rpx;margin-top:16rpx;font-size:22rpx;line-height:1.6;text-align:left">
@@ -69,6 +71,8 @@ const devLoading = ref(false);
 const errMsg = ref('');
 const diagInfo = ref('');
 const auth = useAuthStore();
+const isProdBuild = import.meta.env.MODE === 'production';
+const showDevTools = !isProdBuild;
 
 function onDiagnose() {
   // #ifdef MP-WEIXIN
@@ -113,7 +117,7 @@ async function onWxLogin() {
     uni.hideLoading();
     // 本地开发: AppSecret 未配置时自动走 dev-login
     const msg = e instanceof ApiError ? e.message : String(e);
-    if (msg.includes('appid/secret') || msg.includes('占位') || msg.includes('BadGateway') || (e instanceof ApiError && e.bizCode === 502)) {
+    if (!isProdBuild && (msg.includes('appid/secret') || msg.includes('占位') || msg.includes('BadGateway') || (e instanceof ApiError && e.bizCode === 502))) {
       await onDevLogin();
     } else {
       errMsg.value = msg;
@@ -122,11 +126,25 @@ async function onWxLogin() {
   return;
   // #endif
 
+  if (isProdBuild) {
+    uni.showModal({
+      title: '请使用微信小程序登录',
+      content: '正式环境暂不开放网页登录，请在微信小程序内完成登录和认养。',
+      showCancel: false,
+    });
+    return;
+  }
+
   // H5 / 其他: 用 dev-login 兜底
   await onDevLogin();
 }
 
 async function onDevLogin() {
+  if (isProdBuild) {
+    errMsg.value = '正式环境已关闭开发测试登录';
+    return;
+  }
+
   devLoading.value = true;
   errMsg.value = '';
   try {

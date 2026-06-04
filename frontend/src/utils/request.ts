@@ -10,7 +10,10 @@
 function readBaseUrl(): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fromEnv = (import.meta as any).env?.VITE_API_BASE as string | undefined;
-  return fromEnv || 'http://127.0.0.1:3000/api';
+  if (fromEnv) return fromEnv;
+  return import.meta.env.MODE === 'production'
+    ? 'https://www.rockingwei.online/api'
+    : 'http://127.0.0.1:3000/api';
 }
 
 export const API_BASE_URL = readBaseUrl();

@@ -105,6 +105,7 @@
       </view>
 
       <!-- 开发者模式登录（dev_mode — 无真实 AppSecret 时） -->
+      <!-- #ifndef MP-WEIXIN -->
       <view v-else-if="step === 'dev_mode'">
         <text class="card-title">开发者模式登录</text>
         <text class="card-sub">⚠️ 非生产环境，请输入农户姓名直接登录（跳过微信验证）</text>
@@ -139,6 +140,7 @@
           <text class="admin-text">⚙️ 管理员入口</text>
         </view>
       </view>
+      <!-- #endif -->
 
     </view>
   </view>
@@ -251,8 +253,14 @@ async function startWxLogin() {
       pendingOpenid.value = result.openid;
       step.value = 'register';
     } else if (result.type === 'dev_mode') {
+      // #ifndef MP-WEIXIN
       await loadDevFarmers();
       step.value = 'dev_mode';
+      // #endif
+      // #ifdef MP-WEIXIN
+      step.value = 'init';
+      uni.showToast({ title: '微信登录配置未完成', icon: 'none', duration: 3000 });
+      // #endif
     }
   } catch (err: any) {
     step.value = 'init';
@@ -313,6 +321,11 @@ async function confirmRegister() {
 }
 
 async function confirmDevLogin() {
+  // #ifdef MP-WEIXIN
+  return;
+  // #endif
+
+  // #ifndef MP-WEIXIN
   if (!devName.value.trim()) return;
   devLoading.value = true;
   try {
@@ -328,12 +341,19 @@ async function confirmDevLogin() {
   } finally {
     devLoading.value = false;
   }
+  // #endif
 }
 
 async function quickDevSelect(f: FarmerItem) {
+  // #ifdef MP-WEIXIN
+  return;
+  // #endif
+
+  // #ifndef MP-WEIXIN
   selectedId.value = f.id;
   devName.value = f.name;
   await confirmDevLogin();
+  // #endif
 }
 
 function goBackFromRegister() {

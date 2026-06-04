@@ -7,7 +7,10 @@
 function readBaseUrl(): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fromEnv = (import.meta as any).env?.VITE_API_BASE as string | undefined;
-  return fromEnv || 'http://127.0.0.1:3000/api';
+  if (fromEnv) return fromEnv;
+  return import.meta.env.MODE === 'production'
+    ? 'https://www.rockingwei.online/api'
+    : 'http://127.0.0.1:3000/api';
 }
 
 const BASE_URL = readBaseUrl();
@@ -79,7 +82,7 @@ export function request<T = unknown>(
       fail: (err) => {
         const msg = (err as any).errMsg || '';
         if (msg.includes('timeout')) {
-          reject(new Error('网络超时，请检查：1）后端是否运行 2）微信开发者工具已勾选"不校验合法域名"'));
+          reject(new Error('网络超时，请检查：1）后端是否运行 2）线上域名是否已加入微信小程序 request 合法域名'));
         } else {
           reject(new Error(msg || '网络错误'));
         }
