@@ -532,12 +532,12 @@ wx.login() → code → POST /foster/auth/login
 - [ ] iOS .ipa 出包(若 C9 到位)
 - [ ] TestFlight 内部测试 + 3 名测试员安装
 
-### 2.17 🟡 测试(2/7)· W1-W3 · 共同
+### 2.17 🟡 测试(3/7)· W1-W3 · 共同
 
-完成度 29%
+完成度 43%
 
 - [ ] 后端单测覆盖率 ≥ 40%
-- [ ] e2e 测试套件(supertest):auth / order / wallet 主链路
+- [x] e2e 测试套件(supertest):auth / order / wallet 主链路 ✅ 2026-06-05 · Codex (`npm -w backend run test:e2e -- --runInBand`: 5 suites / 46 tests)
 - [x] e2e 测试套件补充 upload / share member / pay boundary 用例 ✓ 2026-05-25 · Codex
 - [x] `scripts/smoke-w1.sh` curl 一条龙 ✅ 2026-06-05 · Codex
 - [ ] 前端 H5 端到端真机走查

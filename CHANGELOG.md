@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 复核后端 e2e 套件：`auth` / `order` / `wallet` 主链路及 upload/share/pay boundary 共 5 suites、46 tests 全通过，并同步任务清单测试进度。
 - 加固 `scripts/smoke-prod.sh`：H5 检查改用稳定的 uni-app 挂载点，并新增 DNSPod webblock 入口诊断，便于区分业务故障和域名/备案拦截。
 - 复核生产访问链路：服务器侧 `smoke-prod` 24/24 全绿；当前外部网络访问域名命中 DNSPod webblock，已在任务清单标记 C6 备案/接入风险。
 - 新增 W1 本地 smoke 一条龙 `scripts/smoke-w1.sh` 与 `npm run smoke:w1`，覆盖 health、dev-login、用户态接口、下单/取消和无 token 401 边界；`SMOKE_MUTATE=1` 可额外验证 mock 支付与拼猪分享。
