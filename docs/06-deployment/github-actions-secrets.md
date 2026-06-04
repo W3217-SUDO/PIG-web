@@ -12,6 +12,7 @@ The backend deploy workflow uses the monorepo layout:
 - archive: root `package.json` / `package-lock.json`, `backend/dist`, `backend/package.json`, `backend/db`
 - server: `npm ci --omit=dev --workspace backend`
 - upload/reload: native `ssh/scp`, then extract, switch `/opt/pig/current`, run migration, reload PM2
+- release identity: `NODE_ENV=production` and `GIT_COMMIT=${{ github.sha }}` are injected into PM2; deploy fails if `/api/health.data.commit` does not match the deployed Git SHA.
 
 ## Required Repository Secrets
 
@@ -32,13 +33,14 @@ GitHub repository -> `Settings` -> `Secrets and variables` -> `Actions` -> `New 
 - Deployed release: `/opt/pig/releases/20260605_055928`.
 - PM2 status: `pig-backend` online.
 - Server-side `smoke-prod`: 25/25.
+- Health release identity: `/api/health.data.commit` is validated during deploy.
 
 ## How To Verify After Adding Secrets
 
 1. Open GitHub Actions.
 2. Select `Deploy Backend`.
 3. Click `Run workflow` on `main`.
-4. The deploy job should reach `upload + reload`, upload `/tmp/release.tar.gz`, switch `/opt/pig/current`, reload `pig-backend`, and pass `curl http://127.0.0.1:3000/api/health`.
+4. The deploy job should reach `upload + reload`, upload `/tmp/release.tar.gz`, switch `/opt/pig/current`, reload `pig-backend`, pass `curl http://127.0.0.1:3000/api/health`, and verify the health `commit` equals the GitHub SHA.
 
 Server-side post-deploy check:
 

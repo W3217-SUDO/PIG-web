@@ -1,78 +1,72 @@
 #!/usr/bin/env bash
-# PIG 后端部署脚本(在服务器 ubuntu 用户身份下跑)
-# 使用:
-#   ssh pig 'bash -s' < infra/deploy/backend.sh
-# 或先 scp 上去:
-#   scp infra/deploy/backend.sh pig:/tmp/ && ssh pig 'bash /tmp/backend.sh'
+# PIG backend deployment script for the ubuntu user on the server.
 #
-# 前置条件(一次性):
-# 1. GitHub Deploy keys 已加 ~/.ssh/github-deploy.pub
-#    或用 HTTPS clone(GFW 干扰时重试 2-3 次)
-# 2. /opt/pig/shared/.env.production 已就位 + WX_MP_APPID 等已填
-# 3. MySQL pig 库 + pig_app 账户已建(由 W0 装环境时建好)
+# Usage:
+#   ssh pig 'bash -s' < infra/deploy/backend.sh
+#   BRANCH=dev ssh pig 'bash -s' < infra/deploy/backend.sh
 
 set -euo pipefail
-trap 'echo "❌ FAILED at line $LINENO"; exit 1' ERR
+trap 'echo "FAILED at line $LINENO"; exit 1' ERR
 
 REPO_HTTPS="https://github.com/W3217-SUDO/PIG-web.git"
 REPO_SSH="git@github.com:W3217-SUDO/PIG-web.git"
 BRANCH="${BRANCH:-main}"
 
 TS=$(date +%Y%m%d-%H%M%S)
-REL=/opt/pig/releases/$TS
-LOG_DIR=/opt/pig/logs
+REL="/opt/pig/releases/$TS"
+LOG_DIR="/opt/pig/logs"
 
 mkdir -p "$REL" "$LOG_DIR"
 
-echo "═══ 1/6 Clone 代码 ═══"
-# 优先 SSH(快,无 GFW 干扰),失败回退 HTTPS + 重试
+echo "== 1/6 Clone code =="
 if ssh -o ConnectTimeout=5 -T -o BatchMode=yes git@github.com 2>&1 | grep -q "successfully authenticated"; then
   git clone --depth 1 -b "$BRANCH" "$REPO_SSH" "$REL"
 else
-  echo "  (SSH 不可用,回退 HTTPS, 大 buffer + 3 次重试)"
+  echo "  SSH clone unavailable, fallback to HTTPS with retries"
   for i in 1 2 3; do
     if git -c http.postBuffer=524288000 \
-          -c http.lowSpeedLimit=0 -c http.lowSpeedTime=999999 \
-          clone --depth 1 -b "$BRANCH" "$REPO_HTTPS" "$REL"; then
+      -c http.lowSpeedLimit=0 -c http.lowSpeedTime=999999 \
+      clone --depth 1 -b "$BRANCH" "$REPO_HTTPS" "$REL"; then
       break
     fi
     rm -rf "$REL"
     mkdir -p "$REL"
-    [ "$i" = 3 ] && { echo "  ❌ HTTPS clone 3 次失败,加 Deploy key 到 GitHub"; exit 2; }
+    [ "$i" = 3 ] && { echo "HTTPS clone failed 3 times. Add a Deploy key to GitHub."; exit 2; }
     sleep 3
   done
 fi
-echo "  ✓ release: $REL"
+
+GIT_COMMIT="$(git -C "$REL" rev-parse HEAD 2>/dev/null || echo unknown)"
+echo "  release: $REL"
+echo "  commit: $GIT_COMMIT"
 
 echo
-echo "═══ 2/6 注入 .env.production(复制,不用软链, cluster mode 兼容)═══"
+echo "== 2/6 Inject production env =="
 cp /opt/pig/shared/.env.production "$REL/backend/.env.production"
 chmod 600 "$REL/backend/.env.production"
 
 echo
-echo "═══ 3/6 安装依赖(workspaces,根目录一次装全部)═══"
+echo "== 3/6 Install dependencies =="
 cd "$REL"
 npm install --no-audit --no-fund --prefer-offline
 
 echo
-echo "═══ 4/6 backend build (先清 dist 避免 incremental cache 错位) ═══"
-cd "$REL/backend"; rm -rf dist tsconfig.tsbuildinfo
+echo "== 4/6 Build backend =="
 cd "$REL/backend"
+rm -rf dist tsconfig.tsbuildinfo
 NODE_ENV=production npm run build
-[ -f dist/main.js ] || { echo "❌ dist/main.js 不存在"; exit 3; }
+[ -f dist/main.js ] || { echo "dist/main.js does not exist"; exit 3; }
 
 echo
-echo "═══ 5/6 跑 migration(增量) ═══"
+echo "== 5/6 Run migrations =="
 NODE_ENV=production npm run migration:run
 
 echo
-echo "═══ 6/6 PM2 重启(fork + --update-env 强制重读 .env.production)═══"
+echo "== 6/6 Restart PM2 =="
 ln -sfn "$REL" /opt/pig/current
 cd "$REL/backend"
 pm2 delete pig-backend 2>/dev/null || true
-# 关键:从 release 目录启动,这样 ConfigModule 能正确找到 .env.production
-# --update-env 让 PM2 daemon 把当前 shell env 传给 worker
-NODE_ENV=production pm2 start dist/main.js \
+NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" pm2 start dist/main.js \
   --name pig-backend \
   --cwd "$REL/backend" \
   --log "$LOG_DIR/pig-backend.log" \
@@ -81,16 +75,19 @@ NODE_ENV=production pm2 start dist/main.js \
 pm2 save
 
 echo
-echo "═══ 验证 ═══"
+echo "== Verify =="
 sleep 3
-curl -s -m 5 -w "\n  本机 :3000  → HTTP %{http_code}\n" http://127.0.0.1:3000/api/health | tail -2
-curl -s -m 5 -w "  公网 nginx → HTTP %{http_code}\n" -o /dev/null https://www.rockingwei.online/api/health
+HEALTH_JSON=$(curl -fsS http://127.0.0.1:3000/api/health)
+HEALTH_JSON="$HEALTH_JSON" GIT_COMMIT="$GIT_COMMIT" node -e "const h=JSON.parse(process.env.HEALTH_JSON).data; if(h.commit!==process.env.GIT_COMMIT){console.error('health commit mismatch', h.commit, process.env.GIT_COMMIT); process.exit(1)}"
+echo "$HEALTH_JSON" | head -c 300
+printf "\n"
+curl -s -m 5 -w "public nginx -> HTTP %{http_code}\n" -o /dev/null https://www.rockingwei.online/api/health || true
 
 echo
-echo "✅ 部署完成: $REL"
-echo "📜 最近 5 次 release:"
+echo "Deployment complete: $REL"
+echo "Recent releases:"
 ls -dt /opt/pig/releases/*/ 2>/dev/null | head -5
 
 echo
-echo "🧹 清理 30 天前的旧 release(保留最近 5 次):"
+echo "Cleanup old releases, keeping the latest 5"
 ls -dt /opt/pig/releases/*/ 2>/dev/null | tail -n +6 | xargs -r rm -rf 2>/dev/null

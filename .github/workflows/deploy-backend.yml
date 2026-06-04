@@ -31,7 +31,6 @@ jobs:
 
       - name: build
         run: npm -w backend run build
-        continue-on-error: true
 
       - name: archive
         run: |
@@ -52,6 +51,7 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
+          GIT_COMMIT: ${{ github.sha }}
         run: |
           set -euo pipefail
           test -n "$SSH_HOST" || { echo "::error::Missing GitHub secret SSH_HOST"; exit 1; }
@@ -64,8 +64,10 @@ jobs:
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
           scp -i ~/.ssh/pig_deploy_key release.tar.gz "ubuntu@$SSH_HOST:/tmp/release.tar.gz"
-          ssh -i ~/.ssh/pig_deploy_key "ubuntu@$SSH_HOST" 'bash -s' <<'REMOTE'
+          ssh -i ~/.ssh/pig_deploy_key "ubuntu@$SSH_HOST" "NODE_ENV=production GIT_COMMIT=$GIT_COMMIT bash -s" <<'REMOTE'
             set -euo pipefail
+            export NODE_ENV="${NODE_ENV:-production}"
+            export GIT_COMMIT="${GIT_COMMIT:-unknown}"
             cd /opt/pig
             TS=$(date +%Y%m%d_%H%M%S)
             mkdir -p releases/$TS
@@ -76,10 +78,12 @@ jobs:
             cd /opt/pig
             ln -sfn releases/$TS current
             cd current/backend
-            npm run migration:run 2>/dev/null || echo "no migrations"
-            pm2 reload pig-backend --update-env 2>/dev/null || pm2 start dist/main.js --name pig-backend --update-env
+            NODE_ENV=production npm run migration:run 2>/dev/null || echo "no migrations"
+            NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" pm2 reload pig-backend --update-env 2>/dev/null || \
+              NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" pm2 start dist/main.js --name pig-backend --update-env
             sleep 3
-            curl -fsS http://127.0.0.1:3000/api/health || { pm2 logs pig-backend --lines 50 --nostream; exit 1; }
+            HEALTH_JSON=$(curl -fsS http://127.0.0.1:3000/api/health) || { pm2 logs pig-backend --lines 50 --nostream; exit 1; }
+            HEALTH_JSON="$HEALTH_JSON" node -e "const h=JSON.parse(process.env.HEALTH_JSON).data; if(h.commit!==process.env.GIT_COMMIT){console.error('health commit mismatch', h.commit, process.env.GIT_COMMIT); process.exit(1)}"
             cd /opt/pig/releases
             ls -1t | tail -n +6 | xargs -r rm -rf
           REMOTE

@@ -17,7 +17,7 @@
 | 模块 | 状态 | 说明 |
 |---|---|---|
 | 生产 H5 | ✅ 已部署 | `https://www.rockingwei.online/` 返回 200，Vite bundle 正常 |
-| 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok` |
+| 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok`；Actions 部署会校验 `commit` 等于 GitHub SHA |
 | 生产 smoke | 🟡 服务器侧 25/25 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿；本机公网 HTTP 命中 DNSPod webblock，HTTPS 仍握手失败，需备案/接入/安全组/本地网络复核 |
 | 上传静态托管 | ✅ 已上线 | nginx `/uploads/` 指向 `/opt/pig/shared/uploads/`，公网 URL 验证 200 |
 | 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
@@ -25,7 +25,7 @@
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5` |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
-| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2 元信息，Sentry/告警仍待接入 |
+| 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit 元信息，Sentry/告警仍待接入 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
@@ -521,6 +521,7 @@ wx.login() → code → POST /foster/auth/login
 - [ ] Sentry 前端接入(@sentry/vue + sourcemap 上传)
 - [ ] pino 日志 JSON 行式 + 按日切割(30 天保留)
 - [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex
+- [x] Actions 部署注入并校验 `/api/health.data.commit` ✓ 2026-06-05 · Codex
 - [ ] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / Sentry 阈值)
 
 ### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9
