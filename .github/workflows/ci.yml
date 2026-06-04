@@ -28,12 +28,10 @@ jobs:
         run: npm run lint || echo "skip-if-not-configured"
 
       - name: backend build
-        run: npm -w backend run build || echo "skip-if-not-configured"
-        continue-on-error: true
+        run: npm -w backend run build
 
       - name: frontend type-check
-        run: npm -w frontend run type-check || echo "skip-if-not-configured"
-        continue-on-error: true
+        run: npm -w frontend run type-check
 
       - name: miniapp build audit
         run: |
@@ -112,9 +110,8 @@ jobs:
           NODE_ENV: development
         run: npm run seed:dev
 
-      - name: backend 单元测试(暂无,占位)
+      - name: backend unit tests
         run: npm -w backend run test
-        continue-on-error: true
 
       - name: backend e2e(supertest + 真 MySQL + 真 Redis,4 spec / 24 case)
         working-directory: backend
