@@ -526,6 +526,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex
 - [x] Actions 部署注入并校验 `/api/health.data.commit` ✓ 2026-06-05 · Codex
 - [x] `/api/health` 加 MySQL backup 新鲜度/数量/最新文件状态 ✓ 2026-06-05 · Codex
+- [x] 服务器健康告警 cron(health/db/redis/disk/backup/pm2 restart) ✓ 2026-06-05 · Codex
 - [ ] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / Sentry 阈值)
 
 ### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9

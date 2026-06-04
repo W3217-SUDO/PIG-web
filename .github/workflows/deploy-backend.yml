@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'infra/deploy/**'
+      - 'infra/monitor/**'
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
@@ -44,7 +45,8 @@ jobs:
               backend/db \
               infra/deploy/ecosystem.config.cjs \
               infra/deploy/render-env-production.sh \
-              infra/deploy/logrotate-pig.conf 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
+              infra/deploy/logrotate-pig.conf \
+              infra/monitor/pig-health-alert.sh 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
           else
             echo "no dist yet, skip deploy"
             exit 0
@@ -86,6 +88,8 @@ jobs:
             NODE_ENV=production npm run migration:run 2>/dev/null || echo "no migrations"
             sudo install -m 644 -o root -g root /opt/pig/current/infra/deploy/logrotate-pig.conf /etc/logrotate.d/pig
             sudo logrotate -d /etc/logrotate.d/pig >/dev/null
+            sudo install -m 755 -o root -g root /opt/pig/current/infra/monitor/pig-health-alert.sh /opt/pig/bin/pig-health-alert.sh
+            (crontab -l 2>/dev/null | grep -v '/opt/pig/bin/pig-health-alert.sh'; echo '* * * * * /opt/pig/bin/pig-health-alert.sh >> /opt/pig/logs/pig-health-alert.log 2>&1') | crontab -
             pm2 delete pig-backend 2>/dev/null || true
             NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" PM2_INSTANCES="${PM2_INSTANCES:-2}" \
               pm2 start /opt/pig/current/infra/deploy/ecosystem.config.cjs --update-env

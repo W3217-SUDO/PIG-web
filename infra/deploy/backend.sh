@@ -67,6 +67,8 @@ echo "== 6/6 Restart PM2 =="
 ln -sfn "$REL" /opt/pig/current
 sudo install -m 644 -o root -g root "$REL/infra/deploy/logrotate-pig.conf" /etc/logrotate.d/pig
 sudo logrotate -d /etc/logrotate.d/pig >/dev/null
+sudo install -m 755 -o root -g root "$REL/infra/monitor/pig-health-alert.sh" /opt/pig/bin/pig-health-alert.sh
+(crontab -l 2>/dev/null | grep -v '/opt/pig/bin/pig-health-alert.sh'; echo '* * * * * /opt/pig/bin/pig-health-alert.sh >> /opt/pig/logs/pig-health-alert.log 2>&1') | crontab -
 cd /opt/pig/current/backend
 pm2 delete pig-backend 2>/dev/null || true
 NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" PM2_INSTANCES="${PM2_INSTANCES:-2}" \
