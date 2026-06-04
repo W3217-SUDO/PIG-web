@@ -28,6 +28,7 @@ bash infra/deploy/h5.sh
 - ✅ `/opt/pig/{releases,shared,logs,backups}` 目录就位
 - ✅ `/opt/pig/shared/.env.production` 已存在,关键字段填充(DB / Redis / JWT / WX_MP_APPID)
 - ✅ nginx `/api/` 反代到 `127.0.0.1:3000`(已修 `proxy_pass` 末尾的 `/`)
+- ✅ nginx `/uploads/` 静态托管到 `/opt/pig/shared/uploads/`
 
 ### 1.2 GitHub Deploy key(推荐但**可选**)
 
@@ -72,9 +73,25 @@ ssh pig 'curl -s http://127.0.0.1:3000/api/health'
 
 # 公网
 curl -s https://www.rockingwei.online/api/health
+
+# 上传静态托管
+ssh pig 'mkdir -p /opt/pig/shared/uploads/healthcheck && printf ok > /opt/pig/shared/uploads/healthcheck/nginx.txt'
+curl -i https://www.rockingwei.online/uploads/healthcheck/nginx.txt
+ssh pig 'rm -f /opt/pig/shared/uploads/healthcheck/nginx.txt; rmdir /opt/pig/shared/uploads/healthcheck 2>/dev/null || true'
 ```
 
 期望:`{"code":0,"data":{"status":"ok","db":"ok","redis":"ok","env":"production"}}`
+
+nginx 站点配置中应包含：
+
+```nginx
+location /uploads/ {
+    alias /opt/pig/shared/uploads/;
+    autoindex off;
+    access_log off;
+    expires 30d;
+}
+```
 
 ### 2.4 回滚到上一个 release
 

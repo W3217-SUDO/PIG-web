@@ -101,13 +101,15 @@
       </view>
 
       <!-- 提示 -->
+      <!-- #ifndef MP-WEIXIN -->
       <view v-if="payMethod === 'mock'" class="tip-card">
         <text>💡 <text class="bold">开发测试</text>使用 mock 支付,不真实扣钱。</text>
       </view>
-      <view v-else-if="payMethod === 'wallet'" class="tip-card">
+      <!-- #endif -->
+      <view v-if="payMethod === 'wallet'" class="tip-card">
         <text>💳 钱包余额支付,当前余额 <text class="bold">¥{{ walletBalance }}</text></text>
       </view>
-      <view v-else class="tip-card">
+      <view v-if="payMethod === 'wxpay'" class="tip-card">
         <text>{{ wxpayTip }}</text>
       </view>
 
@@ -182,12 +184,14 @@ const payOptions = computed(() => {
       icon: '💚',
       disabled: false,
     },
+    // #ifndef MP-WEIXIN
     {
       value: 'mock',
       label: '开发 mock',
       sub: '不真实扣钱,仅记账',
       icon: '🧪',
     },
+    // #endif
   ];
   return isProd ? opts.filter((opt) => opt.value !== 'mock') : opts;
 });
@@ -314,8 +318,19 @@ async function onSubmit() {
       });
       return;
     } else {
+      // #ifdef MP-WEIXIN
+      uni.showModal({
+        title: '支付暂不可用',
+        content: '当前小程序版本暂未开通微信支付,请返回后选择认养登记。',
+        showCancel: false,
+      });
+      return;
+      // #endif
+
+      // #ifndef MP-WEIXIN
       // 非生产环境:wxpay / mock 都走开发 mock 支付,便于联调订单后续状态
       await request(`/orders/${order.id}/mock-paid`, { method: 'POST' });
+      // #endif
     }
 
     // 3. 跳结果页

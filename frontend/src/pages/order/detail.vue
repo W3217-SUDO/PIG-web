@@ -118,7 +118,9 @@
       <view class="cta-bar">
         <template v-if="order.status === 'pending'">
           <view class="action-btn ghost" @tap="onCancel"><text>取消订单</text></view>
-          <view class="action-btn primary" @tap="onPay"><text>去支付</text></view>
+          <view class="action-btn primary" @tap="onPay">
+            <text>{{ isProd ? '登记说明' : '去支付' }}</text>
+          </view>
         </template>
         <template v-else-if="order.status === 'paid'">
           <view class="action-btn ghost" @tap="onRefund"><text>申请退款</text></view>
@@ -217,6 +219,7 @@ const loading = ref(true);
 const errMsg = ref('');
 const refundOpen = ref(false);
 const refundReason = ref('');
+const isProd = (import.meta as any).env?.MODE === 'production';
 
 let orderId = '';
 
@@ -247,7 +250,7 @@ function statusIcon(s: string) {
 function statusSub(o: OrderDetail): string {
   switch (o.status) {
     case 'pending':
-      return '请尽快完成支付,15 分钟内有效';
+      return isProd ? '认养登记已提交,客服会联系你确认补款方式' : '请尽快完成支付,15 分钟内有效';
     case 'paid':
       return '猪已经在养着,屠宰日期我们会提前通知';
     case 'shipped':
@@ -266,7 +269,7 @@ function statusSub(o: OrderDetail): string {
 }
 function payMethodLabel(p: string | null) {
   if (!p) return '—';
-  return p === 'wxpay' ? '微信支付' : p === 'wallet' ? '钱包余额' : p === 'mock' ? '开发 mock' : p;
+  return p === 'wxpay' ? '微信支付' : p === 'wallet' ? '钱包余额' : p === 'mock' ? '测试记账' : p;
 }
 
 function fmtTime(iso: string | null) {
@@ -360,7 +363,16 @@ async function onCancel() {
 
 async function onPay() {
   if (!order.value) return;
-  // 跳回下单确认页继续走支付方式选择(简化:这里直接 mock-paid)
+  if (isProd) {
+    uni.showModal({
+      title: '认养登记已提交',
+      content: '当前版本暂未开通微信支付。我们会保留你的认养记录，客服会联系你确认认养和补款方式。',
+      showCancel: false,
+    });
+    return;
+  }
+
+  // 开发环境保留 mock 支付,便于联调订单后续状态
   try {
     await request(`/orders/${order.value.id}/mock-paid`, { method: 'POST' });
     uni.showToast({ title: '支付成功', icon: 'success' });

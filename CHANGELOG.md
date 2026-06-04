@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 修复生产订单页支付入口边界：订单列表/订单详情不再在生产环境调用 `/mock-paid`，改为认养登记说明；开发环境仍保留 mock 联调。
+- 生产 nginx 增加 `/uploads/` 静态托管到 `/opt/pig/shared/uploads/`，上传文件公网 URL 可访问。
 - 小程序提审包加固：启用 `urlCheck=true`，生产 API 默认指向 `https://www.rockingwei.online/api`，微信产物移除开发登录入口和 localhost 兜底。
 - 新增提审清单 `docs/06-deployment/miniapp-submit-checklist.md`，覆盖微信后台域名、开发者工具导入、真机验收、上传审核备注。
 - 生产 H5 已重新部署到 `https://www.rockingwei.online/`，服务器侧 smoke-prod 23/23 全绿。

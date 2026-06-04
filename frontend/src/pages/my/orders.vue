@@ -42,7 +42,9 @@
         <!-- 按状态展示操作按钮 -->
         <view v-if="o.status === 'pending'" class="order-actions">
           <view class="action-btn ghost" @tap.stop="onCancel(o)"><text>取消</text></view>
-          <view class="action-btn primary" @tap.stop="onPay(o)"><text>去支付</text></view>
+          <view class="action-btn primary" @tap.stop="onPay(o)">
+            <text>{{ isProd ? '登记说明' : '去支付' }}</text>
+          </view>
         </view>
         <view v-else-if="o.status === 'paid'" class="order-actions">
           <view class="action-btn ghost" @tap.stop="onRefund(o)"><text>申请退款</text></view>
@@ -145,6 +147,7 @@ const tabs: Array<{ label: string; value: string }> = [
 const activeTab = ref<string>('');
 const list = ref<Order[]>([]);
 const loading = ref(true);
+const isProd = (import.meta as any).env?.MODE === 'production';
 
 function statusLabel(s: string) {
   const m: Record<string, string> = {
@@ -205,7 +208,20 @@ function onCancel(o: Order) {
 }
 
 async function onPay(o: Order) {
-  // 简化:列表里 mock 支付;真实流程在订单详情页选支付方式
+  if (isProd) {
+    uni.showModal({
+      title: '认养登记已提交',
+      content: '当前版本暂未开通微信支付。订单会保留为待确认状态，客服会联系你确认认养和补款方式。',
+      confirmText: '查看详情',
+      cancelText: '知道了',
+      success: (res) => {
+        if (res.confirm) onOpen(o);
+      },
+    });
+    return;
+  }
+
+  // 开发环境保留 mock 支付,便于联调订单后续状态
   try {
     await request(`/orders/${o.id}/mock-paid`, { method: 'POST' });
     uni.showToast({ title: '支付成功', icon: 'success' });

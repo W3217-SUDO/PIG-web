@@ -19,6 +19,7 @@
 | 生产 H5 | ✅ 已部署 | `https://www.rockingwei.online/` 返回 200，Vite bundle 正常 |
 | 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok` |
 | 生产 smoke | ✅ 23/23 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿 |
+| 上传静态托管 | ✅ 已上线 | nginx `/uploads/` 指向 `/opt/pig/shared/uploads/`，公网 URL 验证 200 |
 | 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
 | 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5` |
@@ -27,7 +28,7 @@
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
-> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付边界加固，H5 生产部署完成，服务器侧 smoke 23/23 全绿。
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，服务器侧 smoke 23/23 全绿。
 > ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
 
 ### 大盘 - 2026-05-14 下午(Web 原型系统 + foster-care-page 改进)
@@ -443,12 +444,12 @@ wx.login() → code → POST /foster/auth/login
 - [x] `messageService.notify(userId, type, payload)` 工具方法，异步触发不阻塞主流程 ✓
 - [x] `GET /api/messages` + `PATCH /api/messages/:id/read` + `POST /api/messages/read-all` ✓
 
-### 2.11 🟡 upload · 文件上传(1/2)· P1 · 后端
+### 2.11 🟢 upload · 文件上传(2/2)· P1 · 后端
 
-完成度 50% — 后端上传接口已完成；生产 nginx `/uploads/` 静态托管待部署配置落地
+完成度 100% — 后端上传接口已完成；生产 nginx `/uploads/` 静态托管已落地并验证公网 200
 
 - [x] `POST /api/upload/image`(multer，写本地 `STORAGE_LOCAL_DIR`，前端头像上传已接入) ✓ 2026-05-25 · Codex
-- [ ] nginx `/uploads/` 静态文件托管
+- [x] nginx `/uploads/` 静态文件托管 ✓ 2026-06-05 · Codex
 
 ### 2.12 🟢 Seed 测试数据 🟢 4/4 · 已完成
 
@@ -507,7 +508,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] docker-compose(本地 dev)
 - [ ] **GitHub Actions 实跑一次部署**(SSH key 加白 + pm2 reload 验证)
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
-- [ ] nginx 反代 `/api/` + 静态 `/uploads/` 上线
+- [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
 
 ### 2.15 🔴 监控可观测性(0/5)· W3 · 后端
