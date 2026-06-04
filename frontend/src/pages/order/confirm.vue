@@ -108,7 +108,7 @@
         <text>💳 钱包余额支付,当前余额 <text class="bold">¥{{ walletBalance }}</text></text>
       </view>
       <view v-else class="tip-card">
-        <text>📱 微信支付暂未接入(待真实小程序帐号 + 商户号),将自动降级为 mock 支付。</text>
+        <text>{{ wxpayTip }}</text>
       </view>
 
       <view class="bottom-spacer"></view>
@@ -164,7 +164,8 @@ const remark = ref('');
 const walletBalance = ref('0.00');
 
 type PayMethod = 'wallet' | 'wxpay' | 'mock';
-const payMethod = ref<PayMethod>('mock');
+const isProd = (import.meta as any).env?.MODE === 'production';
+const payMethod = ref<PayMethod>(isProd ? 'wxpay' : 'mock');
 
 const payOptions = computed(() => {
   const opts: Array<{ value: PayMethod; label: string; sub: string; icon: string; disabled?: boolean }> = [
@@ -177,7 +178,7 @@ const payOptions = computed(() => {
     {
       value: 'wxpay',
       label: '微信支付',
-      sub: '暂未接入,将走 mock 支付',
+      sub: isProd ? '提交后生成待支付订单' : '开发期暂走 mock 支付',
       icon: '💚',
       disabled: false,
     },
@@ -188,8 +189,14 @@ const payOptions = computed(() => {
       icon: '🧪',
     },
   ];
-  return opts;
+  return isProd ? opts.filter((opt) => opt.value !== 'mock') : opts;
 });
+
+const wxpayTip = computed(() =>
+  isProd
+    ? '📱 当前版本先开放认养登记,微信支付开通后会通知您补款。'
+    : '📱 微信支付暂未接入,开发环境将自动降级为 mock 支付。',
+);
 
 function onPickPay(opt: { value: PayMethod; disabled?: boolean }) {
   if (opt.disabled) return;
@@ -267,10 +274,13 @@ async function onSubmit() {
     if (parseFloat(walletBalance.value) < parseFloat(totalAmount.value)) {
       uni.showModal({
         title: '余额不足',
-        content: `当前钱包余额 ¥${walletBalance.value},不足以支付 ¥${totalAmount.value}。是否切换为 mock 支付?`,
-        confirmText: '切换',
+        content: isProd
+          ? `当前钱包余额 ¥${walletBalance.value},不足以支付 ¥${totalAmount.value}。请更换支付方式。`
+          : `当前钱包余额 ¥${walletBalance.value},不足以支付 ¥${totalAmount.value}。是否切换为 mock 支付?`,
+        confirmText: isProd ? '知道了' : '切换',
+        showCancel: !isProd,
         success: (res) => {
-          if (res.confirm) payMethod.value = 'mock';
+          if (!isProd && res.confirm) payMethod.value = 'mock';
         },
       });
       return;
@@ -293,8 +303,18 @@ async function onSubmit() {
     // 2. 按支付方式调对应接口
     if (payMethod.value === 'wallet') {
       await request(`/orders/${order.id}/wallet-pay`, { method: 'POST' });
+    } else if (payMethod.value === 'wxpay' && isProd) {
+      uni.showModal({
+        title: '认养登记已提交',
+        content: '订单已生成,当前版本暂未开通微信支付。我们会保留您的认养记录,支付开通后通知您补款。',
+        showCancel: false,
+        success: () => {
+          uni.redirectTo({ url: `/pages/order/result?id=${order.id}&ok=0` });
+        },
+      });
+      return;
     } else {
-      // wxpay 暂未接入 → 降级 mock-paid
+      // 非生产环境:wxpay / mock 都走开发 mock 支付,便于联调订单后续状态
       await request(`/orders/${order.id}/mock-paid`, { method: 'POST' });
     }
 

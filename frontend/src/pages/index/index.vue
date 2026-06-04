@@ -8,7 +8,7 @@
       <text class="hero-lantern l2">🏮</text>
 
       <view class="hero-top">
-        <text class="hero-brand" @tap="todo('关于我们')">私 人 订 猪</text>
+        <text class="hero-brand" @tap="goAbout">私 人 订 猪</text>
         <view class="hero-top-right">
           <view class="btn-foster" @tap="goFoster">
             <text class="btn-foster-text">代养人端</text>
@@ -34,7 +34,7 @@
         <text class="hero-tag-line">10–12 个月慢养土猪 · <text class="tag-highlight">正 好 一 头 年 猪</text></text>
       </view>
 
-      <view class="countdown" @tap="todo('腊月倒计时')">
+      <view class="countdown" @tap="goAbout">
         <text class="countdown-icon">🏮</text>
         <view class="countdown-text">
           <text class="countdown-t1">距 离 腊 月 二 十 三</text>
@@ -57,10 +57,10 @@
         <text class="stp-eyebrow">— 我 们 不 一 样 —</text>
         <text class="stp-title">三件事 · 决定你能不能放心</text>
       </view>
-      <text class="stp-r" @tap="todo('详情')">详情 ›</text>
+      <text class="stp-r" @tap="goAbout">详情 ›</text>
     </view>
     <scroll-view class="value-row" scroll-x :show-scrollbar="false">
-      <view class="value-card v1" @tap="todo('商业模式')">
+      <view class="value-card v1" @tap="goAbout">
         <view>
           <text class="vc-tag">商 业 模 式</text>
           <view class="vc-icon"><text>🛡️</text></view>
@@ -72,7 +72,7 @@
           <text>猪从认领第一天就是你的</text><text>我们没动机给它喂催肥料</text>
         </view>
       </view>
-      <view class="value-card v2" @tap="todo('家乡仪式')">
+      <view class="value-card v2" @tap="goAbout">
         <view>
           <text class="vc-tag">家 乡 仪 式</text>
           <view class="vc-icon"><text>🍲</text></view>
@@ -84,7 +84,7 @@
           <text>川北山区散养土猪</text><text>腊月你的猪你做主</text>
         </view>
       </view>
-      <view class="value-card v3" @tap="todo('全程透明')">
+      <view class="value-card v3" @tap="goAbout">
         <view>
           <text class="vc-tag">全 程 透 明</text>
           <view class="vc-icon"><text>📹</text></view>
@@ -104,10 +104,10 @@
         <text class="stp-eyebrow">— 此 刻 在 山 里 —</text>
         <text class="stp-title">看一眼你认下的那头猪</text>
       </view>
-      <text class="stp-r" @tap="todo('全部直播')">全部直播 ›</text>
+      <text class="stp-r" @tap="goFirstLive">全部直播 ›</text>
     </view>
     <view class="live-mix">
-      <view class="live-mix-left" @tap="todo('直播')">
+      <view class="live-mix-left" @tap="goFirstLive">
         <view class="lm-bg-glow"></view>
         <view class="lm-badge">
           <view class="lm-pulse"></view>
@@ -219,7 +219,7 @@
         <text>💡 <text class="bold">关于钱和肉:</text>每位拼猪人 AA 多少、最后怎么分肉、谁来取猪——<text class="bold">这些都你们自家商量</text>。平台只负责把猪养好、把肉送到主认领人手里,<text class="bold">不参与、不抽成</text>。</text>
       </view>
 
-      <view class="share-cta" @tap="todo('发起拼猪')"><text>🤝  发 起 拼 猪  →</text></view>
+      <view class="share-cta" @tap="goSharePig"><text>🤝  发 起 拼 猪  →</text></view>
     </view>
 
     <!-- ========== 挑你的猪(真实数据) ========== -->
@@ -228,7 +228,7 @@
         <text class="stp-eyebrow">— 挑 一 头 你 的 猪 —</text>
         <text class="stp-title">{{ list.length }} 头慢养土猪 · 任选</text>
       </view>
-      <text class="stp-r" @tap="todo('查看全部')">查看全部 ›</text>
+      <text class="stp-r" @tap="goFirstPig">查看全部 ›</text>
     </view>
     <view v-if="loading" class="loading-state"><text>加载中…</text></view>
     <view v-else-if="errMsg" class="error-state"><text>{{ errMsg }}</text></view>
@@ -275,7 +275,7 @@
     </view>
 
     <!-- ========== 底部 CTA ========== -->
-    <view class="home-bottom-cta" @tap="todo('认一头猪')"><text>🐷  认 一 头 你 的 猪</text></view>
+    <view class="home-bottom-cta" @tap="goFirstPig"><text>🐷  认 一 头 你 的 猪</text></view>
 
     <view class="bottom-spacer"></view>
 
@@ -285,7 +285,7 @@
         <text class="tabbar-icon on">🏠</text>
         <text class="tabbar-text on">首页</text>
       </view>
-      <view class="tabbar-item" @tap="todo('订猪 Tab')">
+      <view class="tabbar-item" @tap="goFirstPig">
         <text class="tabbar-icon">🐷</text>
         <text class="tabbar-text">订猪</text>
       </view>
@@ -349,29 +349,6 @@ function tagFor(p: PigCard, i: number): string {
   return '🥩 慢养土猪';
 }
 
-function todo(name: string) {
-  // 根据功能名称做实际路由，非关键的显示提示
-  if (name.includes('农户')) {
-    // 跳到首个匹配的农户猪详情
-    const first = list.value[0];
-    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
-    else uni.showToast({ title: '暂无猪只数据', icon: 'none' });
-  } else if (name.includes('发起拼猪')) {
-    const first = list.value[0];
-    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
-    else uni.showToast({ title: '请先认领一头猪', icon: 'none' });
-  } else if (name.includes('查看全部') || name.includes('认一头猪') || name.includes('订猪')) {
-    // 滚动到猪列表区域，或直接跳到第一头猪
-    const first = list.value[0];
-    if (first) uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}` });
-    else uni.showToast({ title: '暂无在售猪只', icon: 'none' });
-  } else if (name.includes('直播')) {
-    goFirstLive();
-  } else {
-    uni.showToast({ title: name, icon: 'none', duration: 1200 });
-  }
-}
-
 function goMy() {
   uni.navigateTo({ url: '/pages/my/index' });
 }
@@ -409,6 +386,15 @@ function goFirstLive() {
     uni.navigateTo({ url: `/pages/live/index?pigId=${first.id}` });
   } else {
     uni.showToast({ title: '没有可看的直播', icon: 'none' });
+  }
+}
+
+function goSharePig() {
+  const first = list.value[0];
+  if (first) {
+    uni.navigateTo({ url: `/pages/pig/detail?id=${first.id}&intent=share` });
+  } else {
+    uni.showToast({ title: '请先认领一头猪', icon: 'none' });
   }
 }
 

@@ -65,7 +65,7 @@
     </view>
 
     <view class="menu-card">
-      <view class="menu-item" @tap="todo('帮助与反馈')">
+      <view class="menu-item" @tap="showHelp">
         <text class="menu-icon">❓</text>
         <text class="menu-label">帮助与反馈</text>
         <text class="menu-arrow">›</text>
@@ -201,8 +201,13 @@ function onAddresses() {
   uni.navigateTo({ url: '/pages/my/addresses' });
 }
 
-function todo(name: string) {
-  uni.showToast({ title: `${name}(后续切片实现)`, icon: 'none', duration: 1200 });
+function showHelp() {
+  uni.showModal({
+    title: '帮助与反馈',
+    content: '客服电话:400-XXX-XXXX\n服务时间:9:00-18:00\n如需反馈问题,请截图后联系平台客服。',
+    confirmText: '知道了',
+    showCancel: false,
+  });
 }
 
 onShow(() => {
