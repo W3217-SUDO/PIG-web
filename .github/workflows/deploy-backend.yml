@@ -43,6 +43,7 @@ jobs:
               backend/package.json \
               backend/db \
               infra/deploy/ecosystem.config.cjs \
+              infra/deploy/render-env-production.sh \
               infra/deploy/logrotate-pig.conf 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
           else
             echo "no dist yet, skip deploy"
@@ -77,6 +78,7 @@ jobs:
             tar xzf /tmp/release.tar.gz -C releases/$TS
             cd releases/$TS
             npm ci --omit=dev --workspace backend
+            bash infra/deploy/render-env-production.sh
             [ -f /opt/pig/shared/.env.production ] && ln -sfn /opt/pig/shared/.env.production backend/.env.production
             cd /opt/pig
             ln -sfn releases/$TS current

@@ -41,7 +41,8 @@ echo "  release: $REL"
 echo "  commit: $GIT_COMMIT"
 
 echo
-echo "== 2/6 Inject production env =="
+echo "== 2/6 Render production env =="
+bash "$REL/infra/deploy/render-env-production.sh"
 cp /opt/pig/shared/.env.production "$REL/backend/.env.production"
 chmod 600 "$REL/backend/.env.production"
 

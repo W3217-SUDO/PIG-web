@@ -514,7 +514,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] **小程序构建包自动审计** ✅ 2026-06-05 · Codex（`npm run audit:miniapp` 13 PASS / 0 FAIL；CI 已接入 mp-weixin 构建包审计）
 - [x] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割) ✓ 2026-06-05 · Codex
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
-- [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
+- [x] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓) ✓ 2026-06-05 · Codex
 
 ### 2.15 🔴 监控可观测性(1/5)· W3 · 后端
 
