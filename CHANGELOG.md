@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Launch hardening · 2026-06-05
+- 新增域名公网访问诊断 `docs/06-deployment/domain-access-diagnosis-2026-06-05.md`：记录 DNS/服务器/nginx/证书均正常，但本地公网 HTTPS 握手失败，需 Owner 在腾讯云/备案/DNSPod/安全组侧复核。
 - 后端单测覆盖率达标：新增 order/share/upload/farmer service specs，`npm -w backend run test:cov -- --runInBand` 达到 11 suites / 55 tests，All files statements 40.90%、lines 41.98%。
 - 补充后端服务单测：address/message/pig/user/wallet 共 5 个 service spec，后端 `test:cov` 从 statements 5.78% 提升到 22.11%，但仍未达 40% 门槛。
 - 首次复核后端单测覆盖率基线：`npm -w backend run test:cov -- --runInBand` statements 5.78%，未达 40%；新增 `docs/05-debugging/backend-coverage-plan.md` 记录提升顺序和达标命令。
