@@ -12,7 +12,7 @@ The production app and nginx are healthy on the server, but external HTTPS acces
   - `www.rockingwei.online -> 175.24.175.123`
   - `rockingwei.online -> 175.24.175.123`
 - Server-side production smoke passes:
-  - `PASS: 24`
+  - `PASS: 25`
   - `FAIL: 0`
 - nginx config test passes:
   - `nginx: configuration file /etc/nginx/nginx.conf test is successful`
@@ -33,10 +33,14 @@ openssl s_client -connect www.rockingwei.online:443 -servername www.rockingwei.o
 
 Observed:
 
-- `npm run smoke:prod`: fails externally because HTTPS requests return status `000`.
+- `curl.exe -sS -D - -o NUL -m 10 http://www.rockingwei.online/`: returns DNSPod webblock `302`.
+- `npm run smoke:prod`: fails externally because HTTP is DNSPod-webblocked and HTTPS requests return status `000`.
 - `curl.exe -vk`: TCP connects to `175.24.175.123:443`, then fails during TLS handshake.
 - `openssl s_client`: `unexpected eof while reading`.
 - `Test-NetConnection www.rockingwei.online -Port 443`: `TcpTestSucceeded: True`.
+- The smoke script now reports the two public-entry checks separately:
+  - `HTTP entry is blocked by DNSPod webblock`
+  - `HTTPS entry failed during TLS handshake`
 
 Interpretation:
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# PIG 生产环境 smoke 测试 · curl 一条龙
-# 使用:
+# PIG production smoke test.
+# Usage:
 #   bash scripts/smoke-prod.sh
-# 退出码:
-#   0 = 全绿
-#   1 = 任一检查 FAIL
-# 适用场景:
-#   - 部署后立即跑
-#   - 上线前最终 check
-#   - 故障排查 (看挂在哪一层)
+# Environment overrides:
+#   ROOT=https://www.rockingwei.online
+#   BASE=https://www.rockingwei.online/api
 
 set -u
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./smoke-prod-diagnostics.sh
+. "$SCRIPT_DIR/smoke-prod-diagnostics.sh"
 
 BASE="${BASE:-https://www.rockingwei.online/api}"
 ROOT="${ROOT:-https://www.rockingwei.online}"
@@ -19,10 +19,9 @@ HTTP_ROOT="${HTTP_ROOT:-${ROOT/https:/http:}}"
 PASS=0
 FAIL=0
 
-# helpers
-green() { printf "  \033[32m✓\033[0m %s\n" "$1"; PASS=$((PASS+1)); }
-red()   { printf "  \033[31m✗\033[0m %s\n" "$1"; FAIL=$((FAIL+1)); }
-hdr()   { echo; echo "═══ $1 ═══"; }
+green() { printf "  \033[32mPASS\033[0m %s\n" "$1"; PASS=$((PASS + 1)); }
+red()   { printf "  \033[31mFAIL\033[0m %s\n" "$1"; FAIL=$((FAIL + 1)); }
+hdr()   { printf "\n== %s ==\n" "$1"; }
 
 expect_status() {
   local url="$1" expected="$2" label="$3"
@@ -30,9 +29,9 @@ expect_status() {
   local actual
   actual=$(curl -s -o /dev/null -w "%{http_code}" -m 10 "$@" "$url" 2>&1)
   if [ "$actual" = "$expected" ]; then
-    green "$label → $actual"
+    green "$label -> $actual"
   else
-    red "$label → 期望 $expected, 实际 $actual"
+    red "$label -> expected $expected, got $actual"
   fi
 }
 
@@ -41,89 +40,109 @@ expect_body_contains() {
   shift 3
   local body
   body=$(curl -s -m 10 "$@" "$url" 2>&1)
-  if echo "$body" | grep -q "$needle"; then
-    green "$label 包含 '$needle'"
+  if printf "%s" "$body" | grep -q "$needle"; then
+    green "$label contains '$needle'"
   else
-    red "$label 缺 '$needle' (响应: $(echo "$body" | head -c 80))"
+    red "$label missing '$needle' (response: $(printf "%s" "$body" | head -c 80))"
   fi
 }
 
-# ─────────────────────────────────────────
-echo "🐷 PIG 生产 smoke 测试"
-echo "时间: $(date -Iseconds 2>/dev/null || date)"
+echo "PIG production smoke test"
+echo "Time: $(date -Iseconds 2>/dev/null || date)"
+echo "Root: $ROOT"
 echo "Base: $BASE"
-echo
 
-hdr "0. 公网入口诊断"
+hdr "0. Public entry diagnostics"
 HTTP_HEADERS=$(curl -sS -D - -o /dev/null -m 10 "$HTTP_ROOT/" 2>&1 || true)
-if echo "$HTTP_HEADERS" | grep -q "dnspod.qcloud.com/static/webblock.html"; then
-  red "HTTP 入口被 DNSPod webblock 拦截：请检查 ICP 备案、腾讯云备案接入和域名解析状态"
-else
-  green "HTTP 入口未命中 DNSPod webblock"
-fi
+HTTP_CLASS=$(classify_http_entry "$HTTP_HEADERS")
+case "$HTTP_CLASS" in
+  dnspod-webblock)
+    red "HTTP entry is blocked by DNSPod webblock. Check ICP filing, Tencent Cloud filing access, and DNSPod status."
+    ;;
+  *)
+    green "HTTP entry is not DNSPod webblock"
+    ;;
+esac
 
-hdr "1. H5 SPA 入口"
+HTTPS_PROBE=$(curl -sS -o /dev/null -w "code=%{http_code} err=%{errormsg}" -m 15 "$BASE/health" 2>&1 || true)
+HTTPS_CLASS=$(classify_https_entry "$HTTPS_PROBE")
+case "$HTTPS_CLASS" in
+  https-ok)
+    green "HTTPS API entry is reachable"
+    ;;
+  https-http-*)
+    green "HTTPS entry returned an HTTP response (${HTTPS_CLASS#https-http-}); TLS path is reachable"
+    ;;
+  https-tls-failed)
+    red "HTTPS entry failed during TLS handshake. Check local tunnel/proxy, CDN/WAF, security group, and nginx/certificate chain."
+    ;;
+  https-unreachable)
+    red "HTTPS entry is unreachable. Check DNS, security group, CDN/WAF, and local network path."
+    ;;
+  *)
+    red "HTTPS entry status is unknown: $HTTPS_PROBE"
+    ;;
+esac
+
+hdr "1. H5 SPA entry"
 expect_status "$ROOT/" "200" "GET / (H5 index.html)"
-expect_body_contains "$ROOT/" "<div id=\"app\"" "GET / 含 uni-app 挂载点"
-expect_body_contains "$ROOT/" "assets/index-" "GET / 引用 vite bundle"
+expect_body_contains "$ROOT/" "<div id=\"app\"" "GET / app mount"
+expect_body_contains "$ROOT/" "assets/index-" "GET / vite bundle"
 
-hdr "2. 公开 API"
+hdr "2. Public API"
 expect_status "$BASE/health" "200" "GET /api/health"
 expect_body_contains "$BASE/health" "\"db\":\"ok\"" "/api/health db=ok"
 expect_body_contains "$BASE/health" "\"redis\":\"ok\"" "/api/health redis=ok"
 expect_body_contains "$BASE/health" "\"env\":\"production\"" "/api/health env=production"
 
-expect_status "$BASE/pigs?pageSize=5" "200" "GET /api/pigs 列表"
-expect_body_contains "$BASE/pigs?pageSize=5" "\"items\"" "列表含 items 字段"
-expect_body_contains "$BASE/pigs?pageSize=5" "\"farmer\"" "列表含农户嵌套"
+expect_status "$BASE/pigs?pageSize=5" "200" "GET /api/pigs list"
+expect_body_contains "$BASE/pigs?pageSize=5" "\"items\"" "list has items field"
+expect_body_contains "$BASE/pigs?pageSize=5" "\"farmer\"" "list has farmer field"
 
-hdr "3. 详情链路"
+hdr "3. Pig detail path"
 PIG_ID=$(curl -s -m 10 "$BASE/pigs?pageSize=1" | grep -oE '"id":"[A-Z0-9]{26}"' | head -1 | sed 's/.*"\([^"]\+\)"/\1/')
 if [ -n "$PIG_ID" ]; then
-  green "拿到 pig_id: $PIG_ID"
+  green "Fetched pig_id: $PIG_ID"
   expect_status "$BASE/pigs/$PIG_ID" "200" "GET /api/pigs/:id"
   expect_status "$BASE/pigs/$PIG_ID/timeline" "200" "GET /api/pigs/:id/timeline"
-  expect_body_contains "$BASE/pigs/$PIG_ID/timeline" "\"kind\":\"feeding\"" "timeline 含喂养事件"
-  expect_body_contains "$BASE/pigs/$PIG_ID/timeline" "\"kind\":\"health\"" "timeline 含健康事件"
+  expect_body_contains "$BASE/pigs/$PIG_ID/timeline" "\"kind\":\"feeding\"" "timeline has feeding event"
+  expect_body_contains "$BASE/pigs/$PIG_ID/timeline" "\"kind\":\"health\"" "timeline has health event"
 else
-  red "无法从列表拿到 pig_id (生产库可能未 seed)"
+  red "Cannot fetch pig_id from list. Production DB may not be seeded."
 fi
 
-hdr "4. 鉴权接口 (无 token 应返回 401)"
-expect_status "$BASE/users/me" "401" "GET /api/users/me 无 token"
-expect_status "$BASE/orders/me" "401" "GET /api/orders/me 无 token"
-expect_status "$BASE/wallet/me" "401" "GET /api/wallet/me 无 token"
-expect_status "$BASE/messages" "401" "GET /api/messages 无 token"
+hdr "4. Auth-protected APIs without token"
+expect_status "$BASE/users/me" "401" "GET /api/users/me without token"
+expect_status "$BASE/orders/me" "401" "GET /api/orders/me without token"
+expect_status "$BASE/wallet/me" "401" "GET /api/wallet/me without token"
+expect_status "$BASE/messages" "401" "GET /api/messages without token"
 
-hdr "5. 错误处理"
-expect_status "$BASE/pigs/01XXXXXXXXXXXXXXXXXXXXXXXX" "404" "GET 不存在的 pig → 404"
-expect_status "$BASE/non-existent" "404" "GET 不存在路径 → 404"
+hdr "5. Error handling"
+expect_status "$BASE/pigs/01XXXXXXXXXXXXXXXXXXXXXXXX" "404" "GET missing pig -> 404"
+expect_status "$BASE/non-existent" "404" "GET missing route -> 404"
 
-hdr "6. 静态资源 + 性能"
+hdr "6. Static assets and bundle size"
 HTML=$(curl -s -m 10 "$ROOT/" 2>&1)
-JS_URL=$(echo "$HTML" | grep -oE '/assets/index-[A-Za-z0-9_-]+\.js' | head -1)
+JS_URL=$(printf "%s" "$HTML" | grep -oE '/assets/index-[A-Za-z0-9_-]+\.js' | head -1)
 if [ -n "$JS_URL" ]; then
-  green "首页引用 JS: $JS_URL"
+  green "Home references JS: $JS_URL"
   JS_SIZE=$(curl -s -o /dev/null -w "%{size_download}" -m 15 "$ROOT$JS_URL")
   if [ "$JS_SIZE" -gt 10000 ] && [ "$JS_SIZE" -lt 500000 ]; then
-    green "JS bundle 大小合理: $((JS_SIZE/1024)) KB"
+    green "JS bundle size is reasonable: $((JS_SIZE / 1024)) KB"
   else
-    red "JS bundle 大小异常: $JS_SIZE bytes (期望 10KB-500KB)"
+    red "JS bundle size is abnormal: $JS_SIZE bytes (expected 10KB-500KB)"
   fi
 else
-  red "首页未引用 JS bundle"
+  red "Home page does not reference JS bundle"
 fi
-# API base 正确性: 通过 /api/pigs 真实返回数据来端到端证明(已在 §2 验过)
-# (不再 grep bundle 内部, vite 拆 chunk 后字符串可能不在主 bundle 里)
 
-# ─────────────────────────────────────────
-hdr "汇总"
+hdr "Summary"
 echo "  PASS: $PASS"
 echo "  FAIL: $FAIL"
 if [ "$FAIL" = 0 ]; then
-  printf "\n\033[32m✅ 全绿\033[0m\n"
+  printf "\n\033[32mALL GREEN\033[0m\n"
   exit 0
-else
-  printf "\n\033[31m❌ %d 项失败\033[0m\n" "$FAIL"
-  exit 1
 fi
+
+printf "\n\033[31m%d checks failed\033[0m\n" "$FAIL"
+exit 1

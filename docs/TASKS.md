@@ -18,7 +18,7 @@
 |---|---|---|
 | 生产 H5 | ✅ 已部署 | `https://www.rockingwei.online/` 返回 200，Vite bundle 正常 |
 | 生产 API | ✅ 健康 | `/api/health` 返回 `env=production`、`db=ok`、`redis=ok` |
-| 生产 smoke | 🟡 服务器侧 24/24 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿；外部公网 HTTPS 仍握手失败，需备案/接入/安全组/本地网络复核 |
+| 生产 smoke | 🟡 服务器侧 25/25 | H5 / health / pigs / detail / timeline / auth 401 / 404 / bundle 大小全绿；本机公网 HTTP 命中 DNSPod webblock，HTTPS 仍握手失败，需备案/接入/安全组/本地网络复核 |
 | 上传静态托管 | ✅ 已上线 | nginx `/uploads/` 指向 `/opt/pig/shared/uploads/`，公网 URL 验证 200 |
 | 首页占位入口 | ✅ 清零 | `frontend/src/pages/index/index.vue` 无 `todo()` |
 | 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` 生成 `frontend/dist/build/mp-weixin` |
@@ -29,7 +29,7 @@
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
 
-> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 24/24 全绿。
+> ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 25/25 全绿。
 > 🔴 **当前公网风险**：DNS 已指向 `175.24.175.123`，服务器内 HTTPS/证书/nginx 正常，但本地公网访问 `https://www.rockingwei.online/` TLS 握手失败；需复核腾讯云备案接入、DNSPod 状态、安全组/云防护和本地网络代理。
 > ⚠️ **仍需 Owner 确认**：微信商户号/支付资质、微信小程序后台提审、真实用户真机登录验收。
 
@@ -508,7 +508,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] GitHub Actions `deploy-backend.yml` workflow(配置就绪)
 - [x] 部署 SSH key 生成 + CODEOWNERS
 - [x] docker-compose(本地 dev)
-- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` attempt 2 成功；release `/opt/pig/releases/20260605_054346`，PM2 online，服务器侧 `smoke-prod` 24/24）
+- [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` attempt 2 成功；release `/opt/pig/releases/20260605_054346`，PM2 online，服务器侧 `smoke-prod` 25/25）
 - [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
@@ -542,7 +542,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] `scripts/smoke-w1.sh` curl 一条龙 ✅ 2026-06-05 · Codex
 - [ ] 前端 H5 端到端真机走查
 - [ ] 微信开发者工具真机调试
-- [x] 上线前压测(loadtest 50 RPS / 5 分钟) ✅ 2026-06-05 · Codex（服务器侧只读压测：15000 请求 / 0 失败 / p95 6.7ms；压测后 `smoke-prod` 24/24）
+- [x] 上线前压测(loadtest 50 RPS / 5 分钟) ✅ 2026-06-05 · Codex（服务器侧只读压测：15000 请求 / 0 失败 / p95 6.7ms；压测后 `smoke-prod` 25/25）
 
 ### 2.18 🔴 运营支撑(1/3)· W3 · 共同
 
