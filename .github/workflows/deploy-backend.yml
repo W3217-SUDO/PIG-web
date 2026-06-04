@@ -37,10 +37,11 @@ jobs:
         run: |
           if [ -d backend/dist ]; then
             tar czf release.tar.gz \
+              package.json \
+              package-lock.json \
               backend/dist \
               backend/package.json \
-              backend/package-lock.json \
-              backend/db 2>/dev/null || tar czf release.tar.gz backend/package.json backend/package-lock.json
+              backend/db 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
           else
             echo "no dist yet, skip deploy"
             exit 0
@@ -69,9 +70,9 @@ jobs:
             TS=$(date +%Y%m%d_%H%M%S)
             mkdir -p releases/$TS
             tar xzf /tmp/release.tar.gz -C releases/$TS
-            cd releases/$TS/backend
-            npm ci --omit=dev
-            [ -f /opt/pig/shared/.env.production ] && ln -sfn /opt/pig/shared/.env.production .env.production
+            cd releases/$TS
+            npm ci --omit=dev --workspace backend
+            [ -f /opt/pig/shared/.env.production ] && ln -sfn /opt/pig/shared/.env.production backend/.env.production
             cd /opt/pig
             ln -sfn releases/$TS current
             cd current/backend
