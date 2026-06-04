@@ -24,6 +24,9 @@ jobs:
       - name: install
         run: npm ci
 
+      - name: ci workflow hard-gate audit
+        run: npm run audit:ci
+
       - name: lint
         run: npm run lint || echo "skip-if-not-configured"
 
