@@ -512,7 +512,7 @@ wx.login() → code → POST /foster/auth/login
 - [x] **GitHub Actions 实跑一次部署** ✅ 2026-06-05 · Codex（`Deploy Backend` 最新成功；release `/opt/pig/releases/20260605_063027`，PM2 online，`/api/health.data.commit=9ef5112d064531ca7fbba0564b4a9e4fec841574`，服务器侧 `smoke-prod` 25/25）
 - [x] **H5 自动发布实跑** ✅ 2026-06-05 · Codex（`Deploy H5` 成功；`/var/www/html/pig/release.txt=9ef5112d064531ca7fbba0564b4a9e4fec841574`，服务器侧 `smoke-prod` 25/25）
 - [x] **小程序构建包自动审计** ✅ 2026-06-05 · Codex（`npm run audit:miniapp` 13 PASS / 0 FAIL；CI 已接入 mp-weixin 构建包审计）
-- [ ] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割)
+- [x] `pm2 ecosystem.config.js`(cluster × 2 + 日志切割) ✓ 2026-06-05 · Codex
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [ ] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓)
 

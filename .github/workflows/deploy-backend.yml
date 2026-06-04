@@ -7,6 +7,7 @@ on:
       - 'backend/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'infra/deploy/**'
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
@@ -40,7 +41,9 @@ jobs:
               package-lock.json \
               backend/dist \
               backend/package.json \
-              backend/db 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
+              backend/db \
+              infra/deploy/ecosystem.config.cjs \
+              infra/deploy/logrotate-pig.conf 2>/dev/null || tar czf release.tar.gz package.json package-lock.json backend/package.json
           else
             echo "no dist yet, skip deploy"
             exit 0
@@ -79,12 +82,11 @@ jobs:
             ln -sfn releases/$TS current
             cd current/backend
             NODE_ENV=production npm run migration:run 2>/dev/null || echo "no migrations"
+            sudo install -m 644 -o root -g root /opt/pig/current/infra/deploy/logrotate-pig.conf /etc/logrotate.d/pig
+            sudo logrotate -d /etc/logrotate.d/pig >/dev/null
             pm2 delete pig-backend 2>/dev/null || true
-            NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" pm2 start dist/main.js \
-              --name pig-backend \
-              --cwd /opt/pig/current/backend \
-              --time \
-              --update-env
+            NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" PM2_INSTANCES="${PM2_INSTANCES:-2}" \
+              pm2 start /opt/pig/current/infra/deploy/ecosystem.config.cjs --update-env
             pm2 save
             sleep 3
             HEALTH_JSON=$(curl -fsS http://127.0.0.1:3000/api/health) || { pm2 logs pig-backend --lines 50 --nostream; exit 1; }

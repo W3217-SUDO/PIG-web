@@ -64,21 +64,19 @@ NODE_ENV=production npm run migration:run
 echo
 echo "== 6/6 Restart PM2 =="
 ln -sfn "$REL" /opt/pig/current
-cd "$REL/backend"
+sudo install -m 644 -o root -g root "$REL/infra/deploy/logrotate-pig.conf" /etc/logrotate.d/pig
+sudo logrotate -d /etc/logrotate.d/pig >/dev/null
+cd /opt/pig/current/backend
 pm2 delete pig-backend 2>/dev/null || true
-NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" pm2 start dist/main.js \
-  --name pig-backend \
-  --cwd "$REL/backend" \
-  --log "$LOG_DIR/pig-backend.log" \
-  --time \
-  --update-env
+NODE_ENV=production GIT_COMMIT="$GIT_COMMIT" PM2_INSTANCES="${PM2_INSTANCES:-2}" \
+  pm2 start /opt/pig/current/infra/deploy/ecosystem.config.cjs --update-env
 pm2 save
 
 echo
 echo "== Verify =="
 sleep 3
 HEALTH_JSON=$(curl -fsS http://127.0.0.1:3000/api/health)
-HEALTH_JSON="$HEALTH_JSON" GIT_COMMIT="$GIT_COMMIT" node -e "const h=JSON.parse(process.env.HEALTH_JSON).data; if(h.commit!==process.env.GIT_COMMIT){console.error('health commit mismatch', h.commit, process.env.GIT_COMMIT); process.exit(1)}"
+HEALTH_JSON="$HEALTH_JSON" GIT_COMMIT="$GIT_COMMIT" node -e "const h=JSON.parse(process.env.HEALTH_JSON).data; if(h.commit!==process.env.GIT_COMMIT){console.error('health commit mismatch', h.commit, process.env.GIT_COMMIT); process.exit(1)} if(h.system?.backup?.status!=='ok'){console.error('backup health not ok', h.system?.backup); process.exit(1)}"
 echo "$HEALTH_JSON" | head -c 300
 printf "\n"
 curl -s -m 5 -w "public nginx -> HTTP %{http_code}\n" -o /dev/null https://www.rockingwei.online/api/health || true
