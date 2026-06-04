@@ -56,7 +56,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { request, setToken, ApiError } from '../../utils/request';
+import { request, ApiError } from '../../utils/request';
+import { useAuthStore } from '../../stores/auth';
 
 interface LoginResp {
   user: { id: string; openid: string; nickname: string; role: string };
@@ -67,6 +68,7 @@ interface LoginResp {
 const devLoading = ref(false);
 const errMsg = ref('');
 const diagInfo = ref('');
+const auth = useAuthStore();
 
 function onDiagnose() {
   // #ifdef MP-WEIXIN
@@ -104,7 +106,7 @@ async function onWxLogin() {
       data: { code },
       auth: false,
     });
-    setToken(data.access_token);
+    auth.setSession(data);
     uni.hideLoading();
     uni.reLaunch({ url: '/pages/index/index' });
   } catch (e) {
@@ -133,7 +135,7 @@ async function onDevLogin() {
       data: {},
       auth: false,
     });
-    setToken(data.access_token);
+    auth.setSession(data);
     uni.showToast({ title: '登录成功', icon: 'success', duration: 800 });
     setTimeout(() => {
       uni.reLaunch({ url: '/pages/index/index' });

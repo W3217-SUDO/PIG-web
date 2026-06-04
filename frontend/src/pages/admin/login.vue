@@ -46,7 +46,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { request, setToken, ApiError } from '../../utils/request';
+import { request, ApiError } from '../../utils/request';
+import { useAuthStore } from '../../stores/auth';
 
 interface LoginResp {
   user: { id: string; openid: string; nickname: string; role: string };
@@ -58,6 +59,7 @@ const phone = ref('');
 const password = ref('');
 const loading = ref(false);
 const errMsg = ref('');
+const auth = useAuthStore();
 
 async function onSubmit() {
   errMsg.value = '';
@@ -81,8 +83,7 @@ async function onSubmit() {
       errMsg.value = '该账号不是管理员';
       return;
     }
-    setToken(data.access_token);
-    uni.setStorageSync('pig:user_role', data.user.role);
+    auth.setSession(data);
     uni.showToast({ title: '登录成功', icon: 'success', duration: 800 });
     setTimeout(() => {
       uni.reLaunch({ url: '/pages/foster/admin/index' });

@@ -51,6 +51,9 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   uni.removeStorageSync(TOKEN_KEY);
+  uni.removeStorageSync('pig:refresh_token');
+  uni.removeStorageSync('pig:user');
+  uni.removeStorageSync('pig:user_role');
 }
 
 export interface RequestOptions {

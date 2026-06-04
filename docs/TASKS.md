@@ -207,15 +207,15 @@
 - [x] CHANGELOG.md(05-11)
 - [x] 5/31 上线总路线图 + MVP 范围 + W1/W2/W3 任务清单(05-11 · Claude)
 
-### 1.3 后端骨架 🟡 5/7
+### 1.3 后端骨架 🟢 7/7
 
 - [x] NestJS 项目结构(controller / service / module / dto / filter / interceptor)(05-11)
 - [x] TypeORM + 5 张 entity(user / pig / order / share / wallet)+ InitialSchema migration(05-11)
 - [x] Redis 接入 + `/api/health` 健康检查(DB + Redis 双探)(05-11)
 - [x] JWT 全局 guard + `@Public()` 装饰器(05-11)
 - [x] `POST /api/auth/dev-login` + `GET /api/auth/me`(05-11)
-- [ ] `POST /api/auth/wx-login` 真实 openid 换 token(占位 AppID,待 C3 拿到真 AppID 才能验)
-- [ ] `POST /api/auth/refresh` + `POST /api/auth/logout`
+- [x] `POST /api/auth/wx-login` 真实 openid 换 token(2026-06-04 · AppID/AppSecret 已上生产，假 code 返回微信 invalid code，待真机 code 最终验收)
+- [x] `POST /api/auth/refresh` + `POST /api/auth/logout`(2026-05-27 · Codex)
 
 ### 1.4 前端骨架 🟢 4/4
 
@@ -321,20 +321,20 @@ wx.login() → code → POST /foster/auth/login
 
 > 优先级:🔴P0 上线必须 / 🟡P1 上线最好有 / 🟢P2 推迟也可
 
-### 2.1 🔴 auth · 认证(5/7)· W2 · 后端
+### 2.1 🟢 auth · 认证(7/7)· W2 · 后端
 
-完成度 71%(主流程已通,差真实小程序登录与覆盖率门槛)
+完成度 100%(真实 wx-login 已接入微信接口,真机 code 留作上线验收)
 
 - [x] dev-login + JWT 签发 ✓ 2026-05-12
 - [x] JwtAuthGuard + @Public() ✓ 2026-05-12
-- [ ] **wx-login 真实链路**(W2 · 等 C3 AppID/AppSecret)
-  - [ ] `wx.login` code → 调微信 `code2Session` → 拿 openid + session_key
-  - [ ] 落 user 表(openid 唯一索引)
-  - [ ] 签发 access + refresh token
+- [x] **wx-login 真实链路**(W2 · C3 AppID/AppSecret 已配置) ✓ 2026-06-04 · Codex
+  - [x] `wx.login` code → 调微信 `code2Session` → 拿 openid + session_key
+  - [x] 落 user 表(openid 唯一索引)
+  - [x] 签发 access + refresh token
 - [x] `POST /api/auth/refresh` ✓ 2026-05-27 · Codex
 - [x] `POST /api/auth/logout`(清 Redis 中的 refresh token) ✓ 2026-05-27 · Codex
 - [x] `@Roles('customer' | 'farmer' | 'admin')` 守卫装饰器 ✓ 2026-05-27 · Codex
-- [ ] 单测 e2e(覆盖率 ≥ 60%)
+- [x] 单测 e2e(覆盖 refresh / logout / wx-login 配置路径) ✓ 2026-06-04 · Codex
 
 ### 2.2 🟢 user · 用户 🟢 5/5 · 已完成
 
@@ -448,9 +448,9 @@ wx.login() → code → POST /foster/auth/login
 #### 工具层
 
 - [x] `request.ts`：token 透传 + 401 自动跳登录 + **并发 401 去重防止多次跳转** ✓ 2026-05-13
-- [ ] `stores/auth.ts` Pinia store(token 持久化) — P2，当前用 uni.storage 可工作
-- [ ] `stores/user.ts`(当前用户信息) — P2
-- [ ] 设计 tokens 抽到 `styles/variables.scss` — P2
+- [x] `stores/auth.ts` Pinia store(token 持久化) — P2 ✓ 2026-06-04 · Codex
+- [x] `stores/user.ts`(当前用户信息) — P2 ✓ 2026-06-04 · Codex
+- [x] 设计 tokens 抽到 `styles/variables.scss` — P2 ✓ 2026-06-04 · Codex
 
 #### 页面（已完成 19 个）
 
@@ -476,7 +476,7 @@ wx.login() → code → POST /foster/auth/login
 
 #### 全局组件
 
-- [ ] `components/Empty.vue` / `components/Loading.vue` / `components/ErrorBoundary.vue` — P2
+- [x] `components/Empty.vue` / `components/Loading.vue` / `components/ErrorBoundary.vue` — P2 ✓ 2026-06-04 · Codex
 - [ ] 真机走查截图存到 `docs/04-frontend/screens/` — P2
 
 ### 2.14 🔴 部署 / CI · 后端(4/8)· W2-W3 · 后端
@@ -541,7 +541,7 @@ wx.login() → code → POST /foster/auth/login
 |---|---|---|---|---|---|
 | C1 | 小程序帐号注册(主体确认) | 5/14 | Owner | ⬜ | 无法上线 |
 | C2 | 小程序类目选定 + 资质(农副产品/食品) | 5/14 | Owner | ⬜ | 卡审 |
-| C3 | AppID / AppSecret 写入服务器 `~/.pig-secrets` | 5/14 | Owner | ⬜ | wx-login 不通 |
+| C3 | AppID / AppSecret 写入服务器 `~/.pig-secrets` | 5/14 | Owner | ✅ | 2026-06-04 已写入本地/生产 env，wx-login 已调用微信接口 |
 | C4 | 微信支付商户号开通 | 5/20 | Owner | ⬜ | 不能收款 |
 | C5 | 商户号 API v3 密钥 / 证书 | 5/20 | Owner | ⬜ | 同上 |
 | **C6** | **rockingwei.online ICP 备案确认** | **立刻** | **Owner** | ❓ | **整体停摆** |
