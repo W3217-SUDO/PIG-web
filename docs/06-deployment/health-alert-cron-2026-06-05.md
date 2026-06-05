@@ -31,8 +31,18 @@ This project installs `/opt/pig/bin/pig-health-alert.sh` during backend deployme
 Set `ALERT_WEBHOOK_URL` in `/opt/pig/shared/.env.production`.
 
 - Enterprise WeChat webhook URLs use a markdown payload.
+- Feishu/Lark webhook URLs use `msg_type=text`.
+- DingTalk webhook URLs use `msgtype=text`.
 - Other webhook URLs use a generic text payload.
 - If `ALERT_WEBHOOK_URL` is empty, the script logs the failure and does not print secrets.
+
+Supported URL families:
+
+```env
+ALERT_WEBHOOK_URL=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx
+ALERT_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+ALERT_WEBHOOK_URL=https://oapi.dingtalk.com/robot/send?access_token=xxx
+```
 
 ## Manual verification
 

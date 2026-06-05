@@ -10,6 +10,7 @@ const requiredHardSteps = [
   'backend build',
   'frontend type-check',
   'frontend sentry sanitizer test',
+  'health alert webhook test',
   'miniapp build audit',
   'backend unit tests',
   'backend e2e',

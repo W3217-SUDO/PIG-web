@@ -517,9 +517,9 @@ wx.login() → code → POST /foster/auth/login
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [x] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓) ✓ 2026-06-05 · Codex
 
-### 2.15 🔴 监控可观测性(4/5)· W3 · 后端
+### 2.15 🔴 监控可观测性(8/9)· W3 · 后端
 
-完成度 80%
+完成度 89%
 
 - [x] Sentry 后端接入(@sentry/node，可选 DSN，5xx/未知异常上报，敏感 header 清洗) ✓ 2026-06-05 · Codex
 - [x] Sentry 前端接入(@sentry/browser，H5 可选 DSN，敏感 header 清洗，CI sanitizer 测试) ✓ 2026-06-05 · Codex
@@ -528,7 +528,8 @@ wx.login() → code → POST /foster/auth/login
 - [x] Actions 部署注入并校验 `/api/health.data.commit` ✓ 2026-06-05 · Codex
 - [x] `/api/health` 加 MySQL backup 新鲜度/数量/最新文件状态 ✓ 2026-06-05 · Codex
 - [x] 服务器健康告警 cron(health/db/redis/disk/backup/pm2 restart) ✓ 2026-06-05 · Codex
-- [ ] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / Sentry 阈值)
+- [x] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / health cron) ✓ 2026-06-05 · Codex
+- [ ] Sentry 阈值告警(24h error / release regression)
 
 ### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9
 

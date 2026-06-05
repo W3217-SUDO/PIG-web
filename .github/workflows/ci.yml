@@ -39,6 +39,9 @@ jobs:
       - name: frontend sentry sanitizer test
         run: npm run test:frontend-sentry
 
+      - name: health alert webhook test
+        run: npm run test:health-alert-webhook
+
       - name: miniapp build audit
         run: |
           npm -w frontend run build:mp-weixin

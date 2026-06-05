@@ -29,15 +29,8 @@ append_failures() {
   done < "$file"
 }
 
-send_alert() {
-  local message="$1"
-
-  if [ -z "${ALERT_WEBHOOK_URL:-}" ]; then
-    log "WARN no ALERT_WEBHOOK_URL configured; alert not sent"
-    return 0
-  fi
-
-  ALERT_MESSAGE="$message" ALERT_WEBHOOK_URL="$ALERT_WEBHOOK_URL" node <<'NODE' > "$TMP_DIR/payload.json"
+render_alert_payload() {
+  ALERT_MESSAGE="${ALERT_MESSAGE:-}" ALERT_WEBHOOK_URL="${ALERT_WEBHOOK_URL:-}" node <<'NODE'
 const url = process.env.ALERT_WEBHOOK_URL || "";
 const message = process.env.ALERT_MESSAGE || "";
 
@@ -46,6 +39,11 @@ if (url.includes("qyapi.weixin.qq.com")) {
     msgtype: "markdown",
     markdown: { content: message.replace(/\n/g, "\n> ") },
   }));
+} else if (url.includes("open.feishu.cn") || url.includes("open.larksuite.com")) {
+  process.stdout.write(JSON.stringify({
+    msg_type: "text",
+    content: { text: message },
+  }));
 } else {
   process.stdout.write(JSON.stringify({
     msgtype: "text",
@@ -53,6 +51,17 @@ if (url.includes("qyapi.weixin.qq.com")) {
   }));
 }
 NODE
+}
+
+send_alert() {
+  local message="$1"
+
+  if [ -z "${ALERT_WEBHOOK_URL:-}" ]; then
+    log "WARN no ALERT_WEBHOOK_URL configured; alert not sent"
+    return 0
+  fi
+
+  ALERT_MESSAGE="$message" render_alert_payload > "$TMP_DIR/payload.json"
 
   if curl -fsS --max-time 10 \
     -H 'Content-Type: application/json' \
@@ -179,5 +188,10 @@ $(printf -- '- %s\n' "${failures[@]}")"
   send_alert "$message"
   return 1
 }
+
+if [ "${1:-}" = "--render-alert-payload" ]; then
+  render_alert_payload
+  exit 0
+fi
 
 main "$@"
