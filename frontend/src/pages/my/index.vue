@@ -5,7 +5,13 @@
       <view class="header-bg-glow"></view>
       <view class="user-row">
         <view class="avatar" @tap="onEditProfile">
-          <image v-if="user?.avatarUrl" class="avatar-img" :src="user.avatarUrl" mode="aspectFill" />
+          <image
+            v-if="user?.avatarUrl && !avatarLoadFailed"
+            class="avatar-img"
+            :src="user.avatarUrl"
+            mode="aspectFill"
+            @error="avatarLoadFailed = true"
+          />
           <text v-else class="avatar-placeholder">👤</text>
         </view>
         <view class="user-meta" @tap="onEditProfile">
@@ -115,6 +121,7 @@ interface UserInfo {
 }
 
 const user = ref<UserInfo | null>(null);
+const avatarLoadFailed = ref(false);
 const stats = reactive({ pigs: 0, orders: 0, walletInt: '0' });
 
 async function loadMe() {
@@ -132,6 +139,7 @@ async function loadMe() {
       request<{ wallet: { balance: string } }>('/wallet/me').catch(() => ({ wallet: { balance: '0.00' } })),
     ]);
     user.value = u;
+    avatarLoadFailed.value = false;
     stats.orders = ordersResp.total || 0;
     stats.pigs = ordersResp.items.filter((o) => o.status === 'paid').length;
     stats.walletInt = walletResp.wallet.balance.split('.')[0] || '0';
