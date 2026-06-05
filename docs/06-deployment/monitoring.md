@@ -9,7 +9,7 @@
 | 维度 | 工具 | 状态 |
 |---|---|---|
 | 进程存活 | PM2 自带 | ✅ |
-| 应用日志 | 文件 + grep | ✅ |
+| 应用日志 | pino JSON + PM2 文件 + logrotate | ✅ 30 天保留 |
 | 健康端点 | `/api/health` | ✅ db/redis/mem/disk/pm2 已接入 |
 | HTTP 访问日志 | nginx access.log | ✅ |
 | 异常上报 | **Sentry** | 🟡 后端已接入，待生产 `SENTRY_DSN` 配置 |
