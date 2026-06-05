@@ -9,6 +9,7 @@ const lines = content.split(/\r?\n/);
 const requiredHardSteps = [
   'backend build',
   'frontend type-check',
+  'frontend sentry sanitizer test',
   'miniapp build audit',
   'backend unit tests',
   'backend e2e',

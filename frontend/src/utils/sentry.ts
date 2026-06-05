@@ -8,6 +8,8 @@
  * 没 DSN 时 init 不做任何事,零开销
  */
 
+import { sanitizeSentryRequestHeaders } from './sentrySanitize';
+
 let inited = false;
 
 export function initSentry(): void {
@@ -28,15 +30,14 @@ export function initSentry(): void {
         tracesSampleRate: 0.05,
         beforeSend(event) {
           if (event.request?.headers) {
-            delete event.request.headers['Authorization'];
-            delete event.request.headers['Cookie'];
+            event.request.headers = sanitizeSentryRequestHeaders(event.request.headers);
           }
           return event;
         },
       });
       inited = true;
       // eslint-disable-next-line no-console
-      console.log('🐷 Sentry initialized (H5):', dsn.slice(0, 30) + '...');
+      console.log('Sentry initialized (H5)');
     })
     .catch(() => {
       // 静默忽略

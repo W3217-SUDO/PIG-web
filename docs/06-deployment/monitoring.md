@@ -317,18 +317,16 @@ SENTRY_DSN=https://xxx.ingest.sentry.io/xxx
 
 ### 前端
 
-```bash
-npm -w frontend i @sentry/vue
-```
+当前 H5 前端已接入 `@sentry/browser`。启动时读取 `VITE_SENTRY_DSN`；为空时 no-op。小程序 / APP 端保持 no-op，避免引入浏览器 API 影响多端构建。
 
 ```ts
-import * as Sentry from '@sentry/vue';
 Sentry.init({
-  app,
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
 });
 ```
+
+前端上报前同样清洗 `authorization` / `cookie` header，CI 使用 `npm run test:frontend-sentry` 防回退。
 
 ---
 
@@ -356,7 +354,7 @@ Sentry.init({
 2. ✅ 企业微信机器人告警(`AlertService`)
 3. ✅ PM2 max_memory_restart + 日志
 4. ✅ 数据库每日备份 + cron
-5. 🟡 Sentry(P1): 后端已接入，生产 DSN 待配置；前端待接入
+5. 🟡 Sentry(P1): 后端/H5 已接入，生产 DSN 待配置；小程序/APP 端后续接云端日志
 6. ⬜ MySQL 慢日志(P2)
 7. ⬜ Loki / Grafana(P3,日志量大了)
 

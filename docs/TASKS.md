@@ -516,12 +516,12 @@ wx.login() → code → POST /foster/auth/login
 - [x] nginx 反代 `/api/` + 静态 `/uploads/` 上线 ✓ 2026-06-05 · Codex
 - [x] `backend/.env.production` 从 `~/.pig-secrets` 派生(运维操作,不入仓) ✓ 2026-06-05 · Codex
 
-### 2.15 🔴 监控可观测性(2/5)· W3 · 后端
+### 2.15 🔴 监控可观测性(3/5)· W3 · 后端
 
-完成度 40%
+完成度 60%
 
 - [x] Sentry 后端接入(@sentry/node，可选 DSN，5xx/未知异常上报，敏感 header 清洗) ✓ 2026-06-05 · Codex
-- [ ] Sentry 前端接入(@sentry/vue + sourcemap 上传)
+- [x] Sentry 前端接入(@sentry/browser，H5 可选 DSN，敏感 header 清洗，CI sanitizer 测试) ✓ 2026-06-05 · Codex
 - [ ] pino 日志 JSON 行式 + 按日切割(30 天保留)
 - [x] `/api/health` 加 disk / mem / pm2 状态 ✓ 2026-06-05 · Codex
 - [x] Actions 部署注入并校验 `/api/health.data.commit` ✓ 2026-06-05 · Codex
