@@ -577,6 +577,7 @@ wx.login() → code → POST /foster/auth/login
 | C9 | Apple Developer Program(¥688) | 5/15 | Owner | ⬜ | iOS 砍 / TestFlight 无 |
 | C10 | 软件著作权(部分安卓商店) | — | Owner | ⬜ | 商店上架卡 |
 | **C11** | **代养人端独立 AppID**（当前与主端共用 wx7aaf3180b690e871） | **立刻** | **Owner** | ⬜ | **两端只能上线其中一个，必须分开** |
+| C12 | Owner 上线交接清单 | 6/5 | Codex | ✅ | `docs/06-deployment/owner-launch-handoff-2026-06-05.md` |
 
 ---
 
