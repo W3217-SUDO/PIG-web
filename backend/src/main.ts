@@ -8,6 +8,8 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
+import { static as serveStatic } from 'express';
+import { resolve } from 'path';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseWrapInterceptor } from './common/interceptors/response-wrap.interceptor';
@@ -22,7 +24,13 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // 安全 headers
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
+
+  const uploadDir = resolve(process.cwd(), process.env.STORAGE_LOCAL_DIR || './uploads');
+  app.use('/uploads', serveStatic(uploadDir, { maxAge: '7d', index: false }));
 
   // CORS
   const corsOrigins = (process.env.CORS_ORIGINS || '')
