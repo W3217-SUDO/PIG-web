@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { request, ApiError } from '../../utils/request';
+import { request, ApiError, API_BASE_URL } from '../../utils/request';
 import { useAuthStore } from '../../stores/auth';
 
 interface LoginResp {
@@ -92,6 +92,7 @@ function onDiagnose() {
       `环境: ${mp.envVersion || '?'}\n` +
       `版本: ${mp.version || '-'}\n` +
       `期望 AppID: wx7aaf3180b690e871\n` +
+      `API: ${API_BASE_URL}\n` +
       `是否一致: ${mp.appId === 'wx7aaf3180b690e871' ? '✅ 一致' : '❌ 不一致, 这是登录失败的原因!'}`;
   } catch (e) {
     diagInfo.value = `getAccountInfoSync 失败: ${String(e)}`;
@@ -128,7 +129,7 @@ async function onWxLogin() {
     uni.hideLoading();
     // 本地开发: AppSecret 未配置时自动走 dev-login
     const msg = e instanceof ApiError ? e.message : String(e);
-    if (!isProdBuild && (msg.includes('appid/secret') || msg.includes('占位') || msg.includes('BadGateway') || (e instanceof ApiError && e.bizCode === 502))) {
+    if (!isProdBuild && shouldFallbackToDevLogin(msg, e)) {
       await onDevLogin();
     } else {
       errMsg.value = formatWxLoginError(msg);
@@ -157,6 +158,16 @@ function formatWxLoginError(msg: string): string {
     return '微信登录 code 已失效。请点“诊断小程序 AppID”确认 AppID 一致，然后重新编译/预览小程序，再重新点一次微信登录。';
   }
   return msg;
+}
+
+function shouldFallbackToDevLogin(msg: string, e: unknown): boolean {
+  return (
+    msg.includes('appid/secret') ||
+    msg.includes('占位') ||
+    msg.includes('BadGateway') ||
+    msg.includes('invalid code') ||
+    (e instanceof ApiError && e.bizCode === 502)
+  );
 }
 
 async function onDevLogin() {

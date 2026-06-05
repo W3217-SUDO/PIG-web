@@ -82,6 +82,7 @@ function pickUser(u: User) {
     id: u.id,
     openid: u.openid,
     nickname: u.nickname,
+    avatarUrl: u.avatarUrl,
     avatar_url: u.avatarUrl,
     role: u.role,
     status: u.status,

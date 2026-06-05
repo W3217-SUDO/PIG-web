@@ -53,6 +53,13 @@ export const useAuthStore = defineStore('auth', {
       uni.setStorageSync(USER_ROLE_KEY, session.user.role);
     },
 
+    updateUser(user: Partial<AuthUser>) {
+      if (!this.user) return;
+      this.user = { ...this.user, ...user };
+      uni.setStorageSync(USER_KEY, this.user);
+      uni.setStorageSync(USER_ROLE_KEY, this.user.role);
+    },
+
     clearSession() {
       this.accessToken = '';
       this.refreshToken = '';
