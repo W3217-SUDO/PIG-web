@@ -16,7 +16,7 @@ import { OrderPayment, PaymentChannel, PaymentStatus } from '../order/order-paym
 import { OrderService } from '../order/order.service';
 import { Pig, PigStatus } from '../pig/pig.entity';
 import { User } from '../user/user.entity';
-import { WECHAT_PAY_CLIENT_FACTORY } from './pay.module';
+import { WECHAT_PAY_CLIENT_FACTORY } from './pay.tokens';
 import { WechatPayClient } from './wechat-pay.client';
 
 @Injectable()

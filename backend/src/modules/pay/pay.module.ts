@@ -8,9 +8,8 @@ import { Pig } from '../pig/pig.entity';
 import { User } from '../user/user.entity';
 import { PayController } from './pay.controller';
 import { PayService } from './pay.service';
+import { WECHAT_PAY_CLIENT_FACTORY } from './pay.tokens';
 import { WechatPayClient, loadWechatPayConfigFromEnv } from './wechat-pay.client';
-
-export const WECHAT_PAY_CLIENT_FACTORY = Symbol('WECHAT_PAY_CLIENT_FACTORY');
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderPayment, User, Pig]), OrderModule, MessageModule],
