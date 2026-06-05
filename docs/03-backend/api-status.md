@@ -92,6 +92,19 @@ mockPay 是事务:order=paid + pig.sold_shares+= + 落 order_payment + 触发 me
 | POST | `/orders/:orderId/share` | JWT | 主认领人生成 8 位短码(30 天 TTL,同订单复用未过期 code) |
 | GET | `/share/:code` | @Public | 受邀人公开查看(host 昵称 + 简版订单 + 猪) |
 
+## pay · 支付(`/api/pay`) · 当前状态
+
+| 方法 | 路径 | 鉴权 | 状态 |
+|---|---|---|---|
+| GET | `/pay/orders/:orderId/status` | JWT | 查询订单最新支付流水 |
+| POST | `/pay/orders/:orderId/mock-prepay` | JWT | 开发/受控联调用；生产默认禁用 |
+| POST | `/pay/orders/:orderId/wx-prepay` | JWT | 已建安全失败入口；未配置微信支付时返回 503 |
+| POST | `/pay/wx-notify` | @Public | 占位入口；未配置微信支付时返回 503 |
+
+当前生产仍为“认养登记/待确认”模式。真实 JSAPI 预下单、v3 回调验签、解密、对账和 0.01 元真机验收依赖 C4-C5。
+
+[`pay.controller.ts`](../../backend/src/modules/pay/pay.controller.ts)
+
 [`share.controller.ts`](../../backend/src/modules/share/share.controller.ts)
 
 ## 8. message · 消息(`/api/messages`)

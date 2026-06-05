@@ -134,11 +134,12 @@
 
 | 方法 | 路径 | 用途 |
 |---|---|---|
-| POST | `/api/orders` | 创建订单(返回 prepay 参数) |
+| POST | `/api/orders` | 创建订单(返回订单 ID；生产当前为认养登记/待确认模式) |
 | GET | `/api/orders/:id` | 订单详情 |
 | GET | `/api/orders/me` | 我的订单列表 |
 | POST | `/api/orders/:id/cancel` | 取消订单(出栏前) |
 | POST | `/api/orders/:id/mature-action` | 出栏决策(取猪 / 续养 / 卖回平台) |
+| POST | `/api/pay/orders/:orderId/wx-prepay` | 微信支付预下单安全入口；未配置商户号时返回 503 |
 | POST | `/api/pay/wx-notify` | **微信支付回调**(签名校验严格) |
 
 ### 实体

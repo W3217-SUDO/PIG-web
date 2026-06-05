@@ -390,11 +390,12 @@ wx.login() → code → POST /foster/auth/login
 - [x] `POST /api/orders/:id/mock-paid`(dev 环境，事务包裹) ✓
 - [x] 状态机(`pending_payment / paid / cancelled / refunded / completed`) ✓
 
-### 2.5 🟡 pay · 微信支付(1/6)· W2 · 后端 · ⚠️ 依赖 C4-C5
+### 2.5 🟡 pay · 微信支付(2/7)· W2 · 后端 · ⚠️ 依赖 C4-C5
 
-完成度 17% — 支付模块边界已建立；真实微信支付仍需等商户号到位后实现
+完成度 29% — 支付模块边界已建立；真实微信支付仍需等商户号到位后实现
 
 - [x] 创建 `PayModule` + `GET /api/pay/orders/:orderId/status` + `POST /api/pay/orders/:orderId/mock-prepay` ✓ 2026-05-25 · Codex
+- [x] `POST /api/pay/orders/:orderId/wx-prepay` 安全失败入口(校验订单归属；未配置商户号返回 503，不误走 mock) ✓ 2026-06-05 · Codex
 - [ ] `POST /api/pay/wx-prepay`(JSAPI 下单，返回 5 参数给前端)
 - [ ] `POST /api/pay/wx-notify`(v3 签名校验 + APIv3Key 解密 + 幂等处理)
 - [ ] nginx `/api/pay/wx-notify` 限速(仅微信 IP 段)

@@ -26,6 +26,14 @@ export class PayController {
     return this.pay.mockPrepay(u.id, orderId);
   }
 
+  @ApiBearerAuth()
+  @Post('orders/:orderId/wx-prepay')
+  @ApiOperation({ summary: '微信支付 JSAPI 预下单入口' })
+  async wxPrepay(@Req() req: Request, @Param('orderId') orderId: string) {
+    const u = req.user as User;
+    return this.pay.wxPrepay(u.id, orderId);
+  }
+
   @Public()
   @Post('wx-notify')
   @ApiOperation({ summary: '微信支付回调占位入口' })

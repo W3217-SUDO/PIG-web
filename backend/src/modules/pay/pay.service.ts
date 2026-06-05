@@ -35,7 +35,24 @@ export class PayService {
     return this.orders.mockPay(userId, orderId);
   }
 
+  async wxPrepay(userId: string, orderId: string) {
+    const order = await this.orderRepo.findOne({ where: { id: orderId } });
+    if (!order || order.userId !== userId) {
+      throw new NotFoundException('订单不存在');
+    }
+
+    if (!this.isWxPayConfigured()) {
+      throw new ServiceUnavailableException('微信支付暂未配置');
+    }
+
+    throw new ServiceUnavailableException('微信支付暂未开通');
+  }
+
   async wxNotify() {
     throw new ServiceUnavailableException('微信支付暂未配置');
+  }
+
+  private isWxPayConfigured() {
+    return Boolean(process.env.WX_PAY_MCH_ID && process.env.WX_PAY_API_KEY);
   }
 }
