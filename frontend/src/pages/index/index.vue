@@ -37,9 +37,9 @@
       <view class="countdown" @tap="goAbout">
         <text class="countdown-icon">🏮</text>
         <view class="countdown-text">
-          <text class="countdown-t1">距 离 腊 月 二 十 三</text>
+          <text class="countdown-t1">距 离 腊 月 二 十 三 · {{ countdownTargetLabel }}</text>
           <view class="countdown-t2">
-            <text>还有 </text><text class="countdown-num">259</text><text> 天 · 现在认养正好赶上过年</text>
+            <text>还有 </text><text class="countdown-num">{{ countdownDays }}</text><text> 天 · 现在认养正好赶上过年</text>
           </view>
         </view>
         <text class="countdown-arrow">›</text>
@@ -333,6 +333,8 @@ interface PigListResp {
 const list = ref<PigCard[]>([]);
 const loading = ref(true);
 const errMsg = ref('');
+const countdownDays = ref(0);
+const countdownTargetLabel = ref('');
 
 function priceInt(p: string): string {
   // "830.00" -> "830"; 整数显示更利落
@@ -422,7 +424,32 @@ async function loadList() {
   }
 }
 
-onMounted(loadList);
+function updateCountdown() {
+  const target = nextLunarNewYearPigDay(new Date());
+  const today = startOfLocalDay(new Date());
+  countdownDays.value = Math.max(
+    0,
+    Math.ceil((target.getTime() - today.getTime()) / 86_400_000),
+  );
+  countdownTargetLabel.value = `${target.getFullYear()}年${target.getMonth() + 1}月${target.getDate()}日`;
+}
+
+function nextLunarNewYearPigDay(now: Date): Date {
+  const knownTargets = [
+    new Date(2027, 0, 30), // 2026 农历丙午年腊月廿三
+  ];
+  const today = startOfLocalDay(now);
+  return knownTargets.find((d) => d.getTime() >= today.getTime()) ?? knownTargets[knownTargets.length - 1];
+}
+
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+onMounted(() => {
+  updateCountdown();
+  loadList();
+});
 </script>
 
 <style>
