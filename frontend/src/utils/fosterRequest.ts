@@ -12,6 +12,24 @@ const BASE_URL = readBaseUrl();
 const FARMER_KEY = 'pig:farmer_id';
 const TOKEN_KEY = 'pig:foster_token';
 
+function formatNetworkError(errMsg: string, url: string): string {
+  const msg = errMsg || '网络错误';
+  const shouldExplain =
+    msg.includes('request:fail') ||
+    msg.includes('ERR_CONNECTION') ||
+    msg.includes('timeout') ||
+    msg.includes('SSL') ||
+    msg.includes('TLS');
+
+  if (!shouldExplain) return msg;
+
+  return [
+    msg,
+    `请求地址: ${url}`,
+    '请检查: 1) 微信公众平台 request 合法域名是否已添加 https://www.rockingwei.online 2) 腾讯云备案接入/网站拦截是否已解除 3) 服务器 HTTPS 是否公网可访问',
+  ].join('\n');
+}
+
 export function getFarmerId(): string {
   try {
     return (uni.getStorageSync(FARMER_KEY) as string) || '';
@@ -76,11 +94,7 @@ export function request<T = unknown>(
       },
       fail: (err) => {
         const msg = (err as any).errMsg || '';
-        if (msg.includes('timeout')) {
-          reject(new Error('网络超时，请检查：1）后端是否运行 2）线上域名是否已加入微信小程序 request 合法域名'));
-        } else {
-          reject(new Error(msg || '网络错误'));
-        }
+        reject(new Error(formatNetworkError(msg, fullUrl)));
       },
     });
   });

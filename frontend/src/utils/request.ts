@@ -15,6 +15,24 @@ export const API_BASE_URL = readBaseUrl();
 const BASE_URL = API_BASE_URL;
 const TOKEN_KEY = 'pig:access_token';
 
+function formatNetworkError(errMsg: string, url: string): string {
+  const msg = errMsg || '网络错误';
+  const shouldExplain =
+    msg.includes('request:fail') ||
+    msg.includes('ERR_CONNECTION') ||
+    msg.includes('timeout') ||
+    msg.includes('SSL') ||
+    msg.includes('TLS');
+
+  if (!shouldExplain) return msg;
+
+  return [
+    msg,
+    `请求地址: ${url}`,
+    '请检查: 1) 微信公众平台 request 合法域名是否已添加 https://www.rockingwei.online 2) 腾讯云备案接入/网站拦截是否已解除 3) 服务器 HTTPS 是否公网可访问',
+  ].join('\n');
+}
+
 // 401 并发跳登录去重:多个请求同时 401 时,只跳一次
 let redirectingToLogin = false;
 
@@ -123,7 +141,7 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
         }
       },
       fail: (err) => {
-        reject(new ApiError(99999, err.errMsg || '网络错误', 0));
+        reject(new ApiError(99999, formatNetworkError(err.errMsg || '', fullUrl), 0));
       },
     });
   });
@@ -172,7 +190,14 @@ export function uploadImage(filePath: string): Promise<{
         if (body.code === 0) resolve(body.data);
         else reject(new ApiError(body.code, body.message || '上传失败', status));
       },
-      fail: (err) => reject(new ApiError(99999, err.errMsg || '上传失败', 0)),
+      fail: (err) =>
+        reject(
+          new ApiError(
+            99999,
+            formatNetworkError(err.errMsg || '上传失败', `${API_BASE_URL}/upload/image`),
+            0,
+          ),
+        ),
     });
   });
 }
