@@ -550,11 +550,11 @@ wx.login() → code → POST /foster/auth/login
 - [ ] 微信开发者工具真机调试
 - [x] 上线前压测(loadtest 50 RPS / 5 分钟) ✅ 2026-06-05 · Codex（服务器侧只读压测：15000 请求 / 0 失败 / p95 6.7ms；压测后 `smoke-prod` 25/25）
 
-### 2.18 🔴 运营支撑(1/3)· W3 · 共同
+### 2.18 🔴 运营支撑(2/3)· W3 · 共同
 
-完成度 33%
+完成度 66%
 
-- [ ] `docs/06-deployment/admin-sop.md`(运营 SOP 完整版)
+- [x] `docs/06-deployment/admin-sop.md`(运营 SOP 完整版) ✓ 2026-06-05 · Codex
 - [x] `scripts/admin/*.sql.template`(发猪 / 改单 / 充值模板) ✅ 2026-06-05 · Codex
 - [ ] 与运营做一次"跟随我操作"演练并修订 SOP
 
