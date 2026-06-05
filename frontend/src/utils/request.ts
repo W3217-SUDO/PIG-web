@@ -8,12 +8,7 @@
 
 /** Vite 在 H5 模式下注入 import.meta.env, 小程序/APP 由打包工具替换 */
 function readBaseUrl(): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fromEnv = (import.meta as any).env?.VITE_API_BASE as string | undefined;
-  if (fromEnv) return fromEnv;
-  return import.meta.env.MODE === 'production'
-    ? 'https://www.rockingwei.online/api'
-    : 'http://127.0.0.1:3000/api';
+  return 'https://www.rockingwei.online/api';
 }
 
 export const API_BASE_URL = readBaseUrl();
