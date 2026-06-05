@@ -10,6 +10,7 @@ const requiredHardSteps = [
   'workspace script contract audit',
   'backend build',
   'frontend type-check',
+  'frontend app build',
   'frontend sentry sanitizer test',
   'health alert webhook test',
   'miniapp build audit',

@@ -39,6 +39,9 @@ jobs:
       - name: frontend type-check
         run: npm -w frontend run type-check
 
+      - name: frontend app build
+        run: npm -w frontend run build:app
+
       - name: frontend sentry sanitizer test
         run: npm run test:frontend-sentry
 
