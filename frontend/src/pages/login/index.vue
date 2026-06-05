@@ -68,7 +68,7 @@ import { request, ApiError, API_BASE_URL } from '../../utils/request';
 import { useAuthStore } from '../../stores/auth';
 
 interface LoginResp {
-  user: { id: string; openid: string; nickname: string; role: string };
+  user: { id: string; openid: string; nickname: string; role: string; avatarUrl?: string; avatar_url?: string };
   access_token: string;
   refresh_token: string;
 }
@@ -124,7 +124,7 @@ async function onWxLogin() {
     });
     auth.setSession(data);
     uni.hideLoading();
-    uni.reLaunch({ url: '/pages/index/index' });
+    goAfterLogin(data.user);
   } catch (e) {
     uni.hideLoading();
     // 本地开发: AppSecret 未配置时自动走 dev-login
@@ -187,7 +187,7 @@ async function onDevLogin() {
     auth.setSession(data);
     uni.showToast({ title: '登录成功', icon: 'success', duration: 800 });
     setTimeout(() => {
-      uni.reLaunch({ url: '/pages/index/index' });
+      goAfterLogin(data.user);
     }, 600);
   } catch (e) {
     errMsg.value = e instanceof ApiError ? `[${e.bizCode}] ${e.message}` : String(e);
@@ -198,6 +198,15 @@ async function onDevLogin() {
 
 function goStatic(name: 'terms' | 'privacy') {
   uni.navigateTo({ url: `/pages/static/${name}` });
+}
+
+function goAfterLogin(user: LoginResp['user']) {
+  const avatarUrl = user.avatarUrl || user.avatar_url || '';
+  if (!user.nickname || !avatarUrl) {
+    uni.reLaunch({ url: '/pages/my/profile?fromLogin=1' });
+    return;
+  }
+  uni.reLaunch({ url: '/pages/index/index' });
 }
 
 function goFoster() {

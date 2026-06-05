@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
 import { request, ApiError, uploadImage } from '../../utils/request';
 import { useAuthStore } from '../../stores/auth';
 
@@ -74,6 +75,7 @@ const loading = ref(true);
 const saving = ref(false);
 const errMsg = ref('');
 const openid = ref('');
+const fromLogin = ref(false);
 const auth = useAuthStore();
 const form = reactive({
   nickname: '',
@@ -165,13 +167,23 @@ async function onSave() {
     });
 
     uni.showToast({ title: '已保存', icon: 'success' });
-    setTimeout(() => uni.navigateBack(), 600);
+    setTimeout(() => {
+      if (fromLogin.value) {
+        uni.reLaunch({ url: '/pages/index/index' });
+      } else {
+        uni.navigateBack();
+      }
+    }, 600);
   } catch (e) {
     errMsg.value = e instanceof ApiError ? `[${e.bizCode}] ${e.message}` : String(e);
   } finally {
     saving.value = false;
   }
 }
+
+onLoad((query) => {
+  fromLogin.value = query?.fromLogin === '1';
+});
 
 onMounted(load);
 </script>
