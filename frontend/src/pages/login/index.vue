@@ -9,10 +9,16 @@
       <text class="card-title">登录后,可下单、看我的猪、管理地址</text>
 
       <!-- 微信一键登录(小程序 + APP 真实可用,H5 用 dev 旁路) -->
-      <view class="btn-wx" @tap="onWxLogin">
+      <view class="btn-wx" :class="{ disabled: wxLoading }" @tap="onWxLogin">
         <text class="btn-wx-icon">💚</text>
-        <text class="btn-wx-text">微 信 一 键 登 录</text>
+        <text class="btn-wx-text">{{ wxLoading ? '登 录 中…' : '微 信 一 键 登 录' }}</text>
       </view>
+
+      <!-- #ifdef MP-WEIXIN -->
+      <view class="btn-diagnose" @tap="onDiagnose">
+        <text>🔍 诊断小程序 AppID</text>
+      </view>
+      <!-- #endif -->
 
       <!-- 开发环境旁路 -->
       <!-- #ifndef MP-WEIXIN -->
@@ -68,6 +74,7 @@ interface LoginResp {
 }
 
 const devLoading = ref(false);
+const wxLoading = ref(false);
 const errMsg = ref('');
 const diagInfo = ref('');
 const auth = useAuthStore();
@@ -96,6 +103,10 @@ function onDiagnose() {
 
 async function onWxLogin() {
   // #ifdef MP-WEIXIN
+  if (wxLoading.value) return;
+  wxLoading.value = true;
+  errMsg.value = '';
+  diagInfo.value = '';
   uni.showLoading({ title: '登录中' });
   try {
     const code = await new Promise<string>((resolve, reject) => {
@@ -120,8 +131,10 @@ async function onWxLogin() {
     if (!isProdBuild && (msg.includes('appid/secret') || msg.includes('占位') || msg.includes('BadGateway') || (e instanceof ApiError && e.bizCode === 502))) {
       await onDevLogin();
     } else {
-      errMsg.value = msg;
+      errMsg.value = formatWxLoginError(msg);
     }
+  } finally {
+    wxLoading.value = false;
   }
   return;
   // #endif
@@ -137,6 +150,13 @@ async function onWxLogin() {
 
   // H5 / 其他: 用 dev-login 兜底
   await onDevLogin();
+}
+
+function formatWxLoginError(msg: string): string {
+  if (msg.includes('invalid code')) {
+    return '微信登录 code 已失效。请点“诊断小程序 AppID”确认 AppID 一致，然后重新编译/预览小程序，再重新点一次微信登录。';
+  }
+  return msg;
 }
 
 async function onDevLogin() {
@@ -226,12 +246,29 @@ function goAdmin() {
   justify-content: center;
   box-shadow: 0 12rpx 32rpx rgba(7, 193, 96, 0.3);
 }
+.btn-wx.disabled {
+  opacity: 0.72;
+}
 .btn-wx-icon { font-size: 36rpx; margin-right: 16rpx; }
 .btn-wx-text {
   color: #fff;
   font-size: 30rpx;
   font-weight: 700;
   letter-spacing: 4rpx;
+}
+.btn-diagnose {
+  margin-top: 24rpx;
+  height: 72rpx;
+  border: 2rpx dashed #b8a182;
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-diagnose text {
+  color: #6b4a2f;
+  font-size: 24rpx;
+  font-weight: 600;
 }
 .dev-section {
   margin-top: 48rpx;
