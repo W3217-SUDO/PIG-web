@@ -27,6 +27,9 @@ jobs:
       - name: ci workflow hard-gate audit
         run: npm run audit:ci
 
+      - name: workspace script contract audit
+        run: npm run audit:workspace-scripts
+
       - name: lint
         run: npm run lint || echo "skip-if-not-configured"
 

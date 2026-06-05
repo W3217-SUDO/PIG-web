@@ -27,7 +27,7 @@
 | 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
 | 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit/backup；后端 Sentry 已接入，待生产 `SENTRY_DSN` 配置后生效 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
-| APP | ⚪ 待后续 | uni-app 代码同源，APP 打包/证书/商店账号另排 |
+| APP | 🟡 App 产物可构建 | `npm -w frontend run build:app` 已通过；APK/IPA 打包、证书和商店账号另排 |
 
 > ✅ **本次上线硬化**：首页/我的页占位清理，生产支付/钱包充值边界加固，H5 生产部署完成，`/uploads/` 静态托管上线，`/api/health` 监控字段增强，服务器侧 smoke 25/25 全绿。
 > 🔴 **当前公网风险**：DNS 已指向 `175.24.175.123`，服务器内 HTTPS/证书/nginx 正常，但本地公网访问 `https://www.rockingwei.online/` TLS 握手失败；需复核腾讯云备案接入、DNSPod 状态、安全组/云防护和本地网络代理。
@@ -531,10 +531,11 @@ wx.login() → code → POST /foster/auth/login
 - [x] 飞书 / 钉钉机器人告警 webhook(pm2 restart × 3 / health cron) ✓ 2026-06-05 · Codex
 - [ ] Sentry 阈值告警(24h error / release regression)
 
-### 2.16 🟡 APP 打包(0/4)· W3 · 前端 · ⚠️ iOS 依赖 C9
+### 2.16 🟡 APP 打包(1/5)· W3 · 前端 · ⚠️ iOS 依赖 C9
 
-完成度 0%
+完成度 20%
 
+- [x] uni-app App 端本地构建产物 `frontend/dist/build/app` 生成通过 ✓ 2026-06-05 · Codex
 - [ ] Android APK 出包(HBuilderX 云打包或本地)
 - [ ] APK 自签名 + 上传内部分发(蒲公英 / 群文件)
 - [ ] iOS .ipa 出包(若 C9 到位)

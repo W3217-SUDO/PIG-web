@@ -7,6 +7,7 @@ const content = fs.readFileSync(workflowPath, 'utf8');
 const lines = content.split(/\r?\n/);
 
 const requiredHardSteps = [
+  'workspace script contract audit',
   'backend build',
   'frontend type-check',
   'frontend sentry sanitizer test',
