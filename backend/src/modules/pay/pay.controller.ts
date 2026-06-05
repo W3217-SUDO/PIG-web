@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
+import { SkipResponseWrap } from '../../common/decorators/skip-response-wrap.decorator';
 import { User } from '../user/user.entity';
 import { PayService } from './pay.service';
 
@@ -35,9 +36,14 @@ export class PayController {
   }
 
   @Public()
+  @SkipResponseWrap()
   @Post('wx-notify')
-  @ApiOperation({ summary: '微信支付回调占位入口' })
-  async wxNotify() {
-    return this.pay.wxNotify();
+  @ApiOperation({ summary: '微信支付回调入口' })
+  async wxNotify(
+    @Req() req: Request & { rawBody?: Buffer },
+    @Headers() headers: Record<string, string>,
+  ) {
+    const rawBody = req.rawBody?.toString('utf8') || JSON.stringify(req.body || {});
+    return this.pay.wxNotify(rawBody, headers);
   }
 }

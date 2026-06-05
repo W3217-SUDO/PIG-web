@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { initSentry } from './common/sentry/sentry';
 initSentry();
 
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -13,7 +13,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseWrapInterceptor } from './common/interceptors/response-wrap.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
 
   // 用 Pino 替换默认 logger
   app.useLogger(app.get(Logger));
@@ -45,7 +45,7 @@ async function bootstrap() {
   );
 
   // 全局响应包装 + 异常过滤(顺序:Filter 在最外,Interceptor 在内)
-  app.useGlobalInterceptors(new ResponseWrapInterceptor());
+  app.useGlobalInterceptors(new ResponseWrapInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // Swagger(仅非生产)

@@ -98,10 +98,10 @@ mockPay 是事务:order=paid + pig.sold_shares+= + 落 order_payment + 触发 me
 |---|---|---|---|
 | GET | `/pay/orders/:orderId/status` | JWT | 查询订单最新支付流水 |
 | POST | `/pay/orders/:orderId/mock-prepay` | JWT | 开发/受控联调用；生产默认禁用 |
-| POST | `/pay/orders/:orderId/wx-prepay` | JWT | 已建安全失败入口；未配置微信支付时返回 503 |
-| POST | `/pay/wx-notify` | @Public | 占位入口；未配置微信支付时返回 503 |
+| POST | `/pay/orders/:orderId/wx-prepay` | JWT | 真实 JSAPI 预下单；返回小程序 `requestPayment` 参数；未配置微信支付时返回 503 |
+| POST | `/pay/wx-notify` | @Public | 微信支付 v3 回调；验签、解密、幂等更新订单和支付流水 |
 
-当前生产仍为“认养登记/待确认”模式。真实 JSAPI 预下单、v3 回调验签、解密、对账和 0.01 元真机验收依赖 C4-C5。
+当前生产代码已接入微信支付。正式放量前仍需确认商户平台已绑定当前小程序 AppID，并完成 0.01 元真机验收、对账和异常支付演练。
 
 [`pay.controller.ts`](../../backend/src/modules/pay/pay.controller.ts)
 

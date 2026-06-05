@@ -24,7 +24,7 @@
 | 小程序构建 | ✅ 通过 | `npm -w frontend run build:mp-weixin` + `npm run audit:miniapp`，13 PASS / 0 FAIL |
 | H5 构建 | ✅ 通过 | `npm -w frontend run build:h5`；`infra/deploy/h5.sh` 手工发布已验证 |
 | 后端构建/单测 | ✅ 通过 | `npm -w backend run build` + `npm -w backend test -- --runInBand` |
-| 支付 | 🟡 登记模式 | 生产不展示 mock；钱包自助充值生产禁用；真实微信支付/商户号仍为正式收款上线前置 |
+| 支付 | 🟡 微信支付已接入待真机 | JSAPI 预下单、v3 回调验签/解密/幂等已接入；待商户平台绑定小程序与 0.01 真机验收 |
 | 监控探活 | 🟡 增强中 | `/api/health` 已含 db/redis/mem/disk/pm2/commit/backup；后端 Sentry 已接入，待生产 `SENTRY_DSN` 配置后生效 |
 | 微信小程序提审 | 🟡 待人工 | 需在微信开发者工具导入 `frontend/dist/build/mp-weixin`，真机验收 wx-login |
 | APP | 🟡 App 产物可构建 | `npm -w frontend run build:app` 已通过；APK/IPA 打包、证书和商店账号另排 |
@@ -390,14 +390,15 @@ wx.login() → code → POST /foster/auth/login
 - [x] `POST /api/orders/:id/mock-paid`(dev 环境，事务包裹) ✓
 - [x] 状态机(`pending_payment / paid / cancelled / refunded / completed`) ✓
 
-### 2.5 🟡 pay · 微信支付(2/7)· W2 · 后端 · ⚠️ 依赖 C4-C5
+### 2.5 🟡 pay · 微信支付(5/7)· W2 · 后端 · ⚠️ 依赖真机验收
 
-完成度 29% — 支付模块边界已建立；真实微信支付仍需等商户号到位后实现
+完成度 71% — JSAPI 预下单、回调验签/解密、支付成功幂等落账已接入；仍需商户平台绑定小程序后做 0.01 真机验收
 
 - [x] 创建 `PayModule` + `GET /api/pay/orders/:orderId/status` + `POST /api/pay/orders/:orderId/mock-prepay` ✓ 2026-05-25 · Codex
 - [x] `POST /api/pay/orders/:orderId/wx-prepay` 安全失败入口(校验订单归属；未配置商户号返回 503，不误走 mock) ✓ 2026-06-05 · Codex
-- [ ] `POST /api/pay/wx-prepay`(JSAPI 下单，返回 5 参数给前端)
-- [ ] `POST /api/pay/wx-notify`(v3 签名校验 + APIv3Key 解密 + 幂等处理)
+- [x] `POST /api/pay/orders/:orderId/wx-prepay` 真实 JSAPI 下单，返回小程序调起支付参数 ✓ 2026-06-05 · Codex
+- [x] `POST /api/pay/wx-notify` v3 签名校验 + APIv3Key 解密 + 幂等处理 ✓ 2026-06-05 · Codex
+- [x] 小程序生产下单页接 `uni.requestPayment` ✓ 2026-06-05 · Codex
 - [ ] nginx `/api/pay/wx-notify` 限速(仅微信 IP 段)
 - [ ] 真实 ¥0.01 全链路通过(沙箱 + 真机双验)
 - [ ] 真实微信支付接入后补支付 e2e 沙箱用例
@@ -572,8 +573,8 @@ wx.login() → code → POST /foster/auth/login
 | C1 | 小程序帐号注册(主体确认) | 5/14 | Owner | ⬜ | 无法上线 |
 | C2 | 小程序类目选定 + 资质(农副产品/食品) | 5/14 | Owner | ⬜ | 卡审 |
 | C3 | AppID / AppSecret 写入服务器 `~/.pig-secrets` | 5/14 | Owner | ✅ | 2026-06-04 已写入本地/生产 env，wx-login 已调用微信接口 |
-| C4 | 微信支付商户号开通 | 5/20 | Owner | ⬜ | 不能收款 |
-| C5 | 商户号 API v3 密钥 / 证书 | 5/20 | Owner | ⬜ | 同上 |
+| C4 | 微信支付商户号开通 | 5/20 | Owner | 🟡 资料已提供 | 仍需确认商户平台已绑定当前小程序 AppID |
+| C5 | 商户号 API v3 密钥 / 证书 | 5/20 | Owner | ✅ | 2026-06-05 已提供 APIv3 key、商户证书、平台证书；待生产部署验证 |
 | **C6** | **rockingwei.online ICP 备案确认** | **立刻** | **Owner** | 🔴 外部访问命中 DNSPod webblock(2026-06-05) | **整体停摆** |
 | C7 | 食品/农副产品资质(若类目需要) | 5/25 | Owner | ⬜ | 卡审 |
 | C8 | 隐私政策 + 用户协议文案 | 5/22 | Owner | ⬜ | 已有占位页，需 Owner 补充真实文案 |

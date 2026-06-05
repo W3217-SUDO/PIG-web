@@ -37,8 +37,13 @@ export const configuration = () => ({
       secret: process.env.WX_OPEN_SECRET || '',
     },
     pay: {
+      appid: process.env.WX_PAY_APPID || process.env.WX_MP_APPID || process.env.WECHAT_APPID || '',
       mchId: process.env.WX_PAY_MCH_ID || '',
       apiKey: process.env.WX_PAY_API_KEY || '',
+      apiV3Key: process.env.WX_PAY_API_V3_KEY || process.env.PAY_KEY_V3 || '',
+      certSerialNo: process.env.WX_PAY_CERT_SERIAL_NO || process.env.PAY_SERIAL || '',
+      privateKeyPath: process.env.WX_PAY_PRIVATE_KEY_PATH || process.env.PAY_KEY_PATH || '',
+      platformCertPath: process.env.WX_PAY_PLATFORM_CERT_PATH || process.env.PAY_PLATFORM_CERT_PATH || '',
       notifyUrl: process.env.WX_PAY_NOTIFY_URL || '',
     },
   },

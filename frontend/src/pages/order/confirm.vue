@@ -155,6 +155,18 @@ interface Address {
   detail: string;
   isDefault: boolean;
 }
+interface WxPrepayResponse {
+  orderId: string;
+  prepayId: string;
+  payParams: {
+    appId: string;
+    timeStamp: string;
+    nonceStr: string;
+    package: string;
+    signType: 'RSA';
+    paySign: string;
+  };
+}
 
 const pig = ref<Pig | null>(null);
 const shares = ref(1);
@@ -308,6 +320,26 @@ async function onSubmit() {
     if (payMethod.value === 'wallet') {
       await request(`/orders/${order.id}/wallet-pay`, { method: 'POST' });
     } else if (payMethod.value === 'wxpay' && isProd) {
+      // #ifdef MP-WEIXIN
+      const prepay = await request<WxPrepayResponse>(`/pay/orders/${order.id}/wx-prepay`, {
+        method: 'POST',
+      });
+      await new Promise<void>((resolve, reject) => {
+        uni.requestPayment({
+          provider: 'wxpay',
+          timeStamp: prepay.payParams.timeStamp,
+          nonceStr: prepay.payParams.nonceStr,
+          package: prepay.payParams.package,
+          signType: prepay.payParams.signType,
+          paySign: prepay.payParams.paySign,
+          success: () => resolve(),
+          fail: (err: { errMsg?: string }) => reject(new Error(err.errMsg || '支付未完成')),
+        } as any);
+      });
+      uni.redirectTo({ url: `/pages/order/result?id=${order.id}&ok=1` });
+      return;
+      // #endif
+
       uni.showModal({
         title: '认养登记已提交',
         content: '订单已生成,当前版本暂未开通微信支付。我们会保留您的认养记录,支付开通后通知您补款。',
