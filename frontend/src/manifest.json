@@ -56,6 +56,14 @@
             "packNpmManually" : true,
             "packNpmRelationList" : []
         },
+        "permission" : {
+            "scope.userLocation" : {
+                "desc" : "用于在腾讯地图中选择收货地址"
+            }
+        },
+        "requiredPrivateInfos" : [
+            "chooseLocation"
+        ],
         "usingComponents" : true
     },
     "mp-alipay" : {

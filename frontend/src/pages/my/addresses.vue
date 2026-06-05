@@ -42,6 +42,15 @@
       <view class="modal" @tap.stop>
         <text class="modal-title">{{ editing.id ? '编辑地址' : '新增地址' }}</text>
 
+        <view class="map-picker" @tap="chooseMapAddress">
+          <text class="map-picker-icon">📍</text>
+          <view class="map-picker-main">
+            <text class="map-picker-title">腾讯地图选择地址</text>
+            <text class="map-picker-sub">{{ pickedAddressText || '从地图搜索/定位，一键回填省市区和详细地址' }}</text>
+          </view>
+          <text class="map-picker-arrow">›</text>
+        </view>
+
         <view class="form-row">
           <text class="form-label">收件人</text>
           <input class="form-input" v-model="form.name" placeholder="姓名" maxlength="20" />
@@ -109,6 +118,7 @@ const loading = ref(true);
 const editing = ref<Address | null>(null);
 const saving = ref(false);
 const formErr = ref('');
+const pickedAddressText = ref('');
 const form = reactive<{
   name: string;
   phone: string;
@@ -148,6 +158,7 @@ function fillForm(a: Partial<Address>) {
   form.district = a.district ?? '';
   form.detail = a.detail ?? '';
   form.isDefault = a.isDefault ?? false;
+  pickedAddressText.value = [form.province, form.city, form.district, form.detail].filter(Boolean).join(' ');
 }
 
 function onAdd() {
@@ -165,6 +176,64 @@ function onEdit(a: Address) {
 function closeModal() {
   editing.value = null;
   formErr.value = '';
+  pickedAddressText.value = '';
+}
+
+function chooseMapAddress() {
+  uni.chooseLocation({
+    success: (res) => {
+      applyPickedLocation({
+        name: res.name || '',
+        address: res.address || '',
+      });
+    },
+    fail: (err) => {
+      const msg = err.errMsg || '';
+      uni.showToast({
+        title: msg.includes('auth') || msg.includes('permission') ? '请允许位置权限后再选择地址' : '地图选址已取消',
+        icon: 'none',
+      });
+    },
+  });
+}
+
+function applyPickedLocation(location: { name: string; address: string }) {
+  const full = `${location.address || ''}${location.name || ''}`.trim();
+  if (!full) return;
+
+  const parsed = parseCnAddress(location.address || full);
+  form.province = parsed.province || form.province;
+  form.city = parsed.city || form.city;
+  form.district = parsed.district || form.district;
+  form.detail = buildDetail(parsed.detail, location.name);
+  pickedAddressText.value = [form.province, form.city, form.district, form.detail].filter(Boolean).join(' ');
+}
+
+function buildDetail(detail: string, name: string): string {
+  const parts = [detail, name].map((s) => s.trim()).filter(Boolean);
+  return Array.from(new Set(parts)).join(' ');
+}
+
+function parseCnAddress(address: string): {
+  province: string;
+  city: string;
+  district: string;
+  detail: string;
+} {
+  let rest = address.trim();
+  const provinceMatch = rest.match(/^(.+?(省|自治区|北京市|上海市|天津市|重庆市|特别行政区))/);
+  const province = provinceMatch?.[1] || '';
+  if (province) rest = rest.slice(province.length);
+
+  const cityMatch = rest.match(/^(.+?(市|自治州|地区|盟))/);
+  const city = cityMatch?.[1] || (province.endsWith('市') ? province : '');
+  if (cityMatch?.[1]) rest = rest.slice(cityMatch[1].length);
+
+  const districtMatch = rest.match(/^(.+?(区|县|市|旗))/);
+  const district = districtMatch?.[1] || '';
+  if (district) rest = rest.slice(district.length);
+
+  return { province, city, district, detail: rest };
 }
 
 async function onSave() {
@@ -364,6 +433,43 @@ onShow(load);
   text-align: center;
   margin-bottom: 32rpx;
   display: block;
+}
+.map-picker {
+  min-height: 104rpx;
+  border: 2rpx solid #f0e8d4;
+  background: #fff8ea;
+  border-radius: 24rpx;
+  padding: 18rpx 20rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+}
+.map-picker-icon {
+  font-size: 34rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+.map-picker-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.map-picker-title {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 800;
+}
+.map-picker-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  line-height: 1.4;
+  color: #8a6239;
+}
+.map-picker-arrow {
+  color: #b8a182;
+  font-size: 36rpx;
+  margin-left: 12rpx;
 }
 .form-row {
   display: flex;
