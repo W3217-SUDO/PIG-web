@@ -8,29 +8,34 @@
     <view class="card">
       <text class="card-title">登录后,可下单、看我的猪、管理地址</text>
 
-      <!-- 微信一键登录(小程序 + APP 真实可用,H5 用 dev 旁路) -->
+      <!-- #ifdef H5 -->
+      <!-- H5 端：一键进入体验（dev-login） -->
+      <view class="btn-wx" :class="{ disabled: devLoading }" @tap="onDevLogin">
+        <text class="btn-wx-icon">🐷</text>
+        <text class="btn-wx-text">{{ devLoading ? '登 录 中…' : '一 键 进 入 体 验' }}</text>
+      </view>
+      <text class="h5-tip">网页版演示 · 无需微信扫码</text>
+      <!-- #endif -->
+
+      <!-- #ifdef MP-WEIXIN -->
+      <!-- 微信小程序：真实微信登录 -->
       <view class="btn-wx" :class="{ disabled: wxLoading }" @tap="onWxLogin">
         <text class="btn-wx-icon">💚</text>
         <text class="btn-wx-text">{{ wxLoading ? '登 录 中…' : '微 信 一 键 登 录' }}</text>
       </view>
-
-      <!-- #ifdef MP-WEIXIN -->
       <view class="btn-diagnose" @tap="onDiagnose">
         <text>🔍 诊断小程序 AppID</text>
       </view>
       <!-- #endif -->
 
-      <!-- 开发环境旁路 -->
+      <!-- #ifndef H5 -->
       <!-- #ifndef MP-WEIXIN -->
-      <view v-if="showDevTools" class="dev-section">
-        <text class="dev-label">— 开发测试通道 —</text>
-        <view class="btn-dev" @tap="onDevLogin">
-          <text>{{ devLoading ? '登录中…' : 'dev 一键登录(自动建测试号)' }}</text>
-        </view>
-        <view class="btn-dev" style="margin-top:16rpx;border-color:#888" @tap="onDiagnose">
-          <text style="color:#888">🔍 诊断小程序 AppID</text>
-        </view>
+      <!-- APP 等其他平台 -->
+      <view class="btn-wx" :class="{ disabled: wxLoading }" @tap="onWxLogin">
+        <text class="btn-wx-icon">💚</text>
+        <text class="btn-wx-text">{{ wxLoading ? '登 录 中…' : '微 信 一 键 登 录' }}</text>
       </view>
+      <!-- #endif -->
       <!-- #endif -->
 
       <view v-if="errMsg" class="err">{{ errMsg }}</view>
@@ -79,7 +84,8 @@ const errMsg = ref('');
 const diagInfo = ref('');
 const auth = useAuthStore();
 const isProdBuild = import.meta.env.MODE === 'production';
-const showDevTools = !isProdBuild;
+// H5 构建时，VITE_SHOW_DEV_LOGIN=true 可强制显示开发通道（浏览器不支持 wx.login）
+const showDevTools = !isProdBuild || import.meta.env.VITE_SHOW_DEV_LOGIN === 'true';
 
 function onDiagnose() {
   // #ifdef MP-WEIXIN
@@ -140,16 +146,7 @@ async function onWxLogin() {
   return;
   // #endif
 
-  if (isProdBuild) {
-    uni.showModal({
-      title: '请使用微信小程序登录',
-      content: '正式环境暂不开放网页登录，请在微信小程序内完成登录和认养。',
-      showCancel: false,
-    });
-    return;
-  }
-
-  // H5 / 其他: 用 dev-login 兜底
+  // H5 浏览器端：直接走 dev-login（浏览器不支持 wx.login）
   await onDevLogin();
 }
 
@@ -166,12 +163,16 @@ function shouldFallbackToDevLogin(msg: string, e: unknown): boolean {
     msg.includes('占位') ||
     msg.includes('BadGateway') ||
     msg.includes('invalid code') ||
-    (e instanceof ApiError && e.bizCode === 502)
+    msg.includes('wx login fail') ||
+    msg.includes('timeout') ||
+    (e instanceof ApiError && (e.httpStatus === 502 || e.bizCode === 502))
   );
 }
 
 async function onDevLogin() {
-  if (isProdBuild) {
+  // H5 模式：VITE_SHOW_DEV_LOGIN=true 时始终允许（浏览器无法走真实微信登录）
+  const allowDevLogin = !isProdBuild || import.meta.env.VITE_SHOW_DEV_LOGIN === 'true';
+  if (!allowDevLogin) {
     errMsg.value = '正式环境已关闭开发测试登录';
     return;
   }
@@ -275,6 +276,14 @@ function goAdmin() {
   font-size: 30rpx;
   font-weight: 700;
   letter-spacing: 4rpx;
+}
+.h5-tip {
+  display: block;
+  text-align: center;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.5);
+  margin-top: 20rpx;
+  letter-spacing: 2rpx;
 }
 .btn-diagnose {
   margin-top: 24rpx;

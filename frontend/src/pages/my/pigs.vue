@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
-import { request, ApiError } from '../../utils/request';
+import { request, getToken, ApiError } from '../../utils/request';
 
 interface PigBrief {
   id: string;
@@ -90,6 +90,12 @@ function goHome() {
 }
 
 async function load() {
+  // 未登录：直接跳转到登录页，不发请求（避免 401/timeout）
+  if (!getToken()) {
+    loading.value = false;
+    uni.navigateTo({ url: '/pages/login/index' });
+    return;
+  }
   loading.value = true;
   try {
     const data = await request<{ items: Order[] }>('/orders/me?status=paid&pageSize=50');

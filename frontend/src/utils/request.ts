@@ -8,6 +8,26 @@
 
 /** Vite 在 H5 模式下注入 import.meta.env, 小程序/APP 由打包工具替换 */
 function readBaseUrl(): string {
+  // #ifdef MP-WEIXIN
+  // 微信开发者工具（envVersion=develop）时，自动切换到本地后端
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = (uni as any).getAccountInfoSync?.();
+    if (info?.miniProgram?.envVersion === 'develop') {
+      return 'http://127.0.0.1:3000/api';
+    }
+  } catch {
+    // ignore, fall through to production URL
+  }
+  // #endif
+
+  // H5: 直接访问让 Vite 在构建时静态内联环境变量
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const apiBase: string = import.meta.env.VITE_API_BASE_URL || '';
+  if (apiBase) return apiBase;
+
   return 'https://www.rockingwei.online/api';
 }
 

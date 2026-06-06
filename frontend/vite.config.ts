@@ -6,10 +6,22 @@ export default defineConfig({
   plugins: [uni()],
   server: {
     port: 5173,
-    strictPort: false,  // 如果 5173 被占用自动换端口
-    cors: true,         // 允许 file:// 原型页跨域访问
+    host: '0.0.0.0',    // 允许局域网访问
+    strictPort: false,
+    cors: true,
     headers: {
-      'X-Frame-Options': 'ALLOWALL',  // 允许 iframe 嵌入
+      'X-Frame-Options': 'ALLOWALL',
+    },
+    proxy: {
+      // H5 开发时代理 API，避免跨域
+      '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
     },
   },
 });

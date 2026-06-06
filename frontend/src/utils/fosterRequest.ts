@@ -5,6 +5,23 @@
  */
 
 function readBaseUrl(): string {
+  // #ifdef MP-WEIXIN
+  // 微信开发者工具（envVersion=develop）时，自动切换到本地后端
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = (uni as any).getAccountInfoSync?.();
+    if (info?.miniProgram?.envVersion === 'develop') {
+      return 'http://127.0.0.1:3000/api';
+    }
+  } catch {
+    // ignore
+  }
+  // #endif
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const apiBase: string = import.meta.env.VITE_API_BASE_URL || '';
+  if (apiBase) return apiBase;
   return 'https://www.rockingwei.online/api';
 }
 
