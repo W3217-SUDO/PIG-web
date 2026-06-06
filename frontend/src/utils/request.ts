@@ -8,17 +8,50 @@
 
 /** Vite 在 H5 模式下注入 import.meta.env, 小程序/APP 由打包工具替换 */
 function readBaseUrl(): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fromEnv = (import.meta as any).env?.VITE_API_BASE as string | undefined;
-  if (fromEnv) return fromEnv;
-  return import.meta.env.MODE === 'production'
-    ? 'https://www.rockingwei.online/api'
-    : 'http://127.0.0.1:3000/api';
+  // #ifdef MP-WEIXIN
+  // 微信开发者工具（envVersion=develop）时，自动切换到本地后端
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = (uni as any).getAccountInfoSync?.();
+    if (info?.miniProgram?.envVersion === 'develop') {
+      return 'http://127.0.0.1:3000/api';
+    }
+  } catch {
+    // ignore, fall through to production URL
+  }
+  // #endif
+
+  // H5: 直接访问让 Vite 在构建时静态内联环境变量
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const apiBase: string = import.meta.env.VITE_API_BASE_URL || '';
+  if (apiBase) return apiBase;
+
+  return 'https://www.rockingwei.online/api';
 }
 
 export const API_BASE_URL = readBaseUrl();
 const BASE_URL = API_BASE_URL;
 const TOKEN_KEY = 'pig:access_token';
+
+function formatNetworkError(errMsg: string, url: string): string {
+  const msg = errMsg || '网络错误';
+  const shouldExplain =
+    msg.includes('request:fail') ||
+    msg.includes('ERR_CONNECTION') ||
+    msg.includes('timeout') ||
+    msg.includes('SSL') ||
+    msg.includes('TLS');
+
+  if (!shouldExplain) return msg;
+
+  return [
+    msg,
+    `请求地址: ${url}`,
+    '请检查: 1) 微信公众平台 request 合法域名是否已添加 https://www.rockingwei.online 2) 腾讯云备案接入/网站拦截是否已解除 3) 服务器 HTTPS 是否公网可访问',
+  ].join('\n');
+}
 
 // 401 并发跳登录去重:多个请求同时 401 时,只跳一次
 let redirectingToLogin = false;
@@ -128,7 +161,7 @@ export function request<T = unknown>(url: string, opts: RequestOptions = {}): Pr
         }
       },
       fail: (err) => {
-        reject(new ApiError(99999, err.errMsg || '网络错误', 0));
+        reject(new ApiError(99999, formatNetworkError(err.errMsg || '', fullUrl), 0));
       },
     });
   });
@@ -177,7 +210,14 @@ export function uploadImage(filePath: string): Promise<{
         if (body.code === 0) resolve(body.data);
         else reject(new ApiError(body.code, body.message || '上传失败', status));
       },
-      fail: (err) => reject(new ApiError(99999, err.errMsg || '上传失败', 0)),
+      fail: (err) =>
+        reject(
+          new ApiError(
+            99999,
+            formatNetworkError(err.errMsg || '上传失败', `${API_BASE_URL}/upload/image`),
+            0,
+          ),
+        ),
     });
   });
 }

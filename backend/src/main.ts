@@ -8,6 +8,9 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
+import { static as serveStatic } from 'express';
+import { resolve, join } from 'path';
+import { existsSync } from 'fs';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseWrapInterceptor } from './common/interceptors/response-wrap.interceptor';
@@ -22,7 +25,30 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // 安全 headers
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
+
+  const uploadDir = resolve(process.cwd(), process.env.STORAGE_LOCAL_DIR || './uploads');
+  app.use('/uploads', serveStatic(uploadDir, { maxAge: '7d', index: false }));
+
+  // H5 静态文件托管（uni-app 编译输出）
+  const h5Dir = resolve(process.cwd(), '../frontend/dist/build/h5');
+  if (existsSync(h5Dir)) {
+    // 静态资源
+    app.use('/', serveStatic(h5Dir, { maxAge: '1h', index: false }));
+    // SPA fallback：所有非 /api、/uploads 路由都返回 index.html（支持 hash 路由刷新）
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    app.use((req: any, res: any, next: any) => {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+        res.sendFile(join(h5Dir, 'index.html'));
+      } else {
+        next();
+      }
+    });
+    console.log(`🌐  H5 Web:          http://0.0.0.0:${process.env.PORT || 3000}`);
+  }
 
   // CORS
   const corsOrigins = (process.env.CORS_ORIGINS || '')
